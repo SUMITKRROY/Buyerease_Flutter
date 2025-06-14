@@ -13,7 +13,8 @@ class InspectionListHandler {
     static const String _logger = "InspectionListHandler";
 
     static Future<bool> updatePOItemHdr(
-        Database db, InspectionModal inspectionModel) async {
+        Database db, InspectionModal inspectionModel) async
+    {
         try {
             final contentValues = <String, dynamic>{
                 "VendorContact": inspectionModel.vendorContact,

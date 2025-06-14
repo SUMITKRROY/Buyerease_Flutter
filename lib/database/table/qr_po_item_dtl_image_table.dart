@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import '../database_helper.dart';
 import '../database_helper.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class QrPoItemDtlImageTable {
   static const String TABLE_NAME = "QRPOItemDtl_Image";
@@ -103,4 +105,19 @@ class QrPoItemDtlImageTable {
     final db = await DatabaseHelper().database;
     return await db.delete(TABLE_NAME);
   }
+
+
+  // Update only fileContent by pRowID
+  Future<void> updateFileContent(String id, Uint8List fileContentData) async {
+    final db = await DatabaseHelper().database;
+    await db.update(
+      TABLE_NAME,
+      {
+        fileContent: fileContentData,
+      },
+      where: '$pRowID = ?',
+      whereArgs: [id],
+    );
+  }
+
 }

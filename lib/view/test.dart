@@ -1,122 +1,72 @@
-import 'package:buyerease/database/database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sqflite/sqflite.dart';
 
-import '../database/table/qr_po_item_dtl_table.dart';
-import '../model/inspection_model.dart';
-import '../services/inspection_list/InspectionListHandler.dart';
-
-class TestScreen extends StatefulWidget {
-  const TestScreen({super.key});
-
-  @override
-  _TestScreenState createState() => _TestScreenState();
+void main() {
+  runApp(MaterialApp(home: PoInspectionMergedPage()));
 }
 
-class _TestScreenState extends State<TestScreen> {
-  List<InspectionModal> inspectionList = [];
-  bool isLoading = false;
+class PoInspectionMergedPage extends StatelessWidget {
+  final TextStyle headerStyle = const TextStyle(fontWeight: FontWeight.bold);
+  final TextStyle normalStyle = const TextStyle(fontSize: 14);
 
-  @override
-  void initState() {
-    super.initState();
-    // fetchItemIds(); // Don't await here.
-    getUnsyncedFeedback();
-    getLocalList("");
+  Widget buildCell(String text, {double width = 80, bool isHeader = false}) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        style: isHeader ? headerStyle : normalStyle,
+      ),
+    );
   }
 
-  Future<void> fetchItemIds() async {
-
-     await InspectionListHandler.getInspectionList("");
-    final qrpoTable = QRPOItemDtlTable();
-    // String? itemIds = await qrpoTable.getCustomerItemRefByPRowID('Search By DEL Id');
-    String? itemIds = await qrpoTable.getCustomerItemRefByPRowID('DEL0366268');
-
-    if (itemIds != null) {
-      print("Fetched Item IDs: $itemIds");
-    } else {
-      print("No Item IDs found.");
-    }
-  }
-  Future<List<Map<String, dynamic>>> getUnsyncedFeedback() async {
-    try {
-      final db = await DatabaseHelper().database;
-      final String query = '''
-      SELECT * FROM QRFeedbackhdr 
-      WHERE pRowID NOT IN (
-        SELECT pRowID FROM QRFeedbackhdr 
-        WHERE status IN (20, 40, 45, 50, 60, 65) 
-        AND datetime(recDt) <= datetime(IFNULL(Last_Sync_Dt, '1900-01-01 00:00:00'))
-      )
-      AND IsSynced = 0
-      ORDER BY InspectionDt DESC
-    ''';
-
-      final List<Map<String, dynamic>> result = await db.rawQuery(query);
-      print("print result $result");
-      return result;
-    } on DatabaseException catch (e) {
-      if (e.isNoSuchTableError()) {
-        print('Error: Table QRFeedbackhdr does not exist.');
-      } else {
-        print('Database error: $e');
-      }
-      return []; // Return empty list on error
-    } catch (e) {
-      print('Unknown error: $e');
-      return [];
-    }
+  Widget buildRow(List<String> data, {bool isHeader = false}) {
+    final widths = [50.0, 80.0, 60.0, 110.0, 60.0, 60.0, 60.0, 80.0];
+    return Row(
+      children: [
+        for (int i = 0; i < data.length; i++)
+          buildCell(data[i], width: widths[i], isHeader: isHeader),
+      ],
+    );
   }
 
-
-  Future<void> getLocalList(String searchStr) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      List<InspectionModal> localList = await InspectionListHandler.getInspectionList(searchStr);
-
-      setState(() {
-        inspectionList.clear();
-        if (localList.isNotEmpty) {
-          inspectionList.addAll(localList);
-          print("Fetched inspections: ${inspectionList.length}");
-          for (var item in localList) {
-            print("pRowID: ${item.pRowID}, QRHdrID: ${item.qrHdrID}");
-          }
-        } else {
-          Fluttertoast.showToast(msg: "Inspection did not find");
-        }
-      });
-    } catch (e) {
-      debugPrint("Error fetching local list: $e");
-      Fluttertoast.showToast(msg: "Failed to load inspections");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+  Widget buildMergedDescription(String text) {
+    return Container(
+      width: 560, // Sum of all cell widths above
+      padding: const EdgeInsets.all(8.0),
+      color: Colors.grey.shade100,
+      child: Text(text, style: const TextStyle(fontSize: 14)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Inspections")),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : inspectionList.isEmpty
-          ? Center(child: Text("No inspections found"))
-          : ListView.builder(
-        itemCount: inspectionList.length,
-        itemBuilder: (context, index) {
-          final item = inspectionList[index];
-          return ListTile(
-            title: Text(item.pRowID ?? ""),
-            subtitle: Text(item.qrHdrID ?? ""),
-          );
-        },
+      appBar: AppBar(title: const Text("PO Inspection Table")),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildRow([
+              'Po', 'Item', 'order', 'inspested till date',
+              'available', 'Accept', 'Short', 'inspect later'
+            ], isHeader: true),
+
+            buildRow(['1010', '1412345', '12', '12', '0', '0', '0', '']),
+            buildMergedDescription(
+              '01412345 (CN1) - Holiday Poinsettia- 2.76 x 4" - Wax',
+            ),
+
+            buildRow(['1010', '124563', '75', '75', '0', '0', '0', '']),
+            buildRow(List.filled(8, '')), // Blank row
+            buildMergedDescription(
+              '01412345 (CN1) - Holiday Poinsettia- 2.76 x 4" - Wax',
+            ),
+
+            const SizedBox(height: 10),
+            buildRow(['Total', '', '87', '', '0', '0', '', '']),
+          ],
+        ),
       ),
     );
   }

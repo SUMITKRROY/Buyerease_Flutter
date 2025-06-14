@@ -5,7 +5,9 @@ import 'package:buyerease/view/over_all_result/quality_parameters_result.dart';
 import 'package:buyerease/view/over_all_result/sample_collected.dart';
 import 'package:buyerease/view/over_all_result/test_reports.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../config/theame_data.dart';
 import '../po/workmanship.dart';
 import 'barcode.dart';
 import 'digital_uploaded.dart';
@@ -65,10 +67,24 @@ class _OverAllResultState extends State<OverAllResult>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.id,
-          style: const TextStyle(color: Colors.white),
+        leading: const BackButton(color: Colors.white),
+        backgroundColor: ColorsData.primaryColor,
+        title: ListTile(title: Text("Item detail" ,style: TextStyle(color: Colors.white,fontSize: 18.sp),),
+        subtitle: Text(
+          "Item no.(${widget.id})",
+          style:  TextStyle(color: Colors.white,fontSize: 12.sp),
         ),
+        ),
+          actions: [
+          TextButton(
+          onPressed: () {},
+      child: Text('UNDO', style: TextStyle(color: Colors.white)),
+    ),
+    TextButton(
+    onPressed: () {},
+    child: Text('SAVE', style: TextStyle(color: Colors.white)),
+    ),
+    ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -94,10 +110,10 @@ class _OverAllResultState extends State<OverAllResult>
                         child: DropdownButton(
                           hint: _dropDownValue == null
                               ? const Text('Select')
-                              : Text(_dropDownValue!, style: const TextStyle(color: Colors.blue)),
+                              : Text(_dropDownValue!, style: const TextStyle(color: ColorsData.primaryColor)),
                           isExpanded: true,
                           iconSize: 30.0,
-                          style: const TextStyle(color: Colors.blue),
+                          style: const TextStyle(color: ColorsData.primaryColor),
                           items: ['PASS', 'FAILED'].map((val) {return DropdownMenuItem<String>(value: val, child: Text(val));}).toList(),
                           onChanged: (val) {setState(() {_dropDownValue = val;});
                           },
@@ -118,7 +134,7 @@ class _OverAllResultState extends State<OverAllResult>
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.8,
-                child: TabBarView(controller: _controller, children: const [
+                child: TabBarView(controller: _controller, children:   [
                   Center(child: ItemQuantity()),
                   Center(child: PackingAppearance()),
                   Center(child: PackingMeasurement()),

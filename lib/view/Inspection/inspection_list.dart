@@ -80,9 +80,9 @@ class _InspectionListState extends State<InspectionList> {
 
   void selectAll() {
     setState(() {
-      selectedItems = inspectionData
-          .where((item) => !syncedItems.contains(item['pRowID']))
-          .map((item) => item['pRowID'] as String)
+      selectedItems = inspectionList
+          .where((item) => !syncedItems.contains(item.pRowID))
+          .map((item) => item.pRowID ?? "")
           .toSet();
     });
   }
@@ -139,19 +139,37 @@ class _InspectionListState extends State<InspectionList> {
 
   // Add search function
   List<InspectionModal> getFilteredItems() {
+    if (searchQuery.isEmpty) {
+      return inspectionList.where((item) {
+        final isSynced = syncedItems.contains(item.pRowID);
+        return isOpen ? !isSynced : isSynced;
+      }).toList();
+    }
+
+    final query = searchQuery.trim();
+    
     return inspectionList.where((item) {
       final isSynced = syncedItems.contains(item.pRowID);
       final matchesState = isOpen ? !isSynced : isSynced;
       
-      if (searchQuery.isEmpty) return matchesState;
-      
-      // Convert search query and item values to lowercase for case-insensitive search
-      final query = searchQuery.toLowerCase();
-      final id = item.pRowID?.toString().toLowerCase() ?? '';
-      final customerId = item.customer?.toString().toLowerCase() ?? '';
-      
-      // Check if either ID or Customer ID contains the search query
-      return matchesState && (id.contains(query) || customerId.contains(query));
+      if (!matchesState) return false;
+
+      // Convert all searchable fields to lowercase strings and handle null values
+      final searchableFields = [
+        item.pRowID?.toString().toLowerCase() ?? '',
+        item.customer?.toString().toLowerCase() ?? '',
+        item.poListed?.toString().toLowerCase() ?? '',
+        item.itemListId?.toString().toLowerCase() ?? '',
+        item.vendor?.toString().toLowerCase() ?? '',
+        item.vendorContact?.toString().toLowerCase() ?? '',
+        item.vendorAddress?.toString().toLowerCase() ?? '',
+        item.qr?.toString().toLowerCase() ?? '',
+        item.inspector?.toString().toLowerCase() ?? '',
+        item.status?.toString().toLowerCase() ?? '',
+      ];
+
+      // Check if any field contains the search query
+      return searchableFields.any((field) => field.contains(query));
     }).toList();
   }
 
@@ -315,10 +333,10 @@ class _InspectionListState extends State<InspectionList> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: inspectionList.length,
+                    itemCount: filteredItems.length,
                     padding: const EdgeInsets.all(8.0),
                     itemBuilder: (context, index) {
-                      final item = inspectionList[index];
+                      final item = filteredItems[index];
                       final isSelected = selectedItems.contains(item.pRowID);
                       
                       return GestureDetector(
@@ -327,8 +345,21 @@ class _InspectionListState extends State<InspectionList> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => InspectionDetailScreen()
-                                    // DetailPageOne(id: item.pRowID ?? "")
+                                builder: (_) => InspectionDetailScreen(data: {
+                                  'pRowID': item.pRowID,
+                                  'inspectionDt': item.inspectionDt,
+                                  'activity': item.activity,
+                                  'customer': item.customer,
+                                  'poListed': item.poListed,
+                                  'itemListId': item.itemListId,
+                                  'vendor': item.vendor,
+                                  'vendorContact': item.vendorContact,
+                                  'vendorAddress': item.vendorAddress,
+                                  'qr': item.qr,
+                                  'inspector': item.inspector,
+                                  'status': item.status,
+                                  'qrHdrID': item.qrHdrID,
+                                })
                               )
                             );
                           } else {

@@ -30,9 +30,10 @@ class ApiRoute {
   static String forgotPassword = "$ipAddress$baseUrl/Account/ForgotPassword";
   static String syncProfile = "$ipAddress$baseUrl/Associate/UpdateProfile";
   static String downloadBase = "$ipAddressDownload$baseAddressDownload";
-  static String encryptHistory = "$ipAddress$baseUrl" + "Quality/Encrypt";
+  static String encryptHistory = "$ipAddress$baseUrl/Quality/Encrypt";
   static String historyDetails = "$ipAddressDownload/QR/InspectionReportEntryViaHtml.aspx?Session=";
   static String updateReadStatus = "$ipAddress$baseUrl/Quality/DownloadStatus";
+  static String getQrPoItemImage = "$ipAddress$baseUrl/Quality/GetQRPOItemImage?";
 
 
   /// Reset config dynamically
@@ -54,10 +55,10 @@ class ApiRoute {
     forgotPassword = "$ipAddress$baseUrl/Account/ForgotPassword";
     syncProfile = "$ipAddress$baseUrl/Associate/UpdateProfile";
     downloadBase = "$ipAddressDownload$baseAddressDownload";
-    encryptHistory = "$ipAddress$baseUrl" + "Quality/Encrypt";
+    encryptHistory = "$ipAddress$baseUrl/Quality/Encrypt";
     historyDetails = "$ipAddressDownload/QR/InspectionReportEntryViaHtml.aspx?Session=";
     updateReadStatus = "$ipAddress$baseUrl/Quality/DownloadStatus";
-
+    getQrPoItemImage = "$ipAddress$baseUrl/Quality/GetQRPOItemImage?";
   }
 
   /// Check if device is online

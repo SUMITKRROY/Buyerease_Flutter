@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:buyerease/database/table/qr_po_item_dtl_image_table.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../config/api_route.dart';
@@ -5,7 +9,6 @@ import '../utils/dio_helper.dart';
 
 class MasterRepo {
   Dio dio = DioApi().sendRequest;
-
 
   Future<Response> getCommunityCode(String code) async {
     try {
@@ -30,8 +33,7 @@ class MasterRepo {
     required String hddSerialNo,
     required String deviceType,
     required String location,
-  }) async
-  {
+  }) async {
     try {
       Dio dio = DioApi().sendRequest;
 
@@ -61,8 +63,7 @@ class MasterRepo {
     required String hddSerialNo,
     required String deviceType,
     required String location,
-  }) async
-  {
+  }) async {
     try {
       Dio dio = DioApi().sendRequest;
 
@@ -87,16 +88,15 @@ class MasterRepo {
   }
 
   Future<Response> getDefectMaster({
-    required String user,
-  }) async
-  {
+    required String userId,
+  }) async {
     try {
       Dio dio = DioApi().sendRequest;
 
       final response = await dio.post(
         ApiRoute.defectMaster,
         data: {
-          "UserID": user,
+          "UserID": userId,
         },
       );
 
@@ -106,7 +106,20 @@ class MasterRepo {
     }
   }
 
+  Future<Response> downloadAndUpdateImage({
+    required String pRowId,
+  }) async {
+    try {
+      Dio dio = DioApi().sendRequest;
 
+      String url = "${ApiRoute.getQrPoItemImage}QRPOItemImageID=$pRowId";
 
+      final response = await dio.post(url);
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
 }

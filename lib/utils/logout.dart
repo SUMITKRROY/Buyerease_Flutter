@@ -34,8 +34,10 @@ logout(context) {
               // dynamic data = await SQLHelper.getItems();
               // await SQLHelper.deleteLoginOut(data[0]['id']);
               hiveBox.put('loggedIn', false);
-             await UserMasterTable().deleteAll();
-            Navigator.of(context).pushAndRemoveUntil(
+             // await UserMasterTable().deleteAll();
+              await DatabaseHelper().deleteAllTableData();
+
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => Login()),
                     (route) => false);
           },

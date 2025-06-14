@@ -126,7 +126,7 @@ class DatabaseHelper {
     }
   }
 
-  // Delete the database
+/*  // Delete the database
   static Future<void> deleteDatabase() async {
     // Get the database path
     final databasePath = await getDatabasesPath();
@@ -135,6 +135,59 @@ class DatabaseHelper {
     // Delete the database
     await   sqflite.deleteDatabase(path);
     print("Database deleted successfully!");
+  }*/
+
+
+  Future<void> deleteAllTableData() async {
+    final db = await database;
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+
+    final tables = [
+      DefectApplicableMatrix.TABLE_NAME,
+      DefectMaster.TABLE_NAME,
+      Enclosures.TABLE_NAME,
+      GenMst.TABLE_NAME,
+      InspLvlDtlTable.TABLE_NAME,
+      InspLevelHeaderTable.TABLE_NAME,
+      QrAuditBatchDetailsTable.TABLE_NAME,
+      QrEnclosureTable.TABLE_NAME,
+      QrFindingsTable.TABLE_NAME,
+      QrInspectionHistoryTable.TABLE_NAME,
+      QrPoIntimationDetailsTable.TABLE_NAME,
+      QrPoItemDtlImageTable.TABLE_NAME,
+      QrPoItemDtlItemMeasurementTable.TABLE_NAME,
+      QrPoItemDtlMaterialInspectionDtlTable.TABLE_NAME,
+      QRPOItemDtlOnSiteTestTable.TABLE_NAME,
+      QrPoItemDtlPkgAppDetailsTable.TABLE_NAME,
+      QRPOItemDtlProdSpecsTable.TABLE_NAME,
+      QRPOItemDtlSamplePurposeTable.TABLE_NAME,
+      QRPOItemDtlTable.TABLE_NAME,
+      QRPOItemFitnessCheckTable.TABLE_NAME,
+      QRPOItemHdrTable.TABLE_NAME,
+      QRPOItemMoreParamDtlSaveTable.TABLE_NAME,
+      QRProductionStatusTable.TABLE_NAME,
+      QRQualityParameterFieldsTable.TABLE_NAME,
+      QualityLevelTable.TABLE_NAME,
+      QualityLevelDtlTable.TABLE_NAME,
+      SizeQuantityTable.TABLE_NAME,
+      SubTeamDtlTable.TABLE_NAME,
+      SubTeamHdrTable.TABLE_NAME,
+      SyncInfoTable.TABLE_NAME,
+      Sysdata22Table.TABLE_NAME,
+      TestTable.TABLE_NAME,
+      TestReportTable.TABLE_NAME,
+      UserMasterTable.TABLE_NAME,
+      QRFeedbackHdrTable.TABLE_NAME,
+    ];
+
+    for (final table in tables) {
+      await db.delete(table);
+    }
+
+    await db.execute('PRAGMA foreign_keys = ON');
+
+    print("All table data deleted using TABLE_NAME constants.");
   }
 
 }

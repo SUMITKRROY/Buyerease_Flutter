@@ -4,6 +4,7 @@ import 'package:buyerease/utils/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../over_all_result/over_all_result.dart';
 import '../po/po_page.dart';
 
 class DetailPageOne extends StatefulWidget {
@@ -806,7 +807,8 @@ class _DetailPageOneState extends State<DetailPageOne> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (_) => PoPage(id:widget.id)));
+                                      // builder: (_) => PoPage(id:widget.id)));
+                                      builder: (_) => OverAllResult(id: '',)));
                             },
                             child: const Text('Go To Po Details')),
                       ],

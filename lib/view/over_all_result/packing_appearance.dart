@@ -1,201 +1,228 @@
-import 'dart:io';
-
-import 'package:buyerease/utils/camera.dart';
+import 'package:buyerease/components/add_image_icon.dart';
 import 'package:flutter/material.dart';
 
-class PackingAppearance extends StatefulWidget {
-  const PackingAppearance({super.key});
+import '../../components/over_all_dropdown.dart';
+import '../../components/remarks.dart';
 
+class PackingAppearance extends StatefulWidget {
   @override
-  State<PackingAppearance> createState() => _PackingAppearanceState();
+  _PackingAppearanceState createState() => _PackingAppearanceState();
 }
 
 class _PackingAppearanceState extends State<PackingAppearance> {
-  List data = ['Unit Packing', 'Shipping Mark', 'Master Packing'];
-  final ImagePickerService _imagePickerService = ImagePickerService();
-  String imageName = '';
-  String? _dropDownValue;
-  String? _dropDownValue2;
+  final List<String> sampleSizes = [
+    'A(5)', 'B(3)', 'C(5)', 'D(8)', 'E(13)',
+    'F(20)', 'G(32)', 'H(50)', 'J(80)', 'K(125)',
+    'L(200)', 'M(315)', 'N(500)', 'Q(1250)', 'P(800)',
+  ];
+
+  final List<String> results = ['PASS', 'FAIL'];
+
+  final List<Map<String, String>> items = [
+    {"desc": "PACKAGING APPEARANCE"},
+    {"desc": "PACKAGING DESCRIPTION"},
+    {"desc": "Test"},
+    {"desc": "Test12"},
+    {"desc": "Test4"},
+    {"desc": "Test3"},
+    {"desc": "Test1"},
+  ];
+
+  late List<String> selectedSamples;
+  late List<String> selectedResults;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedSamples = List.generate(items.length, (_) => 'A(5)');
+    selectedResults = List.generate(items.length, (_) => 'PASS');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Over All Result'),
-                  Container(
-                      height: 35,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: Colors.white,
-                      ),
-                      child: DropdownButton(
-                        hint: _dropDownValue == null
-                            ? const Text('Select')
-                            : Text(
-                          _dropDownValue!,
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                        isExpanded: true,
-                        iconSize: 30.0,
-                        style: const TextStyle(color: Colors.blue),
-                        items: ['PASS', 'FAILED'].map(
-                              (val) {
-                            return DropdownMenuItem<String>(
-                              value: val,
-                              child: Text(val),
-                            );
-                          },
-                        ).toList(),
-                        onChanged: (val) {
-                          setState(
-                                () {
-                              _dropDownValue = val;
-                            },
-                          );
-                        },
-                      )),
-                ],
-              ),
-              const Divider(thickness: 1,color: Colors.black),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox(height: 5);
-                  },
-                  itemCount: data.length,
-                  itemBuilder: (e, index) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          border: Border.all(color: Colors.black, width: 1),
-                          color: Colors.white),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.2,
-                                  child: Text(data[index])),
-                              Container(
-                                  height: 35,
-                                  width: MediaQuery.of(context).size.width * 0.3,
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 10),
-                                  // decoration: BoxDecoration(
-                                  //   borderRadius: BorderRadius.circular(3),
-                                  //   border: Border.all(color: Colors.black, width: 1),
-                                  //   color: Colors.white,
-                                  // ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton(
-                                      hint: _dropDownValue == null
-                                          ? const Text('Select')
-                                          : Text(
-                                              _dropDownValue!,
-                                              style: const TextStyle(
-                                                  color: Colors.blue),
-                                            ),
-                                      isExpanded: true,
-                                      iconSize: 30.0,
-                                      style: const TextStyle(color: Colors.blue),
-                                      items: ['A(2)', 'A(1)'].map(
-                                        (val) {
-                                          return DropdownMenuItem<String>(
-                                            value: val,
-                                            child: Text(val),
-                                          );
-                                        },
-                                      ).toList(),
-                                      onChanged: (val) {
-                                        setState(
-                                          () {
-                                            _dropDownValue = val;
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  )),
-                              Container(
-                                height: 35,
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                // decoration: BoxDecoration(
-                                //   borderRadius: BorderRadius.circular(3),
-                                //   border: Border.all(color: Colors.black, width: 1),
-                                //   color: Colors.white,
-                                // ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    hint: _dropDownValue2 == null
-                                        ? const Text('Select')
-                                        : Text(
-                                            _dropDownValue2!,
-                                            style:
-                                                const TextStyle(color: Colors.blue),
-                                          ),
-                                    isExpanded: true,
-                                    iconSize: 30.0,
-                                    style: const TextStyle(color: Colors.blue),
-                                    items: ['Awaiting', 'Failed'].map((val) {
-                                      return DropdownMenuItem<String>(
-                                          value: val, child: Text(val));
-                                    }).toList(),
-                                    onChanged: (val) {
-                                      setState(
-                                        () {
-                                          _dropDownValue2 = val;
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                  width: MediaQuery.of(context).size.width * 0.2,
-                                  alignment: Alignment.topLeft,
-                                  child: IconButton(
-                                      onPressed: () async  {
-                                        final File? image = await _imagePickerService.pickImage(context);
-                                        if (image != null) {
-                                          imageName = image.path.split('/').last.toString();
-                                          setState(() {});
-                                        } else {
-                                          debugPrint('No image selected.');
-                                        }
-                                      },
-                                      icon: const Icon(Icons.camera_alt))),
-                              SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.7,
-                                  child: Text(imageName == "" ? 'No Image Selected' : imageName)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+    return Column(
+      children: [
+        OverAllDropdown(),
+
+        _buildCardSection("Unit Packing"),
+        _buildCardSection("Shipping Mark"),
+        _buildTableHeader(),
+        Expanded(child: _buildDataList()),
+        // Remark
+        Remarks()
+      ],
+    );
+  }
+
+
+  Widget _buildCardSection(String title) {
+    String selectedSample = 'A(5)';
+    String selectedResult = 'PASS';
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Title
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-              )
-            ],
-          ),
+
+                // Sample Size Dropdown
+                Expanded(
+                  flex: 2,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: selectedSample,
+                    underline: const SizedBox(),
+                    onChanged: (value) {
+                      // Optional: Handle change
+                    },
+                    items: sampleSizes.map((size) {
+                      return DropdownMenuItem(
+                        value: size,
+                        child: Text(size, style: const TextStyle(fontSize: 12)),
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                // Result Dropdown (PASS / FAIL)
+                Expanded(
+                  flex: 2,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: selectedResult,
+                    underline: const SizedBox(),
+                    onChanged: (value) {
+                      // Optional: Handle change
+                    },
+                    items: ['PASS', 'FAIL'].map((result) {
+                      return DropdownMenuItem(
+                        value: result,
+                        child: Text(result, style: const TextStyle(fontSize: 12)),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+            AddImageIcon()
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTableHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: Row(
+        children: const [
+          Expanded(
+            flex: 3,
+            child: Text(
+              "Description",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              "SampleSize",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              "Result",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataList() {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  items[index]["desc"]!,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: _dropdown(
+                  sampleSizes,
+                  selectedSamples[index],
+                      (value) {
+                    setState(() {
+                      selectedSamples[index] = value!;
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: _dropdown(
+                  results,
+                  selectedResults[index],
+                      (value) {
+                    setState(() {
+                      selectedResults[index] = value!;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _dropdown(List<String> items, String selectedValue, void Function(String?)? onChanged) {
+    return DropdownButton<String>(
+      isExpanded: true,
+      value: selectedValue,
+      icon: const Icon(Icons.arrow_drop_down),
+      underline: Container(height: 1, color: Colors.grey),
+      onChanged: onChanged,
+      items: items.map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }).toList(),
     );
   }
 }

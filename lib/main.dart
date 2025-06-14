@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:buyerease/provider/community/community_code_cubit.dart';
+import 'package:buyerease/provider/defect_master/defect_master_cubit.dart';
+import 'package:buyerease/provider/download_image/download_image_cubit.dart';
 import 'package:buyerease/provider/login_cubit/login_cubit.dart';
 import 'package:buyerease/provider/sync_cubit/sync_cubit.dart';
 import 'package:buyerease/view/splash/splash_screen.dart';
@@ -65,6 +67,8 @@ class MyApp extends StatelessWidget {
             BlocProvider<CommunityCodeCubit>(create: (context) => CommunityCodeCubit()),
             BlocProvider<LoginCubit>(create: (context) => LoginCubit()),
             BlocProvider<SyncCubit>(create: (context) => SyncCubit()),
+            BlocProvider<DefectMasterCubit>(create: (context) => DefectMasterCubit()),
+            BlocProvider<DownloadImageCubit>(create: (context) => DownloadImageCubit()),
           ],
 
           child: MaterialApp(

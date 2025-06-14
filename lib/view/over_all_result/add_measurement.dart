@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:buyerease/utils/camera.dart';
 import 'package:flutter/material.dart';
 
+import '../../config/theame_data.dart';
+
 class AddMeasurement extends StatefulWidget {
   const AddMeasurement({super.key});
 
@@ -27,8 +29,19 @@ class _AddMeasurementState extends State<AddMeasurement> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(color: Colors.white),
+        backgroundColor: ColorsData.primaryColor,
         title: const Text('Add Measurement',style: TextStyle(color: Colors.white),),
+        actions: [
+          IconButton(
+            color: Colors.white,
+            onPressed: () {},
+            icon: Icon(Icons.search), // or any other icon
+          )
+
+        ],
       ),
+
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
@@ -274,7 +287,21 @@ class _AddMeasurementState extends State<AddMeasurement> {
             //   ],
             // ),
             const SizedBox(height: 10),
-            ElevatedButton(onPressed: (){}, child: const Text('Finding'))
+            ElevatedButton(
+              onPressed: () {
+                // Return measurement data to previous screen
+                Navigator.pop(context, {
+                  'length': length,
+                  'width': width,
+                  'height': height,
+                  'description': description,
+                  'result1': _dropDownValue,
+                  'result2': _dropDownValue2,
+                  'imageName': imageName,
+                });
+              },
+              child: const Text('Finding')
+            )
           ],
         ),
       ),

@@ -1,66 +1,47 @@
+import 'package:buyerease/components/custom_table.dart';
 import 'package:buyerease/database/database_helper.dart';
 import 'package:buyerease/utils/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class Carton extends StatefulWidget {
-  const Carton({super.key});
+class Carton extends StatelessWidget {
 
-  @override
-  State<Carton> createState() => _CartonState();
-}
-
-class _CartonState extends State<Carton> {
-  List<Map<String, dynamic>> _itemList = [];
-  bool loading = true;
-  dynamic data;
-
-  // Future<void> syncData() async {
-  //   data = await SQLHelper.getTableData(1);
-  //   _itemList = data;
-  //   setState(() {
-  //     if (data != []) {
-  //       loading = false;
-  //     } else {
-  //       debugPrint('data44 $data');
-  //     }
-  //   });
-  // }
-
-  @override
-  void initState() {
-    super.initState();
-    // syncData();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: loading == true
-            ? const Center(child: Loading())
-            : Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                child: SingleChildScrollView(
-                  child: DataTable(
-                    columnSpacing: MediaQuery.of(context).size.width * 0.02,
-                    border: TableBorder.all(color: Colors.black),
-                    columns: const [
-                      DataColumn(label: Expanded(child: Center(child: Text('PO')))),
-                      DataColumn(label: Expanded(child: Center(child: Text('item')))),
-                      DataColumn(label: Expanded(child: Center(child: Text('Packed')))),
-                      DataColumn(label: Expanded(child: Center(child: Text('Available')))),
-                      DataColumn(label: Expanded(child: Center(child: Text('To Inspected')))),
-                    ],
-                    rows: _itemList.map<DataRow>((item) {
-                      return DataRow(cells: [
-                        DataCell(Center(child: Text(item['PONO'].toString()))),
-                        DataCell(Center(child: Text(item['CustomerItemRef'].toString()))),
-                        DataCell(Center(child: Text(item['PackedQty'].toString()))),
-                        DataCell(Center(child: Text(item['CartonsPacked2'].toString()))),
-                        DataCell(Center(child: Text(item['CartonsPacked2'].toString()))),
-                      ]);
-                    }).toList(),
-                  ),
-                ),
-              ));
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomTable(
+              rowData: ['PO', 'Item', 'Packed', 'Available', 'To \nInspected']
+                  .map((data) => Text(data,style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),))
+                  .toList(),
+              isHeader: true,
+            ),
+            CustomTable(
+              rowData: ['1010', '01412345', '0', '0', '1']
+                  .map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),
+            ),
+            CustomTable(
+              rowData: ['1010', '', '0', '0', '1']
+                  .map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),
+            ),
+            const SizedBox(
+              width: 390,
+              child: Divider(thickness: 1, color: Colors.black12),
+            ),
+            CustomTable(
+              rowData: ['Total', '', '0', '0', '2']
+                  .map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
+

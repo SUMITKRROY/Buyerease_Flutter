@@ -1,13 +1,15 @@
 import 'dart:async';
 
 
-import 'package:buyerease/custom_appbar/custom_appbar.dart';
+import 'package:buyerease/components/custom_appbar.dart';
 import 'package:buyerease/database/database_helper.dart';
 
 import 'package:buyerease/main.dart';
+import 'package:buyerease/provider/defect_master/defect_master_cubit.dart';
 
 import 'package:buyerease/utils/logout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:buyerease/routes/route_path.dart';
 
@@ -27,7 +29,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   final _hiveBox = Hive.box("mybox");
+
   List dataList = [
     {
       'title': 'Inception',
@@ -49,22 +53,24 @@ class _HomePageState extends State<HomePage> {
       'icon': 'assets/images/icon3.png',
       'page': 'InspectionList.dart'
     },
-    {
-      'title': 'test',
-      'icon': 'assets/images/icon3.png',
-      'page': 'InspectionList.dart'
-    },
+    // {
+    //   'title': 'test',
+    //   'icon': 'assets/images/icon3.png',
+    //   'page': 'InspectionList.dart'
+    // },
   ];
+
   @override
   void initState() {
     super.initState();
     resetUrl();
-
   }
+
   Future<void> resetUrl() async {
     final downloadUrl = await SharedPrefService.getDownloadUrl();
     final apiUrl = await SharedPrefService.getApiUrl();
     ApiRoute.resetConfig(downloadUrl!, apiUrl!);
+
   }
   // Future<void> deleteData() async {
   //   dynamic data = await SQLHelper.getItems();
@@ -127,12 +133,13 @@ class _HomePageState extends State<HomePage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (_) => const SyncList()));
-                          } else {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const TestScreen()));
                           }
+                          // else {
+                          //   Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //           builder: (_) =>   PoInspectionMergedPage()));
+                          // }
                         },
                         child: Container(
                           decoration: BoxDecoration(

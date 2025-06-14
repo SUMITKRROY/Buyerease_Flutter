@@ -3,7 +3,7 @@ import '../database_helper.dart';
 import '../database_helper.dart';
 
 class InspLevelHeaderTable {
-  static const String TABLE_NAME = "InsplvlHdr";
+    static const String TABLE_NAME = "InsplvlHdr";
 
   static const String pRowID = "pRowID";
   static const String locID = "LocID";

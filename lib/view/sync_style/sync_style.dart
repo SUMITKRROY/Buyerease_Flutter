@@ -1,4 +1,4 @@
-import 'package:buyerease/custom_appbar/custom_appbar.dart';
+import 'package:buyerease/components/custom_appbar.dart';
 import 'package:buyerease/database/database_helper.dart';
 
 import 'package:buyerease/utils/toast.dart';

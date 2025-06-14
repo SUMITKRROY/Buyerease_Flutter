@@ -1,7 +1,12 @@
 import 'dart:io';
 
+import 'package:buyerease/components/add_image_icon.dart';
 import 'package:buyerease/utils/camera.dart';
 import 'package:flutter/material.dart';
+
+import '../../components/over_all_dropdown.dart';
+import '../../components/remarks.dart';
+import '../../config/theame_data.dart';
 
 class BarCode extends StatefulWidget {
   const BarCode({super.key});
@@ -16,10 +21,7 @@ class _BarCodeState extends State<BarCode> {
   final visualController = TextEditingController();
   String? _dropDownValue;
   String? remark;
-  List dataBarCode = [
-    'Unit Packing',
-    'Master Packing'
-  ];
+  List dataBarCode = ['Unit Packing', 'Master Packing'];
   List<String> base64string = [];
   String? imageType;
   String imageName = '';
@@ -32,187 +34,109 @@ class _BarCodeState extends State<BarCode> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Over All Result'),
-                  Container(
-                      height: 35,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(color: Colors.black, width: 1),
-                        color: Colors.white,
+              OverAllDropdown(),
+              /// Card layout
+              Card(
+                margin: const EdgeInsets.all(12),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// Title + dropdown
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Unit Packing",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                              fontSize: 14, // Font size 14
+                            ),
+                          ),
+                          DropdownButton<String>(
+                            value: "A(5)",
+                            items: const [
+                              DropdownMenuItem(value: "A(5)", child: Text("A(5)", style: TextStyle(fontSize: 12))),
+                              DropdownMenuItem(value: "B(2)", child: Text("B(2)", style: TextStyle(fontSize: 12))),
+                            ],
+                            onChanged: (val) {},
+                          )
+                        ],
                       ),
-                      child: DropdownButton(
-                        hint: _dropDownValue == null
-                            ? const Text('Select')
-                            : Text(
-                                _dropDownValue!,
-                                style: const TextStyle(color: Colors.blue),
+                      const SizedBox(height: 16),
+                      /// Specification & Visual fields
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                labelText: "Specification",
+                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                border: OutlineInputBorder(),
                               ),
-                        isExpanded: true,
-                        iconSize: 30.0,
-                        style: const TextStyle(color: Colors.blue),
-                        items: ['PASS', 'FAILED'].map(
-                          (val) {
-                            return DropdownMenuItem<String>(
-                              value: val,
-                              child: Text(val),
-                            );
-                          },
-                        ).toList(),
-                        onChanged: (val) {
-                          setState(
-                            () {
-                              _dropDownValue = val;
-                            },
-                          );
-                        },
-                      )),
-                ],
-              ),
-              const Divider(thickness: 1, color: Colors.blue),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.55,
-                child: ListView.builder(
-                    itemCount: dataBarCode.length,
-                    itemBuilder: (e, index) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          border: Border.all(color: Colors.black, width: 1),
-                          color: Colors.white),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(dataBarCode[index], style: const TextStyle(color: Colors.blueAccent, fontSize: 15)),
-                                Container(
-                                    height: 35,
-                                    width: MediaQuery.of(context).size.width * 0.3,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    // decoration: BoxDecoration(
-                                    //   borderRadius: BorderRadius.circular(3),
-                                    //   border: Border.all(color: Colors.black, width: 1),
-                                    //   color: Colors.white,
-                                    // ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton(
-                                        hint: _dropDownValue == null
-                                            ? const Text('Select')
-                                            : Text(_dropDownValue!, style: const TextStyle(color: Colors.blue),),
-                                        isExpanded: true,
-                                        iconSize: 30.0,
-                                        style: const TextStyle(color: Colors.blue),
-                                        items: ['A(2)', 'A(1)'].map(
-                                          (val) {return DropdownMenuItem<String>(value: val,child: Text(val),
-                                            );
-                                          },
-                                        ).toList(),
-                                        onChanged: (val) {
-                                          setState(
-                                            () {
-                                              _dropDownValue = val;
-                                            },
-                                          );
-                                        },
-                                      ),
-                                    ))
-                              ],
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Result', style: TextStyle(color: Colors.blueAccent[200], fontSize: 12)),
-                                Container(height: 35,width: MediaQuery.of(context).size.width * 0.3,padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    // decoration: BoxDecoration(
-                                    //   borderRadius: BorderRadius.circular(3),
-                                    //   border: Border.all(color: Colors.black, width: 1),
-                                    //   color: Colors.white,
-                                    // ),
-                                    child: DropdownButtonHideUnderline(
-                                      child: DropdownButton(
-                                        hint: _dropDownValue == null
-                                            ? const Text('Select')
-                                            : Text(_dropDownValue!, style: const TextStyle(color: Colors.blue)),
-                                        isExpanded: true,
-                                        iconSize: 30.0,
-                                        style: const TextStyle(color: Colors.blue),
-                                        items: ['A(2)', 'A(1)'].map((val) {return DropdownMenuItem<String>(value: val,child: Text(val));}).toList(),
-                                        onChanged: (val) {setState(() {_dropDownValue = val;});},
-                                      ),
-                                    ))
-                              ],
-                            ),
-                            Column(children: [
-                              Row(mainAxisAlignment :MainAxisAlignment.spaceEvenly, children: [
-                                Container(width: MediaQuery.of(context).size.width * 0.3,height:MediaQuery.of(context).size.width * 0.1,color:Colors.blueAccent[100],alignment:Alignment.center,child: const Text(style:TextStyle(color: Colors.white),'Specification')),
-                                Container(width: MediaQuery.of(context).size.width * 0.3,height:MediaQuery.of(context).size.width * 0.1,color:Colors.blueAccent[100],alignment:Alignment.center,child: const Text(style:TextStyle(color: Colors.white),'Visual')),
-                              ],
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                labelText: "Visual",
+                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                border: OutlineInputBorder(),
                               ),
-                              const SizedBox(height: 0.5),
-                              Row(mainAxisAlignment :MainAxisAlignment.spaceEvenly, children: [
-                                Container(width: MediaQuery.of(context).size.width * 0.3,height:MediaQuery.of(context).size.width * 0.1,alignment:Alignment.center,color:Colors.blueAccent[100],child: TextField(controller: specificationController)),
-                                Container(width: MediaQuery.of(context).size.width * 0.3,height:MediaQuery.of(context).size.width * 0.1,alignment:Alignment.center,color:Colors.blueAccent[100],child: TextField(controller: visualController)),
-                                ],
-                              )
-                            ]),
-                            Row(
-                              children: [
-                                Container(
-                                    width: MediaQuery.of(context).size.width * 0.2,
-                                    alignment: Alignment.topLeft,
-                                    child: IconButton(
-                                        onPressed: () async  {
-                                          final File? image = await _imagePickerService.pickImage(context);
-                                          if (image != null) {
-                                            imageName = image.path.split('/').last.toString();
-                                            setState(() {});}
-                                          else {debugPrint('No image selected.');}
-                                        },
-                                        icon: const Icon(Icons.camera_alt))),
-                                SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.7,
-                                    child: Text(imageName == "" ? 'No Image Selected' : imageName)),
-                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                // width:
-                // MediaQuery.of(context).size.width *
-                //     0.8,
-                // padding: const EdgeInsets.symmetric(
-                //     horizontal: 20),
-                // // margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Colors.black,
-                        width: 1),
-                    borderRadius: BorderRadius.circular(12)),
-                child: TextFormField(
-                  keyboardType: TextInputType.name,
-                  initialValue: remark,
-                  onChanged: (value) =>
-                  remark = value.trim(),
-                  style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: " Remark",
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      /// Scan + Result + Camera
+                      /// Scan + Result Dropdown + Camera in one row
+                      Row(
+                        children: [
+                          /// Scan field
+                          Expanded(
+                            flex: 4,
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                labelText: "Scan",
+                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          /// Result dropdown
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<String>(
+                              value: "PASS",
+                              items: const [
+                                DropdownMenuItem(value: "PASS", child: Text("PASS", style: TextStyle(fontSize: 12))),
+                                DropdownMenuItem(value: "FAIL", child: Text("FAIL", style: TextStyle(fontSize: 12))),
+                              ],
+                              onChanged: (val) {},
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      /// Camera icon
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: AddImageIcon()
+                      ),
+                    ],
                   ),
                 ),
               ),
+              // Remark
+              Remarks()
             ],
           ),
         ),

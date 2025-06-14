@@ -513,10 +513,11 @@ class POItemDtlHandler {
   static Future<List<POItemDtl>> getItemList( BuildContext context ,String pInspectionID) async {
     final List<POItemDtl> itemList = [];
     try {
-      if (!await GenUtils.columnExistsInTable( table: 'QRPOItemdtl', columnToCheck: 'RetailPrice')) {
-        print('$_tag: Column RetailPrice not found, altering to REAL.');
-        await GenUtils.handleToAlterAsReal('QRPOItemdtl', 'RetailPrice');
-      }
+      // if (!await GenUtils.columnExistsInTable( table: 'QRPOItemdtl', columnToCheck: 'RetailPrice')) {
+      //   print('$_tag: Column RetailPrice not found, altering to REAL.');
+      //
+      //   await GenUtils.handleToAlterAsReal('QRPOItemdtl', 'RetailPrice');
+      // }
 
       final db = await DatabaseHelper().database;
       final query = '''
@@ -589,60 +590,56 @@ class POItemDtlHandler {
 
       for (var row in result) {
         final poItemDtl = POItemDtl(
-          pRowID: row['QrItemID'] as String?,
-          qrHdrID: row['QRHdrID'] as String?,
-          qrpoItemHdrID: row['QRPOItemHdrID'] as String?,
-          poItemDtlRowID: row['POItemDtlRowID'] as String?,
-          sampleCodeID: row['SampleCodeID'] as String?,
-          availableQty: row['AvailableQty'] as int?,
-          allowedinspectionQty: row['AllowedInspectionQty'] as int?,
-          inspectedQty: row['InspectedQty'] as int?,
-          acceptedQty: row['AcceptedQty'] as int?,
-          furtherInspectionReqd: row['FurtherInspectionReqd'] as int?,
-          shortStockQty: row['ShortStockQty'] as int?,
-          cartonsInspected: row['CartonsInspected'] as int?,
-          cartonsPacked: row['CartonsPacked'] as int?,
-          cartonsPacked2: row['CartonsPacked2'] as int?,
-          allowedCartonInspection: row['AllowedCartonInspection'] as int?,
-          criticalDefectsAllowed: row['CriticalDefectsAllowed'] as int?,
-          majorDefectsAllowed: row['MajorDefectsAllowed'] as int?,
-          minorDefectsAllowed: row['MinorDefectsAllowed'] as int?,
-          criticalDefect: row['CriticalDefect'] as int?,
-          majorDefect: row['MajorDefect'] as int?,
-          minorDefect: row['MinorDefect'] as int?,
+          pRowID: row['QrItemID']?.toString(),
+          qrHdrID: row['QRHdrID']?.toString(),
+          qrpoItemHdrID: row['QRPOItemHdrID']?.toString(),
+          poItemDtlRowID: row['POItemDtlRowID']?.toString(),
+          sampleCodeID: row['SampleCodeID']?.toString(),
+          availableQty: (row['AvailableQty'] as num?)?.toInt(),
+          allowedinspectionQty: (row['AllowedInspectionQty'] as num?)?.toInt(),
+          inspectedQty: (row['InspectedQty'] as num?)?.toInt(),
+          acceptedQty: (row['AcceptedQty'] as num?)?.toInt(),
+          furtherInspectionReqd: (row['FurtherInspectionReqd'] as num?)?.toInt(),
+          shortStockQty: (row['ShortStockQty'] as num?)?.toInt(),
+          cartonsInspected: (row['CartonsInspected'] as num?)?.toInt(),
+          cartonsPacked: (row['CartonsPacked'] as num?)?.toInt(),
+          cartonsPacked2: (row['CartonsPacked2'] as num?)?.toInt(),
+          allowedCartonInspection: (row['AllowedCartonInspection'] as num?)?.toInt(),
+          criticalDefectsAllowed: (row['CriticalDefectsAllowed'] as num?)?.toInt(),
+          majorDefectsAllowed: (row['MajorDefectsAllowed'] as num?)?.toInt(),
+          minorDefectsAllowed: (row['MinorDefectsAllowed'] as num?)?.toInt(),
+          criticalDefect: (row['CriticalDefect'] as num?)?.toInt(),
+          majorDefect: (row['MajorDefect'] as num?)?.toInt(),
+          minorDefect: (row['MinorDefect'] as num?)?.toInt(),
           retailPrice: row['RetailPrice'] as double?,
-          poMasterPackQty: row['POMasterPackQty'] as int?,
-          recDirty: row['recDirty'] as int?,
-          poNo: row['PONO'] as String?,
-          itemDescr: row['ItemDescr'] as String?,
-          orderQty: row['OrderQty'] as String?,
-          earlierInspected: row['EarlierInspected'] as int?,
-          customerItemRef: row['CustomerItemRef'] as String?,
-          hologramNo: row['HologramNo'] as String?,
-          qrItemID: row['QrItemID'] as String?,
-          sampleSizeDescr: row['SampleSizeDescr'] as String?,
-          itemID: row['ItemID'] as String?,
-          qrItemBaseMaterialID: row['QRItemBaseMaterialID'] as String?,
-          qrItemBaseMaterialAddOnInfo:
-              row['QRItemBaseMaterial_AddOnInfo'] as String?,
-          barcodeInspectionResult: row['Barcode_InspectionResult'] as String?,
-          onSiteTestInspectionResult:
-              row['OnSiteTest_InspectionResult'] as String?,
-          itemMeasurementInspectionResult:
-              row['ItemMeasurement_InspectionResult'] as String?,
-          workmanshipInspectionResult:
-              row['WorkmanShip_InspectionResult'] as String?,
-          overallInspectionResult: row['Overall_InspectionResult'] as String?,
-          pkgMeInspectionResult: row['PKG_Me_InspectionResult'] as String?,
-          digitals: row['Digitals'] as int?,
-          enclCount: row['EnclCount'] as int?,
-          isSelected: row['IsSelected'] as int?,
-          sizeBreakUP: row['SizeBreakUP'] as int?,
-          shipToBreakUP: row['ShipToBreakUP'] as String?,
-          testReportStatus: row['testReportStatus'] as int?,
-          duplicateFlag: row['DuplicateFlag'] as int?,
-          isHologramExpired: row['IsHologramExpired'] as int?,
-          itemRepeat: row['ItemRepeat'] as int?,
+          poMasterPackQty: (row['POMasterPackQty'] as num?)?.toInt(),
+          recDirty: (row['recDirty'] as num?)?.toInt(),
+          poNo: row['PONO']?.toString(),
+          itemDescr: row['ItemDescr']?.toString(),
+          orderQty: row['OrderQty']?.toString(),
+          earlierInspected: (row['EarlierInspected'] as num?)?.toInt(),
+          customerItemRef: row['CustomerItemRef']?.toString(),
+          hologramNo: row['HologramNo']?.toString(),
+          qrItemID: row['QrItemID']?.toString(),
+          sampleSizeDescr: row['SampleSizeDescr']?.toString(),
+          itemID: row['ItemID']?.toString(),
+          qrItemBaseMaterialID: row['QRItemBaseMaterialID']?.toString(),
+          qrItemBaseMaterialAddOnInfo: row['QRItemBaseMaterial_AddOnInfo']?.toString(),
+          barcodeInspectionResult: row['Barcode_InspectionResult']?.toString(),
+          onSiteTestInspectionResult: row['OnSiteTest_InspectionResult']?.toString(),
+          itemMeasurementInspectionResult: row['ItemMeasurement_InspectionResult']?.toString(),
+          workmanshipInspectionResult: row['WorkmanShip_InspectionResult']?.toString(),
+          overallInspectionResult: row['Overall_InspectionResult']?.toString(),
+          pkgMeInspectionResult: row['PKG_Me_InspectionResult']?.toString(),
+          digitals: (row['Digitals'] as num?)?.toInt(),
+          enclCount: (row['EnclCount'] as num?)?.toInt(),
+          isSelected: (row['IsSelected'] as num?)?.toInt(),
+          sizeBreakUP: (row['SizeBreakUP'] as num?)?.toInt(),
+          shipToBreakUP: row['ShipToBreakUP']?.toString(),
+          testReportStatus: (row['testReportStatus'] as num?)?.toInt(),
+          duplicateFlag: (row['DuplicateFlag'] as num?)?.toInt(),
+          isHologramExpired: (row['IsHologramExpired'] as num?)?.toInt(),
+          itemRepeat: (row['ItemRepeat'] as num?)?.toInt(),
         );
 
         // final importantList = await ItemInspectionDetailHandler.isImportant(

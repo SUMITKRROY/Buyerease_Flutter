@@ -2,7 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import '../database_helper.dart';
 
 class QRPOItemDtlTable {
-  static const String tableName = 'QRPOItemdtl';
+  static const String TABLE_NAME = 'QRPOItemdtl';
 
   // Column names
   static const String colPRowID = 'pRowID';
@@ -78,7 +78,7 @@ class QRPOItemDtlTable {
   static const String colProductID = 'ProductID';
 
   static const String CREATE = '''
-  CREATE TABLE IF NOT EXISTS $tableName (
+  CREATE TABLE IF NOT EXISTS $TABLE_NAME (
     $colPRowID TEXT,
     $colLocID TEXT,
     $colQRHdrID TEXT,
@@ -157,7 +157,7 @@ class QRPOItemDtlTable {
   Future<void> insert(Map<String, dynamic> map) async {
     final db = await DatabaseHelper().database;
     await db.insert(
-      tableName,
+      TABLE_NAME,
       map,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -165,13 +165,13 @@ class QRPOItemDtlTable {
 
   Future<List<Map<String, dynamic>>> getAll() async {
     final db = await DatabaseHelper().database;
-    return await db.query(tableName);
+    return await db.query(TABLE_NAME);
   }
 
   Future<List<Map<String, dynamic>>> getByQRHdrID(String qrHdrId) async {
     final db = await DatabaseHelper().database;
     return await db.query(
-      tableName,
+      TABLE_NAME,
       where: '$colQRHdrID = ?',
       whereArgs: [qrHdrId],
     );
@@ -180,7 +180,7 @@ class QRPOItemDtlTable {
   Future<void> updateRecord(String rowID, Map<String, dynamic> values) async {
     final db = await DatabaseHelper().database;
     await db.update(
-      tableName,
+      TABLE_NAME,
       values,
       where: '$colPRowID = ?',
       whereArgs: [rowID],
@@ -190,7 +190,7 @@ class QRPOItemDtlTable {
   Future<int> deleteRecord(String rowID) async {
     final db = await DatabaseHelper().database;
     return await db.delete(
-      tableName,
+      TABLE_NAME,
       where: '$colPRowID = ?',
       whereArgs: [rowID],
     );
@@ -198,13 +198,13 @@ class QRPOItemDtlTable {
 
   Future<int> deleteAll() async {
     final db = await DatabaseHelper().database;
-    return await db.delete(tableName);
+    return await db.delete(TABLE_NAME);
   }
 
   Future<List<Map<String, dynamic>>> getEnabledRecords() async {
     final db = await DatabaseHelper().database;
     return await db.query(
-      tableName,
+      TABLE_NAME,
       where: '$colRecEnable = ?',
       whereArgs: [1],
     );
@@ -214,7 +214,7 @@ class QRPOItemDtlTable {
   Future<String?> getCustomerItemRefByPRowID(String pRowID) async {
     final db = await DatabaseHelper().database;
     final result = await db.query(
-      tableName,
+      TABLE_NAME,
       columns: [colCustomerItemRef],
       where: '$colPRowID = ? AND $colRecEnable = ?',
       whereArgs: [pRowID, 1],

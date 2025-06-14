@@ -1,8 +1,10 @@
 
 import 'package:buyerease/view/po/po_item.dart';
 import 'package:buyerease/view/po/quality_parameters.dart';
+import 'package:buyerease/view/po/workmanship/po_workmanship.dart';
 import 'package:flutter/material.dart';
 
+import '../../config/theame_data.dart';
 import '../over_all_result/workmanship.dart';
 import 'carton.dart';
 import 'enclosure.dart';
@@ -46,7 +48,20 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id, style: const TextStyle(color: Colors.white)),
+        centerTitle: false, // Correct casing: "centerTitle", not "CenterTile"
+        leading: const BackButton(color: Colors.white),
+        backgroundColor: ColorsData.primaryColor,
+        title: Text( 'DEL0067128', style: TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () {},
+            child: Text('UNDO', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () {},
+            child: Text('SAVE', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: SizedBox(
@@ -63,9 +78,9 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.74,
-                child: TabBarView(controller: _controller, children: const [
+                child: TabBarView(controller: _controller, children:   [
                   Center(child: PoItem()),
-                  Center(child: WorkManShip()),
+                  Center(child: PoWorkmanship()),
                   Center(child: Carton()),
                   Center(child: MoreDetails()),
                   Center(child: QualityParameters()),

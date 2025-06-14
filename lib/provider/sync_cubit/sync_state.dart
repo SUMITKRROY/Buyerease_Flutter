@@ -8,9 +8,7 @@ final class SyncInitial extends SyncState {}
 final class SyncLoading extends SyncState {}
 
 final class SyncSuccess extends SyncState {
-  final Map<String,dynamic> userData;
 
-  SyncSuccess(this.userData);
 }
 
 final class SyncFailure extends SyncState {

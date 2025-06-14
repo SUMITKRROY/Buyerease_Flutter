@@ -18,42 +18,42 @@ class FslLog {
     // Informational log
     static void i(String tag, String message) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 800); // INFO level
+     //   developer.log(message, name: tag, level: 800); // INFO level
         _appendLog('I', tag, message);
     }
 
     // Debug log
     static void d(String tag, String message) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 500); // DEBUG level
+      //  developer.log(message, name: tag, level: 500); // DEBUG level
         _appendLog('D', tag, message);
     }
 
     // Warning log
     static void w(String tag, String message) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 900); // WARNING level
+     //   developer.log(message, name: tag, level: 900); // WARNING level
         _appendLog('W', tag, message);
     }
 
     // Error log
     static void e(String tag, String message, [StackTrace? stackTrace]) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 1000, stackTrace: stackTrace); // ERROR level
+     //   developer.log(message, name: tag, level: 1000, stackTrace: stackTrace); // ERROR level
         _appendLog('E', tag, message);
     }
 
     // Verbose log for API-related JSON messages
     static void vc(String tag, String message) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 300); // VERBOSE level
+      //  developer.log(message, name: tag, level: 300); // VERBOSE level
         _appendLog('V', tag, message);
     }
 
     // Verbose log for Google API-related JSON messages
     static void vg(String tag, String message) {
         message = message.isEmpty ? ' ' : message;
-        developer.log(message, name: tag, level: 300); // VERBOSE level
+      //  developer.log(message, name: tag, level: 300); // VERBOSE level
         _appendLog('V', tag, message);
     }
 
@@ -63,15 +63,15 @@ class FslLog {
 
         if (_logFile != null && await _logFile!.exists()) {
             if (_fileSize(_logFile!) >= FClientConfig.logFileMaxSizeInKB) {
-                developer.log('Logger file more than ${FClientConfig.logFileMaxSizeInKB} KB, deleting file',
-                    name: 'FslLog');
+                // developer.log('Logger file more than ${FClientConfig.logFileMaxSizeInKB} KB, deleting file',
+                //     name: 'FslLog');
                 await _logFile!.delete();
                 _logFile = null;
             }
         }
 
         if (_logFile == null || !await _logFile!.exists()) {
-            developer.log('Logger file object doesn\'t exist', name: 'FslLog');
+          //  developer.log('Logger file object doesn\'t exist', name: 'FslLog');
             initFlag = await initializeLog(); // Corrected from _initializeLog to initializeLog
         }
 
@@ -83,8 +83,8 @@ class FslLog {
                     mode: FileMode.append,
                 );
             } catch (e, stackTrace) {
-                developer.log('Error writing to log file: $e',
-                    name: 'FslLog', stackTrace: stackTrace);
+             //   developer.log('Error writing to log file: $e',
+              //      name: 'FslLog', stackTrace: stackTrace);
             }
         } else {
             developer.log('Logger initialization failed', name: 'FslLog');
@@ -97,13 +97,13 @@ class FslLog {
             final directory = await getApplicationDocumentsDirectory();
             _logFile = File('${directory.path}/FslLog.txt');
 
-            developer.log('Logger file path - ${_logFile!.path}', name: 'FslLog');
+          //  developer.log('Logger file path - ${_logFile!.path}', name: 'FslLog');
 
             if (await _logFile!.exists()) {
-                developer.log('Logger file exists', name: 'FslLog');
+           //     developer.log('Logger file exists', name: 'FslLog');
                 if (_fileSize(_logFile!) >= FClientConfig.logFileMaxSizeInKB) {
-                    developer.log('Logger file more than ${FClientConfig.logFileMaxSizeInKB} KB, deleting file',
-                        name: 'FslLog');
+                    // developer.log('Logger file more than ${FClientConfig.logFileMaxSizeInKB} KB, deleting file',
+                    //     name: 'FslLog');
                     await _logFile!.delete();
                 }
             }
@@ -119,8 +119,8 @@ class FslLog {
 
             return true;
         } catch (e, stackTrace) {
-            developer.log('Error initializing log file: $e',
-                name: 'FslLog', stackTrace: stackTrace);
+            // developer.log('Error initializing log file: $e',
+            //     name: 'FslLog', stackTrace: stackTrace);
             return false;
         }
     }
