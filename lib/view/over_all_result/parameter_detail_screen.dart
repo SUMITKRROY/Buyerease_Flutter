@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../config/theame_data.dart';
 
-class ParameterDetailScreen extends StatefulWidget {
+class ParameterDetailScreen extends StatefulWidget {  final String id;
   final String parameterName;
   final String? existingComment;
 
   const ParameterDetailScreen({
     super.key,
     required this.parameterName,
-    this.existingComment,
+    this.existingComment, required this.id,
   });
 
   @override
@@ -116,7 +116,7 @@ class _ParameterDetailScreenState extends State<ParameterDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-               AddImageIcon(),
+                  AddImageIcon(title: "Unit pack appearance", id: widget.id,),
                   const SizedBox(width: 20),
                   Text(
                     'Add Photo',

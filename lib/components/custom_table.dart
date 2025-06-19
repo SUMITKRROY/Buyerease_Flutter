@@ -7,6 +7,7 @@ class CustomTable extends StatelessWidget {
   final String? description;
   final bool isHeader;
   final bool isFirstCellClickable;
+  final String? customerItemRef;
 
   final TextStyle headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp);
   final TextStyle normalStyle = TextStyle(fontSize: 10.sp);
@@ -16,6 +17,7 @@ class CustomTable extends StatelessWidget {
     this.description,
     this.isHeader = false,
     this.isFirstCellClickable = true,
+    this.customerItemRef,
   });
 
   Widget buildCell(Widget child, {double width = 80}) {
@@ -47,15 +49,12 @@ class CustomTable extends StatelessWidget {
     if (isFirstCellClickable && !isHeader) {
       return InkWell(
         onTap: () {
-          // Assuming the widget is a Text widget containing an ID
-          if (widget is Text) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => OverAllResult(id: widget.data ?? ''),
-              ),
-            );
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OverAllResult(id: customerItemRef ?? ''),
+            ),
+          );
         },
         child: buildCell(widget, width: width),
       );

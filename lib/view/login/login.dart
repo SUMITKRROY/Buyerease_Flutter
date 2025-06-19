@@ -125,8 +125,13 @@ class _LoginState extends State<Login> {
       deviceID = iosDeviceInfo.identifierForVendor!;
     } else if (Platform.isAndroid) {
       var androidDeviceInfo = await deviceInfo.androidInfo;
-      deviceID = androidDeviceInfo.id;
+      deviceID = androidDeviceInfo.serialNumber;
       debugPrint('deviceID $deviceID');
+      print('Brand: ${androidDeviceInfo.brand}');
+      print('Model: ${androidDeviceInfo.model}');
+      print('Device: ${androidDeviceInfo.device}');
+      print('Android ID: ${androidDeviceInfo.id}');
+      print('Fingerprint: ${androidDeviceInfo.fingerprint}');
     }
     return null;
   }

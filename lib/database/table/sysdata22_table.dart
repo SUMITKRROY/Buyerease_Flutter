@@ -73,6 +73,26 @@ class Sysdata22Table {
       whereArgs: [id],
     );
   }
+// Get and print MainDescr values where MasterName is "Status", grouped by MainID and ordered by MainID
+  Future<List<String>> getAndPrintMainDescrWhereStatus() async {
+    final db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> result = await db.query(
+    TABLE_NAME ,
+    where : "$masterName = ?" ,
+    whereArgs: ['Status'],
+    groupBy:  "$mainID ",
+    orderBy:   "$mainID");
+
+    // Extract and print MainDescr from each row
+    List<String> status = result.map((row) => row[mainDescr] as String).toList();
+
+    // Print each MainDescr
+    for (var s in status) {
+      print('Status: $s');
+    }
+
+    return status;
+  }
 
   // Delete a record by GenID
   Future<int> delete(String id) async {

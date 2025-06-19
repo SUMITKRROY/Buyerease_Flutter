@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../config/theame_data.dart';
-import '../po/workmanship.dart';
+import 'over_all_workmanship.dart';
 import 'barcode.dart';
 import 'digital_uploaded.dart';
 import 'history.dart';
@@ -76,12 +76,14 @@ class _OverAllResultState extends State<OverAllResult>
         ),
         ),
           actions: [
-          TextButton(
-          onPressed: () {},
-      child: Text('UNDO', style: TextStyle(color: Colors.white)),
-    ),
+    //       TextButton(
+    //       onPressed: () {},
+    //   child: Text('UNDO', style: TextStyle(color: Colors.white)),
+    // ),
     TextButton(
-    onPressed: () {},
+    onPressed: () {
+
+    },
     child: Text('SAVE', style: TextStyle(color: Colors.white)),
     ),
     ],
@@ -135,18 +137,18 @@ class _OverAllResultState extends State<OverAllResult>
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.8,
                 child: TabBarView(controller: _controller, children:   [
-                  Center(child: ItemQuantity()),
-                  Center(child: PackingAppearance()),
-                  Center(child: PackingMeasurement()),
-                  Center(child: BarCode()),
+                  Center(child: ItemQuantity(id: widget.id,)),
+                  Center(child: PackingAppearance(id: widget.id,)),
+                  Center(child: PackingMeasurement(id:  widget.id,)),
+                  Center(child: BarCode(id:  widget.id,)),
                   Center(child: OnSite()),
-                  Center(child: WorkManShip()),
+                  Center(child: WorkManShip(id:  widget.id,)),
                   Center(child: SampleCollected()),
                   Center(child: ItemMeasurement()),
                   Center(child: History()),
-                  Center(child: QualityParametersResult()),
+                  Center(child: QualityParametersResult(id:  widget.id,)),
                   Center(child: InternalTest()),
-                  Center(child: DigitalUploaded()),
+                  Center(child: DigitalUploaded(id:  widget.id,)),
                   Center(child: TestReports()),
                 ]),
               ),

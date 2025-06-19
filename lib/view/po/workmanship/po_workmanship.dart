@@ -1,13 +1,46 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../components/custom_table.dart';
+import '../../../database/table/qr_po_item_dtl_table.dart';
+import '../../../model/po_item_dtl_model.dart';
 
+class PoWorkmanship extends StatefulWidget {
+  final String pRowId;
+  const PoWorkmanship({super.key, required this.pRowId});
 
+  @override
+  State<PoWorkmanship> createState() => _PoWorkmanshipState();
+}
 
+class _PoWorkmanshipState extends State<PoWorkmanship> {
+  List<POItemDtl> poItems = [];
+  bool isLoading = true;
 
-class PoWorkmanship extends StatelessWidget {
+  @override
+  void initState() {
+    super.initState();
+    fetchItemsByQRHdrID();
+  }
+
+  Future<void> fetchItemsByQRHdrID() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      List<Map<String, dynamic>> items = await QRPOItemDtlTable().getByQRHdrID(widget.pRowId);
+      poItems = items.map((item) => POItemDtl.fromJson(item)).toList();
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   final TextStyle headerStyle = const TextStyle(fontWeight: FontWeight.bold);
   final TextStyle normalStyle = const TextStyle(fontSize: 14);
@@ -44,6 +77,10 @@ class PoWorkmanship extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -59,18 +96,35 @@ class PoWorkmanship extends StatelessWidget {
               isHeader: true,
             ),
 
-            CustomTable(rowData:['1010', '1412345', '12', '12', '0', '0'].map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),),
+            ...poItems.map((item) => CustomTable(
+              rowData: [
+                item.poNo ?? '',
+                item.itemCode ?? '',
+                item.workmanshipToInspectionhdr ?? '0',
+                item.inspectedhdr ?? '0',
+                item.criticalhdr ?? '0',
+                item.majorhdr ?? '0',
+                item.minorhdr ?? '0'
+              ].map((data) => Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
+            )).toList(),
 
-            CustomTable(rowData:['1010', '124563', '75', '75', '0', '0', ].map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),),
-            SizedBox(width:390,child: const Divider(thickness: 1, color: Colors.black12)),
-            CustomTable (rowData:['Total', '', '87', '', '0', '0', ].map((data) => Text(data,style: TextStyle(fontSize: 10.sp),)).toList(),),
+            SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),
+            CustomTable(
+              rowData: [
+                'Total',
+                '',
+                poItems.fold(0, (sum, item) => sum + (int.tryParse(item.workmanshipToInspectionhdr ?? '0') ?? 0)).toString(),
+                poItems.fold(0, (sum, item) => sum + (int.tryParse(item.inspectedhdr ?? '0') ?? 0)).toString(),
+                poItems.fold(0, (sum, item) => sum + (int.tryParse(item.criticalhdr ?? '0') ?? 0)).toString(),
+                poItems.fold(0, (sum, item) => sum + (int.tryParse(item.majorhdr ?? '0') ?? 0)).toString(),
+                poItems.fold(0, (sum, item) => sum + (int.tryParse(item.minorhdr ?? '0') ?? 0)).toString(),
+              ].map((data) => Text(data, style: TextStyle(fontSize: 10.sp))).toList(),
+            ),
           ],
         ),
       ),
     );
   }
-
-
 }
 
 

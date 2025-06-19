@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../database_helper.dart';
+import '../../model/po_item_dtl_model.dart';
 
 class QRPOItemDtlTable {
   static const String TABLE_NAME = 'QRPOItemdtl';
@@ -226,5 +227,17 @@ class QRPOItemDtlTable {
     return null;
   }
 
+  Future<List<POItemDtl>> getByCustomerItemRefAndEnabled(String customerItemRef) async {
+    final db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      TABLE_NAME,
+      where: '$colCustomerItemRef = ? AND $colRecEnable = ?',
+      whereArgs: [customerItemRef, 1],
+    );
+
+    return List.generate(maps.length, (i) {
+      return POItemDtl.fromJson(maps[i]);
+    });
+  }
 
 }

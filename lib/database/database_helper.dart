@@ -1,6 +1,7 @@
 import 'package:buyerease/database/table/defect_applicable_matrix.dart';
 import 'package:buyerease/database/table/defect_master.dart';
 import 'package:buyerease/database/table/enclosures.dart';
+import 'package:buyerease/database/table/gen_quality_parameter_product_map_table.dart';
 import 'package:buyerease/database/table/genmst.dart';
 import 'package:buyerease/database/table/insp_level_detail_table.dart';
 import 'package:buyerease/database/table/insp_level_header_table.dart';
@@ -81,6 +82,7 @@ class DatabaseHelper {
     await db.execute(DefectMaster.CREATE);
     await db.execute(Enclosures.CREATE);
     await db.execute(GenMst.CREATE);
+    await db.execute(GenQualityParameterProductMapTable.CREATE);
     await db.execute(InspLvlDtlTable.CREATE);
     await db.execute(InspLevelHeaderTable.CREATE);
     await db.execute(QrAuditBatchDetailsTable.CREATE);

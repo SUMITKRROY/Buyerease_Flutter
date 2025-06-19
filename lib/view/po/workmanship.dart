@@ -1,182 +1,187 @@
-import 'package:buyerease/database/database_helper.dart';
-import 'package:buyerease/utils/loading.dart';
-import 'package:flutter/material.dart';
-import 'package:buyerease/view/po/add_workmanship.dart';
-
-import '../../components/over_all_dropdown.dart';
-import '../../components/remarks.dart';
-
-class WorkManShip extends StatefulWidget {
-  const WorkManShip({super.key});
-
-  @override
-  State<WorkManShip> createState() => _WorkManShipState();
-}
-
-class _WorkManShipState extends State<WorkManShip> {
-  String overallResult = 'PASS';
-  final List<String> resultOptions = ['PASS', 'FAIL'];
-  bool loading = true;
-  bool noData = false;
-  dynamic data;
-  List<Map<String, dynamic>> _itemList = [];
-
-  Future<void> syncData() async {
-    // data = await SQLHelper.getTableData(1);
-    setState(() {
-      if (data != []) {
-        _itemList = data;
-        loading = false;
-      } else {
-        loading = false;
-        noData = true;
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    syncData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Overall Result Row
-        OverAllDropdown(),
-        SizedBox(height: 20),
-
-        // New Table for displaying _itemList
-        Table(
-          border: TableBorder.all(),
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(),
-            2: FlexColumnWidth(),
-            3: FlexColumnWidth(),
-            4: FlexColumnWidth(),
-            5: FlexColumnWidth(0.5), // For the delete icon column
-          },
-          children: [
-            TableRow(
-              decoration: BoxDecoration(color: Colors.grey.shade300),
-              children: [
-                tableCell("Code"),
-                tableCell("Critical"),
-                tableCell("Major"),
-                tableCell("Minor"),
-                tableCell("Total"),
-                tableCell(""), // For delete icon
-              ],
-            ),
-            ...
-                _itemList.map((item) {
-                  return TableRow(
-                    children: [
-                      tableCell(item['code'].toString()),
-                      tableCell(item['critical'].toString()),
-                      tableCell(item['major'].toString()),
-                      tableCell(item['minor'].toString()),
-                      tableCell(item['total'].toString()),
-                      TableCell(
-                        child: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _itemList.remove(item);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-          ],
-        ),
-        SizedBox(height: 20),
-
-        // Find Button
-        ElevatedButton(
-          onPressed: () {
-            // Find logic
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
-          ),
-          child: Text("Find"),
-        ),
-        SizedBox(height: 20),
-
-        // Original Table (below Find Button)
-        Table(
-          border: TableBorder.all(),
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(),
-            2: FlexColumnWidth(),
-            3: FlexColumnWidth(),
-          },
-          children: [
-            TableRow(
-              decoration: BoxDecoration(color: Colors.grey.shade300),
-              children: [
-                tableCell(""),
-                tableCell("Critical"),
-                tableCell("Major"),
-                tableCell("Minor"),
-              ],
-            ),
-            TableRow(
-              children: [
-                tableCell("Total"),
-                tableCell(_itemList.fold<int>(0, (sum, item) => sum + (item['critical'] as int)).toString()),
-                tableCell(_itemList.fold<int>(0, (sum, item) => sum + (item['major'] as int)).toString()),
-                tableCell(_itemList.fold<int>(0, (sum, item) => sum + (item['minor'] as int)).toString()),
-              ],
-            ),
-            TableRow(
-              children: [
-                tableCell("Permissible Defect"),
-                tableCell("0"),
-                tableCell("0"),
-                tableCell("0"),
-              ],
-            ),
-          ],
-        ),
-        SizedBox(height: 20),
-
-        // Remark
-        Remarks()
-      ],
-    ),
-        floatingActionButton: Padding(
-    padding: const EdgeInsets.only(bottom: 20, right: 20),
-    child: FloatingActionButton(
-      onPressed: () async {
-        final result = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const AddWorkManShip()),
-        );
-        if (result != null) {
-          setState(() {
-            _itemList.add(result);
-          });
-        }
-      },
-    child: const Icon(Icons.add_circle_outline),
-    ),
-    ),
-    );
-  }
-
-  Widget tableCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(text, textAlign: TextAlign.center),
-    );
-  }
-}
+// import 'package:flutter/material.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+//
+// import '../../components/custom_table.dart';
+// import '../../components/remarks.dart';
+// import '../../config/theame_data.dart';
+// import '../../database/table/qr_po_item_dtl_table.dart';
+// import '../../model/po_item_dtl_model.dart';
+// import '../over_all_result/add_workmanship.dart';
+//
+// class WorkManShip extends StatefulWidget {
+//   final String id;
+//   const WorkManShip({super.key, required this.id});
+//
+//   @override
+//   State<WorkManShip> createState() => _WorkManShipState();
+// }
+//
+// class _WorkManShipState extends State<WorkManShip> {
+//   String? _dropDownValue;
+//   String? remark;
+//   List<POItemDtl> poItems = [];
+//   bool isLoading = true;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadData();
+//   }
+//
+//   Future<void> _loadData() async {
+//     try {
+//       final qrPoItemDtlTable = QRPOItemDtlTable();
+//       final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+//       setState(() {
+//         poItems = items;
+//         isLoading = false;
+//         if (items.isNotEmpty) {
+//           _dropDownValue = items.first.workmanshipInspectionResult ?? 'Awaiting';
+//         }
+//       });
+//     } catch (e) {
+//       setState(() {
+//         isLoading = false;
+//       });
+//       print('Error loading data: $e');
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     if (isLoading) {
+//       return const Center(child: CircularProgressIndicator());
+//     }
+//
+//     if (poItems.isEmpty) {
+//       return const Center(child: Text('No data available'));
+//     }
+//
+//     final item = poItems.first;
+//
+//     return Scaffold(
+//       body: Container(
+//         padding: const EdgeInsets.symmetric(vertical: 10),
+//         child: Column(
+//           children: [
+//             Container(
+//               padding: const EdgeInsets.symmetric(horizontal: 5),
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(3),
+//                 border: Border.all(color: Colors.black),
+//                 color: Colors.white,
+//               ),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   const Text('Over All Result'),
+//                   Container(
+//                     height: 35,
+//                     width: MediaQuery.of(context).size.width * 0.4,
+//                     padding: const EdgeInsets.symmetric(horizontal: 10),
+//                     decoration: BoxDecoration(
+//                       borderRadius: BorderRadius.circular(3),
+//                       border: Border.all(color: Colors.black, width: 1),
+//                       color: Colors.white,
+//                     ),
+//                     child: DropdownButtonHideUnderline(
+//                       child: DropdownButton(
+//                         value: _dropDownValue,
+//                         hint: const Text('Select'),
+//                         isExpanded: true,
+//                         iconSize: 30.0,
+//                         style: const TextStyle(color: Colors.blue),
+//                         items: ['Pass', 'Failed', 'Awaiting'].map(
+//                           (val) {
+//                             return DropdownMenuItem<String>(
+//                               value: val,
+//                               child: Text(val),
+//                             );
+//                           },
+//                         ).toList(),
+//                         onChanged: (val) {
+//                           setState(() {
+//                             _dropDownValue = val;
+//                           });
+//                         },
+//                       ),
+//                     ),
+//                   ),
+//                   IconButton(
+//                     icon: Container(
+//                       width: 24,
+//                       height: 24,
+//                       decoration: BoxDecoration(
+//                         border: Border.all(color: Colors.black, width: 1),
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                       child: const Icon(Icons.add),
+//                     ),
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(builder: (_) => const AddWorkManShip()),
+//                       );
+//                     },
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             const SizedBox(height: 10),
+//             SingleChildScrollView(
+//               scrollDirection: Axis.horizontal,
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // CustomTable(
+//                   //   rowData: [
+//                   //     '',
+//                   //     'Critical',
+//                   //     'Major',
+//                   //     'Minor',
+//                   //   ].map((data) => Text(
+//                   //         data,
+//                   //         style: TextStyle(
+//                   //           fontWeight: FontWeight.bold,
+//                   //           fontSize: 12.sp,
+//                   //         ),
+//                   //       )).toList(),
+//                   //   isHeader: true,
+//                   //   isFirstCellClickable: false,
+//                   // ),
+//                   CustomTable(
+//                     rowData: [
+//                       'Total',
+//                       item.criticalDefect?.toString() ?? '0',
+//                       item.majorDefect?.toString() ?? '0',
+//                       item.minorDefect?.toString() ?? '0',
+//                     ].map((data) => Text(
+//                           data,
+//                           style: TextStyle(fontSize: 10.sp),
+//                         )).toList(),
+//                     isFirstCellClickable: false,
+//                   ),
+//                   CustomTable(
+//                     rowData: [
+//                       'Permissible Defect',
+//                       item.criticalDefectsAllowed?.toString() ?? '0',
+//                       item.majorDefectsAllowed?.toString() ?? '0',
+//                       item.minorDefectsAllowed?.toString() ?? '0',
+//                     ].map((data) => Text(
+//                           data,
+//                           style: TextStyle(fontSize: 10.sp),
+//                         )).toList(),
+//                     isFirstCellClickable: false,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             const SizedBox(height: 10),
+//             // Remark
+//             Remarks()
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

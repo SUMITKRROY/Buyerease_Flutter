@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import '../database/database_helper.dart';
 import '../model/defect_master_model.dart';
 import '../model/on_site_modal.dart';
-import '../model/po_item_dtl.dart';
+import '../model/po_item_dtl_model.dart';
 import '../model/po_item_pkg_app_detail_model.dart';
 import '../model/simple_model.dart';
 import '../utils/fsl_log.dart';
@@ -331,24 +331,24 @@ class POItemDtlHandler {
     );
   }
 
-  // // Get list of DefectMasterModel
-  // static Future<List<DefectMasterModel>> getDefectMasterList() async {
-  //     final List<DefectMasterModel> defectList = [];
-  //     try {
-  //         final db = await DatabaseHelper().database;
-  //         final query = 'SELECT * FROM DefectMaster';
-  //         print('$_tag: Query for get defect master list: $query');
-  //         final result = await db.rawQuery(query);
-  //
-  //         for (var row in result) {
-  //             defectList.add(_getDefectMasterData(row));
-  //         }
-  //         print('$_tag: Count of founded defect list: ${defectList.length}');
-  //     } catch (e) {
-  //         print('$_tag: Exception getting defect list: $e');
-  //     }
-  //     return defectList;
-  // }
+  // Get list of DefectMasterModel
+  static Future<List<DefectMasterModel>> getDefectMasterList() async {
+      final List<DefectMasterModel> defectList = [];
+      try {
+          final db = await DatabaseHelper().database;
+          final query = 'SELECT * FROM DefectMaster';
+          print('$_tag: Query for get defect master list: $query');
+          final result = await db.rawQuery(query);
+
+          for (var row in result) {
+              defectList.add(_getDefectMasterData(row));
+          }
+          print('$_tag: Count of founded defect list: ${defectList.length}');
+      } catch (e) {
+          print('$_tag: Exception getting defect list: $e');
+      }
+      return defectList;
+  }
 
   static DefectMasterModel _getDefectMasterData(Map<String, dynamic> row) {
       return DefectMasterModel(

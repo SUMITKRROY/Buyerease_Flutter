@@ -9,7 +9,9 @@ import '../../components/remarks.dart';
 import '../../config/theame_data.dart';
 
 class BarCode extends StatefulWidget {
-  const BarCode({super.key});
+  final String id;
+
+    BarCode({super.key,required this.id});
 
   @override
   State<BarCode> createState() => _BarCodeState();
@@ -129,7 +131,7 @@ class _BarCodeState extends State<BarCode> {
                       /// Camera icon
                       Align(
                         alignment: Alignment.centerRight,
-                        child: AddImageIcon()
+                        child: AddImageIcon(title: "Unit Barcode", id: widget.id,)
                       ),
                     ],
                   ),

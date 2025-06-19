@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'parameter_detail_screen.dart';
 
 class QualityParametersResult extends StatefulWidget {
-  const QualityParametersResult({super.key});
+  final String id;
+    QualityParametersResult({super.key, required this.id});
 
   @override
   State<QualityParametersResult> createState() => _QualityParametersResultState();
@@ -57,7 +58,7 @@ class _QualityParametersResultState extends State<QualityParametersResult> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ParameterDetailScreen(
-                        parameterName: param.name,
+                        parameterName: param.name, id: widget.id,
                       ),
                     ),
                   );
@@ -91,7 +92,7 @@ class _QualityParametersResultState extends State<QualityParametersResult> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ParameterDetailScreen(
-                          parameterName: param.name,
+                          parameterName: param.name, id: widget.id,
                         ),
                       ),
                     );

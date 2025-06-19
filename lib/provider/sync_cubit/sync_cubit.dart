@@ -18,6 +18,7 @@ import 'package:buyerease/database/table/test_report_table.dart';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/utils/app_constants.dart';
 import 'package:meta/meta.dart';
+import '../../database/table/gen_quality_parameter_product_map_table.dart';
 import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../database/table/quality_level_table.dart';
 import '../../database/table/sysdata22_table.dart';
@@ -72,6 +73,7 @@ class SyncCubit extends Cubit<SyncState> {
             FEnumerations.tableItemMeasurement: (data) => QrPoItemDtlItemMeasurementTable().insert(data),
             FEnumerations.tableAuditBatchDetails: (data) => QrAuditBatchDetailsTable().insert(data),
             FEnumerations.tableSizeQuantity: (data) => SizeQuantityTable().insert(data),
+            FEnumerations.tableGenQualityParameterProductMap: (data) => GenQualityParameterProductMapTable().insert(data),
             FEnumerations.tableQrFeedback: (data) => QRFeedbackHdrTable().insert(data),
             // etc.
           };

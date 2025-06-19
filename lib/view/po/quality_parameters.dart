@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../model/po_item_dtl_model.dart';
+
 class QualityParameters extends StatefulWidget {
+  final String pRowId;
+  const QualityParameters({super.key, required this.pRowId});
+
   @override
   _QualityParametersState createState() => _QualityParametersState();
 }
@@ -22,7 +27,6 @@ class _QualityParametersState extends State<QualityParameters> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      
       padding: EdgeInsets.all(08),
       child: ListView(
         children: [
@@ -83,56 +87,38 @@ class _QualityParametersState extends State<QualityParameters> {
     );
   }
 
-  Widget _buildRadio(String title, String yes, String no, String? groupValue, Function(String?) onChanged) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
-            ),
+  Widget _buildRadio(String title, String value1, String value2, String? groupValue, Function(String?) onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 12.sp),
           ),
-          Expanded(
-            flex: 3,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Row(
-                  children: [
-                    Radio<String>(
-                      value: yes,
-                      groupValue: groupValue,
-                      onChanged: onChanged,
-                    ),
-                    Text(
-                      yes,
-                      style: TextStyle(fontSize: 12.sp),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Radio<String>(
-                      value: no,
-                      groupValue: groupValue,
-                      onChanged: onChanged,
-                    ),
-                    Text(
-                      no,
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: RadioListTile<String>(
+                title: Text(value1, style: TextStyle(fontSize: 12.sp)),
+                value: value1,
+                groupValue: groupValue,
+                onChanged: onChanged,
+              ),
             ),
-          ),
-        ],
-      ),
+            Expanded(
+              child: RadioListTile<String>(
+                title: Text(value2, style: TextStyle(fontSize: 12.sp)),
+                value: value2,
+                groupValue: groupValue,
+                onChanged: onChanged,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
-
 }

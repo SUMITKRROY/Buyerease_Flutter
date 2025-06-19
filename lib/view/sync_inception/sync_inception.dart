@@ -102,6 +102,33 @@ class _SyncInceptionState extends State<SyncInception> {
     );
   }
 
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Processing"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Row(
+                children: [
+                  Expanded(child: Text("Getting image data...")),
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showImageDownloadDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -151,13 +178,26 @@ class _SyncInceptionState extends State<SyncInception> {
                 if (state is SyncLoading) {
                   _showDataSyncDialog(context);
                 } else if (state is SyncSuccess) {
+                  // Close the data sync dialog first
+                  Navigator.of(context).pop();
+                  
+                  // Fetch defect master data
                   BlocProvider.of<DefectMasterCubit>(context).fetchDefectMaster(data: userId);
                   setState(() {
                     dataDownloaded = true;
                   });
 
+                  // Show loading dialog while getting image data
+                  _showLoadingDialog(context);
+
+                  // Get all item IDs for image download
                   final ids = await fetchAllItemIds();
+                  
+                  // Close loading dialog
+                  Navigator.of(context).pop();
+
                   if (ids.isNotEmpty) {
+                    // Show image download dialog after data sync is complete
                     _showImageDownloadDialog(context);
                     await startImageDownload(ids);
                   } else {
@@ -231,8 +271,8 @@ class _SyncInceptionState extends State<SyncInception> {
       setState(() {
         imagesDownloaded = true;
       });
-      Navigator.of(context).pop(); // Close image download dialog
-      Navigator.of(context).pop(); // Close image download dialog
+      // Close only the image download dialog
+      Navigator.of(context).pop();
       showToast("Sync completed successfully", true);
       // Navigate to the next page
       Navigator.pushReplacementNamed(context, RoutePath.inspection);

@@ -217,7 +217,7 @@ class InspectionListHandler {
       developer.log("get update query for get synced inspection list $query",
           name: TAG);
       List<Map<String, dynamic>> result = await database.rawQuery(query);
-
+developer.log("results is ${result}");
       for (var row in result) {
         InspectionModal inspectionModal = InspectionModal();
         inspectionModal.pRowID = row["pRowID"];

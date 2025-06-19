@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 
 import 'package:buyerease/view/po/po_item.dart';
 import 'package:buyerease/view/po/quality_parameters.dart';
@@ -5,15 +6,13 @@ import 'package:buyerease/view/po/workmanship/po_workmanship.dart';
 import 'package:flutter/material.dart';
 
 import '../../config/theame_data.dart';
-import '../over_all_result/workmanship.dart';
 import 'carton.dart';
 import 'enclosure.dart';
 import 'more_details.dart';
 
 class PoPage extends StatefulWidget {
-  const PoPage({super.key, required this.id});
-
-  final String id;
+  final String pRowId;
+  const PoPage({super.key, required this.pRowId});
 
   @override
   State<PoPage> createState() => _PoPageState();
@@ -45,21 +44,27 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false, // Correct casing: "centerTitle", not "CenterTile"
+        centerTitle: false,
         leading: const BackButton(color: Colors.white),
         backgroundColor: ColorsData.primaryColor,
-        title: Text( 'DEL0067128', style: TextStyle(color: Colors.white)),
+        title: Text(widget.pRowId, style: const TextStyle(color: Colors.white)),
         actions: [
           TextButton(
             onPressed: () {},
-            child: Text('UNDO', style: TextStyle(color: Colors.white)),
+            child: const Text('UNDO', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             onPressed: () {},
-            child: Text('SAVE', style: TextStyle(color: Colors.white)),
+            child: const Text('SAVE', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -78,14 +83,17 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.74,
-                child: TabBarView(controller: _controller, children:   [
-                  Center(child: PoItem()),
-                  Center(child: PoWorkmanship()),
-                  Center(child: Carton()),
-                  Center(child: MoreDetails()),
-                  Center(child: QualityParameters()),
-                  Center(child: Enclosure()),
-                ]),
+                child: TabBarView(
+                  controller: _controller,
+                  children: [
+                    Center(child: PoItem(pRowId: widget.pRowId)),
+                    Center(child: PoWorkmanship(pRowId: widget.pRowId)),
+                    Center(child: Carton(pRowId: widget.pRowId)),
+                    Center(child: MoreDetails(pRowId: widget.pRowId)),
+                    Center(child: QualityParameters(pRowId: widget.pRowId)),
+                    Center(child: Enclosure(pRowId: widget.pRowId)),
+                  ],
+                ),
               ),
             ],
           ),

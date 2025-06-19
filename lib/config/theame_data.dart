@@ -16,12 +16,12 @@ ThemeData lightMode = ThemeData(
 
   // App Bar Theme
   appBarTheme: AppBarTheme(
-    backgroundColor: ColorsData.whiteColor,
+    backgroundColor: ColorsData.primaryColor,
     elevation: 0,
     centerTitle: true,
-    iconTheme: const IconThemeData(color: ColorsData.textColor),
+    iconTheme: const IconThemeData(color: ColorsData.whiteColor),
     titleTextStyle: TextStyle(
-      color: ColorsData.textColor,
+      color: ColorsData.whiteColor,
       fontSize: 20.sp,
       fontWeight: FontWeight.bold,
     ),

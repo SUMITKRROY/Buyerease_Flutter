@@ -1,6 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 import '../database_helper.dart';
-import '../database_helper.dart';
 
 class InspLvlDtlTable {
   static const String TABLE_NAME = "InspLvlDtl";

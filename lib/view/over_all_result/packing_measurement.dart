@@ -8,25 +8,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../components/remarks.dart';
 import '../../config/theame_data.dart';
+import '../../database/table/qr_po_item_dtl_table.dart';
+import '../../model/po_item_dtl_model.dart';
 
 class PackingMeasurement extends StatefulWidget {
-  const PackingMeasurement({super.key});
+  final String id;
+  const PackingMeasurement({super.key, required this.id});
 
   @override
   State<PackingMeasurement> createState() => _PackingMeasurementState();
 }
 
 class _PackingMeasurementState extends State<PackingMeasurement> {
-  final List<Map<String, dynamic>> _itemList = [
-    {
-      'L': '10.0',
-      'B': '14.0',
-      'H': '6.0',
-      'Wt': '0.0',
-      'CBM': '9.0E-4',
-      'Quantity': '0.0'
-    }
-  ];
   final ImagePickerService _imagePickerService = ImagePickerService();
   String imageName = '';
   final lController = TextEditingController();
@@ -38,9 +31,43 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
   final remarkController = TextEditingController();
   String? _dropDownValue;
   String? remark;
+  List<POItemDtl> poItems = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final qrPoItemDtlTable = QRPOItemDtlTable();
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      setState(() {
+        poItems = items;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error loading data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (poItems.isEmpty) {
+      return const Center(child: Text('No data available'));
+    }
+
+    final item = poItems.first; // Get the first item for now
+
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height * 0.9,
@@ -48,7 +75,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
         child: Column(
           children: [
             // Over All Result Row
-           OverAllDropdown(),
+            OverAllDropdown(),
             const Divider(thickness: 1, color: ColorsData.primaryColor),
 
             // Measurement Card
@@ -120,13 +147,12 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                     /// Table Data Row
                     Row(
                       children: [
-                        for (var data in ["0.0", "0.0", "0.0", "0", "0.0555", ""])
-                          Expanded(
-                            child: Text(
-                              data,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
+                        Expanded(child: Text(item.unitL?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
+                        Expanded(child: Text(item.unitW?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
+                        Expanded(child: Text(item.unitH?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
+                        Expanded(child: Text(item.weight?.toString() ?? '0', style: const TextStyle(fontSize: 12))),
+                        Expanded(child: Text(item.cbm?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
+                        Expanded(child: Text(item.mapCountUnit?.toString() ?? '', style: const TextStyle(fontSize: 12))),
                       ],
                     ),
 
@@ -161,7 +187,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                             ),
                             const SizedBox(width: 10),
                             DropdownButton<String>(
-                              value: "PASS",
+                              value: item.pkgMeInspectionResult ?? "PASS",
                               style: const TextStyle(fontSize: 12),
                               items: const [
                                 DropdownMenuItem(
@@ -179,18 +205,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                         ),
 
                         // Camera icon and count
-                        Row(
-                          children: [
-                            const Text(
-                              "0",
-                              style: TextStyle(
-                                color: Colors.teal,
-                                fontSize: 12,
-                              ),
-                            ),
-                            AddImageIcon()
-                          ],
-                        ),
+                        AddImageIcon(title: "Unit pack", id: widget.id,)
                       ],
                     ),
                   ],

@@ -73,7 +73,7 @@ class QrPoItemDtlImageTable {
     final db = await DatabaseHelper().database;
     final res = await db.query(
       TABLE_NAME,
-      where: '$pRowID = ?',
+      where: '$qrHdrID = ?',
       whereArgs: [id],
     );
     return res.isNotEmpty ? res.first : null;
@@ -117,6 +117,27 @@ class QrPoItemDtlImageTable {
       },
       where: '$pRowID = ?',
       whereArgs: [id],
+    );
+  }
+
+  // Get by QRPOItemHdrID and Title
+  Future<List<Map<String, dynamic>>> getByHdrIDAndTitle(String qrPoItemHdrIDValue, String titleValue) async {
+    final db = await DatabaseHelper().database;
+    return await db.query(
+      TABLE_NAME,
+      where: '$qrPoItemHdrID = ? AND $title = ?',
+      whereArgs: [qrPoItemHdrIDValue, titleValue],
+    );
+  }
+
+
+  // Get by QRHdrID
+  Future<List<Map<String, dynamic>>> getByQrPOItemHdrID(String qrPOItemHdrID) async {
+    final db = await DatabaseHelper().database;
+    return await db.query(
+      TABLE_NAME,
+      where: '$qrPoItemHdrID = ?',
+      whereArgs: [qrPOItemHdrID],
     );
   }
 

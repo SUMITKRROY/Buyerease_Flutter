@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import '../database/database_helper.dart';
 import '../database/table/qr_enclosure_table.dart';
-import '../model/po_item_dtl.dart';
+import '../model/po_item_dtl_model.dart';
 
 class DbHandler {
   Future<void> updateQREnClosureToSync(String pRowID) async {

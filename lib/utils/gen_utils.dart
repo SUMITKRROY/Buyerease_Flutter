@@ -8,7 +8,7 @@ import '../model/digitals_upload_model.dart';
 import '../model/hologram_model.dart';
 import '../model/inspection_model.dart';
 import '../model/item_measurement_model.dart';
-import '../model/po_item_dtl.dart';
+import '../model/po_item_dtl_model.dart';
 import '../model/quality_parameter_model.dart';
 import '../model/workmanship_model.dart';
 import '../utils//fsl_log.dart';

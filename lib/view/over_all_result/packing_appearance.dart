@@ -5,6 +5,10 @@ import '../../components/over_all_dropdown.dart';
 import '../../components/remarks.dart';
 
 class PackingAppearance extends StatefulWidget {
+final String id;
+
+PackingAppearance({required this.id});
+
   @override
   _PackingAppearanceState createState() => _PackingAppearanceState();
 }
@@ -122,7 +126,9 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                 ),
               ],
             ),
-            AddImageIcon()
+            title == "Unit Packing"
+            ?  AddImageIcon(title: "Unit pack appearance", id: widget.id,)
+           : AddImageIcon(title: "Shipping pack appearance", id: widget.id,)
           ],
         ),
       ),

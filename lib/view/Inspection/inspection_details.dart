@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../config/theame_data.dart';
+import '../../database/table/sysdata22_table.dart';
 import '../../model/inspection_level_model.dart';
 import '../../model/quality_level_model.dart';
 import '../../model/inspection_model.dart';
-import '../../model/po_item_dtl.dart';
+import '../../model/po_item_dtl_model.dart';
 import '../../routes/route_path.dart';
 import '../../services/inspection_level_handler.dart';
 import '../../services/quality_level_handler.dart';
 import '../../services/po_item_dtl_handler.dart';
+import '../po/po_item.dart';
+import '../po/po_page.dart';
 
 class InspectionDetailScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -43,6 +46,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   List<QualityLevelModel> _qualityLevels = [];
   String? _selectedQualityLevelMajor;
   String? _selectedQualityLevelMinor;
+  List<String> statusList = [];
 
   @override
   void initState() {
@@ -51,7 +55,17 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     getList(context, widget.data['pRowID']);
     _loadInspectionLevels();
     _loadQualityLevels();
+    fetchAndShowStatus();
   }
+
+  void fetchAndShowStatus() async {
+    Sysdata22Table table = Sysdata22Table();
+     statusList = await table.getAndPrintMainDescrWhereStatus();
+
+    // You can use statusList here if needed
+    print("Fetched ${statusList.length} status entries.");
+  }
+
 
   Future<void> _loadInspectionLevels() async {
     final levels = await InspectionLevelHandler.getInspectionLevels();
@@ -208,7 +222,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               SizedBox(height: 16),
               _dropdownField('Quality Level Minor', ['AQL 2.5']),
               SizedBox(height: 16),
-              _dropdownField('Status', [widget.data['status'] ?? 'Select Status']),
+              _dropdownField('Status', statusList),
             ],
           ),
           SizedBox(height: 16),
@@ -239,7 +253,10 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
           SizedBox(height: 24),
           OutlinedButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(RoutePath.po);
+              developer.log('Items fetched: ${widget.data['pRowID']}');
+              String prowId = widget.data['pRowID'];
+              // Navigator.of(context).pushNamed(RoutePath.po);
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> PoPage(pRowId: prowId,)));
             },
             child: Text('GO TO  PO DETAILS'),
             style: OutlinedButton.styleFrom(

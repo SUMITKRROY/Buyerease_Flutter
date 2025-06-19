@@ -27,9 +27,9 @@ class MyRoutes {
         return CustomPageRoute(child: const HomePage(), settings: settings);
       case RoutePath.register:
         return CustomPageRoute(child: const Register(), settings: settings);
-      case RoutePath.po:
-        final id = settings.arguments as String? ?? '';
-        return CustomPageRoute(child: PoPage(id: id), settings: settings);
+      // case RoutePath.po:
+      //   final id = settings.arguments as String? ?? '';
+      //   return CustomPageRoute(child: PoPage(data: id), settings: settings);
       case RoutePath.details:
         final id = settings.arguments as String? ?? '';
         return CustomPageRoute(child: DetailPageOne(id: id), settings: settings);

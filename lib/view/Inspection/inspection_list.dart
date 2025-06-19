@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:developer' as developer;
 
 import 'package:buyerease/main.dart';
 
@@ -341,6 +342,7 @@ class _InspectionListState extends State<InspectionList> {
                       
                       return GestureDetector(
                         onTap: () {
+                          developer.log("item qrHdrID ${item.qrHdrID}");
                           if (selectedItems.isEmpty) {
                             Navigator.push(
                               context,

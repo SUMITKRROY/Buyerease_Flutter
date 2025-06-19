@@ -1,32 +1,21 @@
 import 'package:flutter/material.dart';
 
 class Enclosure extends StatefulWidget {
+  final String pRowId;
+  const Enclosure({super.key, required this.pRowId});
+
   @override
-  _EnclosureState createState() => _EnclosureState();
+  State<Enclosure> createState() => _EnclosureState();
 }
 
 class _EnclosureState extends State<Enclosure> {
   String dropdownValue = 'General';
   final TextEditingController fileNameController = TextEditingController();
-  bool sendAsMail = false;
 
-  List<Map<String, String>> files = [];
-
-  void _uploadFile() {
-    print('Upload file clicked'); // Add real file logic here
-  }
-
-  void _saveFile() {
-    if (fileNameController.text.trim().isEmpty) return;
-
-    setState(() {
-      files.add({
-        'title': fileNameController.text.trim(),
-        'action': 'View/Delete',
-      });
-      fileNameController.clear();
-      sendAsMail = false;
-    });
+  @override
+  void dispose() {
+    fileNameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,53 +63,38 @@ class _EnclosureState extends State<Enclosure> {
           Row(
             children: [
               ElevatedButton.icon(
-                onPressed: _uploadFile,
-                icon: Icon(Icons.add_circle_outline),
-                label: Text('Upload File', style: TextStyle(fontSize: 12)),
+                onPressed: () {
+                  // Handle upload
+                },
+                icon: Icon(Icons.upload_file),
+                label: Text('Upload'),
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(fontSize: 12),
+                ),
               ),
               SizedBox(width: 10),
-              Checkbox(
-                value: sendAsMail,
-                onChanged: (value) {
-                  setState(() {
-                    sendAsMail = value!;
-                  });
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Handle view
                 },
+                icon: Icon(Icons.visibility),
+                label: Text('View'),
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(fontSize: 12),
+                ),
               ),
-              Text('send as mail', style: TextStyle(fontSize: 12)),
-              Spacer(),
-              OutlinedButton(
-                onPressed: _saveFile,
-                child: Text('SAVE', style: TextStyle(fontSize: 12)),
+              SizedBox(width: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Handle delete
+                },
+                icon: Icon(Icons.delete),
+                label: Text('Delete'),
+                style: ElevatedButton.styleFrom(
+                  textStyle: TextStyle(fontSize: 12),
+                ),
               ),
             ],
-          ),
-
-          Divider(height: 30),
-
-          // Table headers
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Title', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              Text('Action', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          Divider(),
-
-          // File list
-          Expanded(
-            child: files.isEmpty
-                ? Center(child: Text('No files added', style: TextStyle(fontSize: 12)))
-                : ListView.builder(
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(files[index]['title'] ?? '', style: TextStyle(fontSize: 12)),
-                  trailing: Text(files[index]['action'] ?? '', style: TextStyle(fontSize: 12)),
-                );
-              },
-            ),
           ),
         ],
       ),
