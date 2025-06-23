@@ -65,12 +65,27 @@ class CustomTable extends StatelessWidget {
 
   Widget buildMergedDescription(String text) {
     return Container(
-      width: 560,
+      width: 530.w, // Responsive width
       padding: const EdgeInsets.all(8.0),
       color: Colors.grey.shade100,
-      child: Text(text, style: const TextStyle(fontSize: 14)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14),
+              softWrap: true,
+            ),
+          ),
+          Icon(Icons.delete),
+        ],
+      ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -187,7 +187,25 @@ class QRPOItemDtlTable {
       whereArgs: [rowID],
     );
   }
+  Future<void> updateRecordByItemId(String rowID, Map<String, dynamic> values) async {
+    final db = await DatabaseHelper().database;
+    await db.update(
+      TABLE_NAME,
+      values,
+      where: '$colPRowID = ?',
+      whereArgs: [rowID],
+    );
+  }
 
+  Future<void> reSetRecord(String rowID, Map<String, dynamic> values) async {
+    final db = await DatabaseHelper().database;
+    await db.update(
+      TABLE_NAME,
+      values,
+      where: '$colQRHdrID = ?',
+      whereArgs: [rowID],
+    );
+  }
   Future<int> deleteRecord(String rowID) async {
     final db = await DatabaseHelper().database;
     return await db.delete(

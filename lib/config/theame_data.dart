@@ -58,32 +58,32 @@ ThemeData lightMode = ThemeData(
     ),
   ),
 
-  // Input Decoration Theme
-  inputDecorationTheme: InputDecorationTheme(
-    filled: true,
-    fillColor: ColorsData.whiteColor,
-    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10.r),
-      borderSide: const BorderSide(color: ColorsData.darkGrayColor),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10.r),
-      borderSide: const BorderSide(color: ColorsData.darkGrayColor),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10.r),
-      borderSide: const BorderSide(color: ColorsData.primaryColor, width: 2),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10.r),
-      borderSide: const BorderSide(color: Colors.red),
-    ),
-    hintStyle: TextStyle(
-      color: ColorsData.darkGrayColor,
-      fontSize: 14.sp,
-    ),
-  ),
+  // // Input Decoration Theme
+  // inputDecorationTheme: InputDecorationTheme(
+  //   filled: true,
+  //   fillColor: ColorsData.whiteColor,
+  //   contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+  //   border: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(10.r),
+  //     borderSide: const BorderSide(color: ColorsData.darkGrayColor),
+  //   ),
+  //   enabledBorder: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(10.r),
+  //     borderSide: const BorderSide(color: ColorsData.darkGrayColor),
+  //   ),
+  //   focusedBorder: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(10.r),
+  //     borderSide: const BorderSide(color: ColorsData.primaryColor, width: 2),
+  //   ),
+  //   errorBorder: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(10.r),
+  //     borderSide: const BorderSide(color: Colors.red),
+  //   ),
+  //   hintStyle: TextStyle(
+  //     color: ColorsData.darkGrayColor,
+  //     fontSize: 14.sp,
+  //   ),
+  // ),
 
   // Elevated Button Theme
   elevatedButtonTheme: ElevatedButtonThemeData(

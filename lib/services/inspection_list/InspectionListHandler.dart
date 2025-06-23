@@ -104,6 +104,7 @@ class InspectionListHandler {
           ..acceptedDt = row["AcceptedDt"] as String?
           ..comments = row["Comments"] as String?
           ..factory = row["Factory"] as String?
+          ..inspectionLevelDescr = row["InspectionLevelDescr"] as String?
           ..productionStatusRemark = row["ProductionStatusRemark"] as String?
           ..aqlFormula = row["AQLFormula"] as int?;
 
