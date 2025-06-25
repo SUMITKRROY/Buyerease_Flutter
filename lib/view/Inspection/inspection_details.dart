@@ -99,15 +99,15 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
           _selectedInspectionDate = first.inspectionDt != null && first.inspectionDt!.isNotEmpty
             ? DateTime.parse(first.inspectionDt!)
             : DateTime.now();
-          Fluttertoast.showToast(msg: ">>>${_venderContact.text}");
+         // Fluttertoast.showToast(msg: ">>>${_venderContact.text}");
         } else {
-          Fluttertoast.showToast(msg: "Inspection did not find");
+       //   Fluttertoast.showToast(msg: "Inspection did not find");
         }
         isLoading = false;
       });
     } catch (e) {
       debugPrint("Error fetching local list: $e");
-      Fluttertoast.showToast(msg: "Failed to load inspections");
+    //  Fluttertoast.showToast(msg: "Failed to load inspections");
     } finally {
       setState(() {
         isLoading = false;

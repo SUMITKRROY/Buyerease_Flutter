@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import '../database_helper.dart';
 import '../../model/po_item_dtl_model.dart';
+import 'package:flutter/material.dart';
 
 class QRPOItemDtlTable {
   static const String TABLE_NAME = 'QRPOItemdtl';
@@ -206,12 +207,13 @@ class QRPOItemDtlTable {
       whereArgs: [rowID],
     );
   }
-  Future<int> deleteRecord(String rowID) async {
+
+  Future<void> deleteRecord(String pRowId) async {
     final db = await DatabaseHelper().database;
-    return await db.delete(
+    await db.delete(
       TABLE_NAME,
       where: '$colPRowID = ?',
-      whereArgs: [rowID],
+      whereArgs: [pRowId],
     );
   }
 
@@ -257,5 +259,7 @@ class QRPOItemDtlTable {
       return POItemDtl.fromJson(maps[i]);
     });
   }
+
+
 
 }

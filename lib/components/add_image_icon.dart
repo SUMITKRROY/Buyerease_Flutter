@@ -10,12 +10,18 @@ import '../database/table/qr_po_item_dtl_table.dart';
 import '../utils/camera.dart';
 
 class AddImageIcon extends StatefulWidget {
-
   final String title;
   final String id;
   final VoidCallback? onImageAdded;
-        bool isCountShow;
-    AddImageIcon({super.key, required this.title, this.onImageAdded,this.isCountShow = false, required this.id});
+  final bool isCountShow;
+
+  AddImageIcon({
+    super.key,
+    required this.title,
+    required this.id,
+    this.onImageAdded,
+    this.isCountShow = false,
+  });
 
   @override
   State<AddImageIcon> createState() => _AddImageIconState();
@@ -40,59 +46,54 @@ class _AddImageIconState extends State<AddImageIcon> {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
       final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
-      setState(() {
-        if(items.isNotEmpty){
-          qrHdrID = items.first.qrHdrID ?? "";
-          qrPOItemHdrID = items.first.qrpoItemHdrID ?? "";
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (items.isNotEmpty) {
+            qrHdrID = items.first.qrHdrID ?? "";
+            qrPOItemHdrID = items.first.qrpoItemHdrID ?? "";
+          }
+        });
+      }
       await getImageCount();
     } catch (e) {
-      setState(() {
-        loading = false;
-        noData = true;
-      });
+      if (mounted) {
+        setState(() {
+          loading = false;
+          noData = true;
+        });
+      }
       print('Error loading data: $e');
     }
   }
 
   Future<void> getImageCount() async {
-    if (qrHdrID.isEmpty) return;
-    developer.log("qrPOItemHdrID >>>> ${qrPOItemHdrID}");
+    if (qrHdrID.isEmpty || qrPOItemHdrID.isEmpty) return;
+
     final images = await QrPoItemDtlImageTable().getByHdrIDAndTitle(qrPOItemHdrID, widget.title);
-    developer.log("image list >>>> ${images.length}");
-    int count = 0;
-    if (images is List) {
-      for (final img in images) {
-        if (img is Map && 
-            img['Title'] == widget.title && 
-            img['QRPOItemHdrID'] == qrPOItemHdrID) {
-          count++;
-        }
-      }
+    int count = images.where((img) =>
+    img is Map &&
+        img['Title'] == widget.title &&
+        img['QRPOItemHdrID'] == qrPOItemHdrID).length;
+
+    if (mounted) {
+      setState(() {
+        totalCount = count;
+      });
     }
-    setState(() {
-      totalCount = count;
-      developer.log("total count >>>> $totalCount");
-    });
   }
 
   Future<List<Map>> getFilteredImages() async {
     final images = await QrPoItemDtlImageTable().getAll();
-    if (images is List) {
-      return images.where((img) => 
-        img is Map && 
+    return images.where((img) =>
+    img is Map &&
         img['Title'] == widget.title &&
-        img['QRPOItemHdrID'] == qrPOItemHdrID
-      ).cast<Map>().toList();
-    }
-    return [];
+        img['QRPOItemHdrID'] == qrPOItemHdrID).cast<Map>().toList();
   }
 
   Future<void> _showGallery() async {
     final filteredImages = await getFilteredImages();
     if (!mounted) return;
-    
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -110,25 +111,29 @@ class _AddImageIconState extends State<AddImageIcon> {
   }
 
   Future<void> _saveImageToDb(File imageFile) async {
-    final bytes = await imageFile.readAsBytes();
-    final imageName = path.basename(imageFile.path);
-    final now = DateTime.now().toIso8601String();
+    if (qrHdrID.isEmpty || qrPOItemHdrID.isEmpty) {
+      print('Missing IDs: qrHdrID or qrPOItemHdrID');
+      return;
+    }
+
     final localPath = await _saveImageLocally(imageFile);
-    
+    final now = DateTime.now().toIso8601String();
+
     final map = {
       'QRHdrID': qrHdrID,
       'title': widget.title,
       'LocID': "DEL",
       'imageName': "ImNameDEL",
       'QRPOItemHdrID': qrPOItemHdrID,
-      //'fileContent': bytes,
       'ImagePathID': localPath,
       'recDt': now,
       'recAddDt': now,
     };
-    
+
     await QrPoItemDtlImageTable().insert(map);
     await getImageCount();
+
+    // ✅ Trigger the parent callback after successful save
     widget.onImageAdded?.call();
   }
 
@@ -137,25 +142,24 @@ class _AddImageIconState extends State<AddImageIcon> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        widget.isCountShow == true
-        ?SizedBox()
-       : GestureDetector(
-          onTap: _showGallery,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Text(
-              "$totalCount",
-              style: const TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
+        if (!widget.isCountShow)
+          GestureDetector(
+            onTap: _showGallery,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Text(
+                "$totalCount",
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
-        ),
         IconButton(
           onPressed: () async {
             final File? image = await _imagePickerService.pickImage(context);
@@ -171,6 +175,7 @@ class _AddImageIconState extends State<AddImageIcon> {
     );
   }
 }
+
 
 
 class GalleryScreen extends StatefulWidget {

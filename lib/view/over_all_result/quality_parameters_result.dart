@@ -3,7 +3,9 @@ import 'parameter_detail_screen.dart';
 
 class QualityParametersResult extends StatefulWidget {
   final String id;
-    QualityParametersResult({super.key, required this.id});
+  final VoidCallback onChanged; // ✅ Add this
+
+  const QualityParametersResult({super.key, required this.id, required this.onChanged});
 
   @override
   State<QualityParametersResult> createState() => _QualityParametersResultState();

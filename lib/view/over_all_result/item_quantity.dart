@@ -10,7 +10,9 @@ import '../../model/po_item_dtl_model.dart';
 
 class ItemQuantity extends StatefulWidget {
   final String id;
-  ItemQuantity({super.key, required this.id});
+  final VoidCallback onChanged; // Add this
+
+  const ItemQuantity({super.key, required this.id, required this.onChanged});
 
   @override
   State<ItemQuantity> createState() => _ItemQuantityState();
@@ -31,6 +33,15 @@ class _ItemQuantityState extends State<ItemQuantity> {
       return dateStr;
     }
   }
+  bool _hasUnsavedChanges = false;
+  bool _isSaving = false;
+
+  void _markAsChanged() {
+    setState(() {
+      _hasUnsavedChanges = true;
+    });
+  }
+
 
   @override
   void initState() {

@@ -23,6 +23,18 @@ class _PoItemState extends State<PoItem> {
   final Map<String, TextEditingController> acceptControllers = {};
   final Map<String, TextEditingController> shortControllers = {};
 
+  void rebuildControllers() {
+    availableControllers.clear();
+    acceptControllers.clear();
+    shortControllers.clear();
+    for (var item in poItems) {
+      final id = item.pRowID ?? '';
+      availableControllers[id] = TextEditingController(text: (item.availableQty ?? 0).toString());
+      acceptControllers[id] = TextEditingController(text: (item.acceptedQty ?? 0).toString());
+      shortControllers[id] = TextEditingController(text: (item.shortStockQty ?? 0).toString());
+    }
+  }
+
   @override
   void dispose() {
     availableControllers.values.forEach((c) => c.dispose());
@@ -100,7 +112,7 @@ class _PoItemState extends State<PoItem> {
         'ShortStockQty': 0,
       });
     }
-
+    rebuildControllers();
     setState(() {});
     widget.onChanged?.call();
   }
@@ -135,8 +147,8 @@ class _PoItemState extends State<PoItem> {
           children: [
             CustomTable(
               rowData: [
-                'Po', 'Item', 'order', 'inspested\ntill date',
-                'available', 'Accept', 'Short', 'inspect later'
+                'Po', 'Item', 'Order', 'Inspested\nTill Date',
+                'Available', 'Accept', 'Short', 'Inspect Later'
               ].map((e) => Text(e, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp))).toList(),
               isHeader: true,
             ),
@@ -163,6 +175,65 @@ class _PoItemState extends State<PoItem> {
                 ].map((data) => data is Widget ? data : Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
                 description: '${item.itemDescr} - ${item.customerItemRef ?? ''}',
                 customerItemRef: item.customerItemRef,
+                onDelete: () async {
+                  bool isDeleting = false;
+                  await showDialog<bool>(
+                    context: context,
+                    builder: (context) => StatefulBuilder(
+                      builder: (context, setStateDialog) {
+                        return AlertDialog(
+                          title: const Text('Delete Item'),
+                          content: Text('Are you sure you want to delete ${item.pRowID}?'),
+                          actions: [
+                            TextButton(
+                              onPressed: isDeleting ? null : () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: isDeleting
+                                  ? null
+                                  : () async {
+                                      setStateDialog(() {
+                                        isDeleting = true;
+                                      });
+                                      try {
+                                        await QRPOItemDtlTable().deleteRecord(id);
+                                        await fetchItemsByQRHdrID();
+                                        if (mounted) {
+                                          Navigator.pop(context);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Item deleted successfully')),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          Navigator.pop(context);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Failed to delete item')),
+                                          );
+                                        }
+                                      } finally {
+                                        if (mounted) {
+                                          setStateDialog(() {
+                                            isDeleting = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                              child: isDeleting
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Text('Delete', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+                },
               );
             }).toList(),
             SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),
@@ -187,15 +258,15 @@ class _PoItemState extends State<PoItem> {
     void Function(int?) setValue;
 
     if (field == 'available') {
-      controller = availableControllers[id]!;
+      controller = availableControllers[id] ?? TextEditingController(text: (item.availableQty ?? 0).toString());
       getValue = () => item.availableQty;
       setValue = (v) => item.availableQty = v;
     } else if (field == 'accept') {
-      controller = acceptControllers[id]!;
+      controller = acceptControllers[id] ?? TextEditingController(text: (item.acceptedQty ?? 0).toString());
       getValue = () => item.acceptedQty;
       setValue = (v) => item.acceptedQty = v;
     } else {
-      controller = shortControllers[id]!;
+      controller = shortControllers[id] ?? TextEditingController(text: (item.shortStockQty ?? 0).toString());
       getValue = () => item.shortStockQty;
       setValue = (v) => item.shortStockQty = v;
     }
@@ -237,4 +308,5 @@ class _PoItemState extends State<PoItem> {
     setState(() {});
     widget.onChanged?.call();
   }
+
 }

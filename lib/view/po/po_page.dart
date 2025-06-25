@@ -21,6 +21,11 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
   bool _hasUnsavedChanges = false;
   bool _isSaving = false;
   final GlobalKey<State<StatefulWidget>> _poItemKey = GlobalKey<State<StatefulWidget>>();
+final GlobalKey<State<PoWorkmanship>> _workmanshipKey = GlobalKey<State<PoWorkmanship>>();
+final GlobalKey<State<Carton>> _cartonKey = GlobalKey<State<Carton>>();
+final GlobalKey<State<MoreDetails>> _moreDetailsKey = GlobalKey<State<MoreDetails>>();
+final GlobalKey<State<QualityParameters>> _qualityParametersKey = GlobalKey<State<QualityParameters>>();
+final GlobalKey<State<Enclosure>> _enclosureKey = GlobalKey<State<Enclosure>>();
 
 
   List<Widget> list = const [
@@ -54,7 +59,26 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
     setState(() {
       _isSaving = true;
     });
-    await (_poItemKey.currentState as dynamic)?.saveChanges();
+    switch (_selectedIndex) {
+      case 0:
+        await (_poItemKey.currentState as dynamic)?.saveChanges();
+        break;
+      case 1:
+        await (_workmanshipKey.currentState as dynamic)?.saveChanges();
+        break;
+      case 2:
+        await (_cartonKey.currentState as dynamic)?.saveChanges();
+        break;
+      case 3:
+        await (_moreDetailsKey.currentState as dynamic)?.saveChanges();
+        break;
+      case 4:
+        await (_qualityParametersKey.currentState as dynamic)?.saveChanges();
+        break;
+      case 5:
+        await (_enclosureKey.currentState as dynamic)?.saveChanges();
+        break;
+    }
     setState(() {
       _hasUnsavedChanges = false;
       _isSaving = false;
@@ -65,9 +89,28 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
   }
 
   void _undoChanges() {
-    (_poItemKey.currentState as dynamic)?.resetQuantities();
+    switch (_selectedIndex) {
+      case 0:
+        (_poItemKey.currentState as dynamic)?.resetQuantities();
+        break;
+      case 1:
+        (_workmanshipKey.currentState as dynamic)?.resetQuantities();
+        break;
+      case 2:
+        (_cartonKey.currentState as dynamic)?.resetQuantities();
+        break;
+      case 3:
+        (_moreDetailsKey.currentState as dynamic)?.resetQuantities();
+        break;
+      case 4:
+        (_qualityParametersKey.currentState as dynamic)?.resetQuantities();
+        break;
+      case 5:
+        (_enclosureKey.currentState as dynamic)?.resetQuantities();
+        break;
+    }
     setState(() {
-      _hasUnsavedChanges = true;
+      _hasUnsavedChanges = false;
     });
   }
 
@@ -136,11 +179,51 @@ class _PoPageState extends State<PoPage> with SingleTickerProviderStateMixin {
                     });
                   },
                 ),
-                PoWorkmanship(pRowId: widget.pRowId),
-                Carton(pRowId: widget.pRowId),
-                MoreDetails(pRowId: widget.pRowId),
-                QualityParameters(pRowId: widget.pRowId),
-                Enclosure(pRowId: widget.pRowId),
+                PoWorkmanship(
+                  key: _workmanshipKey,
+                  pRowId: widget.pRowId,
+                  onChanged: () {
+                    setState(() {
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                ),
+                Carton(
+                  key: _cartonKey,
+                  pRowId: widget.pRowId,
+                  onChanged: () {
+                    setState(() {
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                ),
+                MoreDetails(
+                  key: _moreDetailsKey,
+                  pRowId: widget.pRowId,
+                  onChanged: () {
+                    setState(() {
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                ),
+                QualityParameters(
+                  key: _qualityParametersKey,
+                  pRowId: widget.pRowId,
+                  onChanged: () {
+                    setState(() {
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                ),
+                Enclosure(
+                  key: _enclosureKey,
+                  pRowId: widget.pRowId,
+                  onChanged: () {
+                    setState(() {
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                ),
               ],
             ),
           ),

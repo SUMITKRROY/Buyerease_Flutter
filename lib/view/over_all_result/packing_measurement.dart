@@ -13,7 +13,9 @@ import '../../model/po_item_dtl_model.dart';
 
 class PackingMeasurement extends StatefulWidget {
   final String id;
-  const PackingMeasurement({super.key, required this.id});
+  final VoidCallback onChanged; // ✅ Add this
+
+  const PackingMeasurement({super.key, required this.id, required this.onChanged});
 
   @override
   State<PackingMeasurement> createState() => _PackingMeasurementState();
@@ -218,5 +220,9 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
         ),
       ),
     );
+  }
+  Future<void> saveChanges() async {
+    setState(() {});
+    widget.onChanged.call();
   }
 }

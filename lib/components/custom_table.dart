@@ -8,6 +8,7 @@ class CustomTable extends StatelessWidget {
   final bool isHeader;
   final bool isFirstCellClickable;
   final String? customerItemRef;
+  final Function()? onDelete;
 
   final TextStyle headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp);
   final TextStyle normalStyle = TextStyle(fontSize: 10.sp);
@@ -18,6 +19,7 @@ class CustomTable extends StatelessWidget {
     this.isHeader = false,
     this.isFirstCellClickable = true,
     this.customerItemRef,
+    this.onDelete,
   });
 
   Widget buildCell(Widget child, {double width = 80}) {
@@ -25,23 +27,6 @@ class CustomTable extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(8.0),
       child: child,
-
-    );
-  }
-
-  Widget buildRow(BuildContext context) {
-    final widths = [70.0, 80.0, 85.0, 80.0, 75.0, 70.0, 70.0, 70.0];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (rowData.isNotEmpty)
-          buildFirstCell(context, rowData[0], widths[0]),
-
-        for (int i = 1; i < rowData.length && i < widths.length; i++)
-          buildCell(rowData[i], width: widths[i]),
-      ],
     );
   }
 
@@ -63,9 +48,44 @@ class CustomTable extends StatelessWidget {
     }
   }
 
+  Widget buildSecondCell(BuildContext context, Widget widget, double width) {
+    if (isFirstCellClickable && !isHeader) {
+      return InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OverAllResult(id: customerItemRef ?? ''),
+            ),
+          );
+        },
+        child: buildCell(widget, width: width),
+      );
+    } else {
+      return buildCell(widget, width: width);
+    }
+  }
+
+  Widget buildRow(BuildContext context) {
+    final widths = [70.0, 80.0, 85.0, 80.0, 75.0, 70.0, 70.0, 70.0];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (rowData.isNotEmpty)
+          buildFirstCell(context, rowData[0], widths[0]),
+        if (rowData.length > 1)
+          buildSecondCell(context, rowData[1], widths[1]),
+        for (int i = 2; i < rowData.length && i < widths.length; i++)
+          buildCell(rowData[i], width: widths[i]),
+      ],
+    );
+  }
+
   Widget buildMergedDescription(String text) {
     return Container(
-      width: 530.w, // Responsive width
+      width: 530.w,
       padding: const EdgeInsets.all(8.0),
       color: Colors.grey.shade100,
       child: Row(
@@ -80,12 +100,16 @@ class CustomTable extends StatelessWidget {
               softWrap: true,
             ),
           ),
-          Icon(Icons.delete),
+          if (onDelete != null && !isHeader)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+              tooltip: 'Delete item',
+            ),
         ],
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

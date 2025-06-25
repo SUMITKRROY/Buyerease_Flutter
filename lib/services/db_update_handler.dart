@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import '../database/database_helper.dart';
 import '../database/table/qr_enclosure_table.dart';
 import '../model/po_item_dtl_model.dart';
+import '../database/table/qr_po_item_dtl_image_table.dart';
 
 class DbHandler {
   Future<void> updateQREnClosureToSync(String pRowID) async {
@@ -310,4 +311,19 @@ class DbHandler {
       rethrow;
     }
   }
+
+  Future<void> updateImageToSync(String pRowID) async {
+    try {
+      final contentValues = {
+        QrPoItemDtlImageTable.fileSent: 1,
+      };
+      await QrPoItemDtlImageTable().update(pRowID, contentValues);
+      print('Updated QRPOItemDtl_Image FileSent=1 for pRowID: $pRowID');
+    } catch (e) {
+      print('Error updating QRPOItemDtl_Image to sync: $e');
+      rethrow;
+    }
+  }
+
+
 }

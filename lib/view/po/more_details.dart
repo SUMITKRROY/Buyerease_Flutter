@@ -7,7 +7,8 @@ import '../../model/po_item_dtl_model.dart';
 
 class MoreDetails extends StatefulWidget {
   final String pRowId;
-  const MoreDetails({super.key, required this.pRowId});
+  final VoidCallback? onChanged;
+  const MoreDetails({super.key, required this.pRowId,this.onChanged});
 
   @override
   State<MoreDetails> createState() => _MoreDetailsState();

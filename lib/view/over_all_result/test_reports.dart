@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TestReports extends StatefulWidget {
-  const TestReports({super.key});
+  final String id;
+  final VoidCallback onChanged;
+
+  const TestReports({super.key, required this.id, required this.onChanged});
 
   @override
   State<TestReports> createState() => _TestReportsState();

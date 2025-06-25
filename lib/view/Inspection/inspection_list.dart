@@ -2,16 +2,19 @@ import 'dart:developer';
 import 'dart:developer' as developer;
 
 import 'package:buyerease/main.dart';
-
+import 'package:buyerease/model/status_modal.dart';
+import 'package:buyerease/utils/app_constants.dart';
 import 'package:buyerease/utils/loading.dart';
 import 'package:buyerease/utils/logout.dart';
 import 'package:buyerease/view/Inspection/inspection_details.dart';
+import 'package:buyerease/view/sync_inception/sync_status_adaptor.dart';
 import 'package:flutter/material.dart';
 
 import '../../database/database_helper.dart';
 import '../../model/inspection_model.dart';
 import '../../services/inspection_list/InspectionListHandler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
 import '../details/detail_page1.dart';
 import '../networks/endpoints.dart';
 import '../post/post_api_call.dart';
@@ -100,6 +103,16 @@ class _InspectionListState extends State<InspectionList> {
     });
   }
 
+  List<StatusModel> _convertToStatusModels(List<InspectionModal> inspections) {
+    return inspections.where((item) => selectedItems.contains(item.pRowID)).map((item) {
+      return StatusModel(
+        tableName: "Inspection",
+        title: "Syncing inspection ${item.pRowID}",
+        status: SyncStatus.pending
+      );
+    }).toList();
+  }
+
   Future<void> syncSelectedItems() async {
     if (selectedItems.isEmpty) return;
 
@@ -116,7 +129,12 @@ class _InspectionListState extends State<InspectionList> {
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the confirmation dialog
+                final statusModels = _convertToStatusModels(inspectionList);
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => SyncStatusPage( )
+                ));
+                // handleSubmitToSync(context);
                 setState(() {
                   isLoading = true;
                 });
@@ -197,6 +215,7 @@ class _InspectionListState extends State<InspectionList> {
           ],
           TextButton(
             onPressed: selectedItems.isEmpty ? null : syncSelectedItems,
+            // onPressed: selectedItems.isEmpty ? null : syncSelectedItems,
             child: const Text('SYNC', style: TextStyle(color: Colors.white)),
           ),
           TextButton(
@@ -460,4 +479,47 @@ class _InspectionListState extends State<InspectionList> {
       ),
     );
   }
+  void handleSubmitToSync(BuildContext context) async {
+    if (inspectionList != null && inspectionList.isNotEmpty) {
+      List<String> idsList = [];
+
+      for (var item in inspectionList) {
+        if (item.isCheckedToSync == true) {
+          idsList.add(item.pRowID ?? "");
+          if (!isOpen) {
+            await ItemInspectionDetailHandler.updateImageToMakeAgainNotSync(item.qrHdrID ?? "");
+          }
+        }
+      }
+
+      if (idsList.isNotEmpty) {
+        bool? confirm = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('Confirmation'),
+              content: Text('Are you sure? Do you want to sync ${idsList.length} inspection(s)?'),
+              actions: [
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: const Text('Yes'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+
+      }
+    }
+  }
+
 }

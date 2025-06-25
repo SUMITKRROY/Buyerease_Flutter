@@ -1,45 +1,54 @@
 import 'package:buyerease/components/add_image_icon.dart';
+import 'package:buyerease/components/sample_size_dropdown.dart';
 import 'package:flutter/material.dart';
-
+import '../../database/table/genmst.dart';
 import '../../components/over_all_dropdown.dart';
 import '../../components/remarks.dart';
 
 class PackingAppearance extends StatefulWidget {
-final String id;
+  final String id;
+  final VoidCallback onChanged;
 
-PackingAppearance({required this.id});
+  const PackingAppearance({super.key, required this.id, required this.onChanged});
 
   @override
   _PackingAppearanceState createState() => _PackingAppearanceState();
 }
 
 class _PackingAppearanceState extends State<PackingAppearance> {
-  final List<String> sampleSizes = [
-    'A(5)', 'B(3)', 'C(5)', 'D(8)', 'E(13)',
-    'F(20)', 'G(32)', 'H(50)', 'J(80)', 'K(125)',
-    'L(200)', 'M(315)', 'N(500)', 'Q(1250)', 'P(800)',
-  ];
-
   final List<String> results = ['PASS', 'FAIL'];
-
-  final List<Map<String, String>> items = [
-    {"desc": "PACKAGING APPEARANCE"},
-    {"desc": "PACKAGING DESCRIPTION"},
-    {"desc": "Test"},
-    {"desc": "Test12"},
-    {"desc": "Test4"},
-    {"desc": "Test3"},
-    {"desc": "Test1"},
-  ];
-
+  List<Map<String, String>> items = [];
   late List<String> selectedSamples;
   late List<String> selectedResults;
 
   @override
   void initState() {
     super.initState();
-    selectedSamples = List.generate(items.length, (_) => 'A(5)');
-    selectedResults = List.generate(items.length, (_) => 'PASS');
+    _loadGenMstData();
+  }
+
+  Future<void> _loadGenMstData() async {
+    try {
+      GenMst genMst = GenMst();
+      final List<Map<String, dynamic>> data = await genMst.getByGenID('550');
+      setState(() {
+        items = data.map((item) {
+          return {
+            "desc": item['MainDescr']?.toString() ?? '',
+          };
+        }).toList();
+
+        selectedSamples = List.generate(items.length, (_) => 'A(5)');
+        selectedResults = List.generate(items.length, (_) => 'PASS');
+      });
+    } catch (e) {
+      print('Error loading GenMst data: $e');
+      setState(() {
+        items = [];
+        selectedSamples = [];
+        selectedResults = [];
+      });
+    }
   }
 
   @override
@@ -47,20 +56,16 @@ class _PackingAppearanceState extends State<PackingAppearance> {
     return Column(
       children: [
         OverAllDropdown(),
-
         _buildCardSection("Unit Packing"),
         _buildCardSection("Shipping Mark"),
         _buildTableHeader(),
         Expanded(child: _buildDataList()),
-        // Remark
         Remarks()
       ],
     );
   }
 
-
   Widget _buildCardSection(String title) {
-    String selectedSample = 'A(5)';
     String selectedResult = 'PASS';
 
     return Card(
@@ -75,7 +80,6 @@ class _PackingAppearanceState extends State<PackingAppearance> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Title
                 Expanded(
                   flex: 3,
                   child: Text(
@@ -87,35 +91,19 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                   ),
                 ),
 
-                // Sample Size Dropdown
+                // ✅ Safe usage, no Expanded inside SampleSizeDropdown anymore
                 Expanded(
                   flex: 2,
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: selectedSample,
-                    underline: const SizedBox(),
-                    onChanged: (value) {
-                      // Optional: Handle change
-                    },
-                    items: sampleSizes.map((size) {
-                      return DropdownMenuItem(
-                        value: size,
-                        child: Text(size, style: const TextStyle(fontSize: 12)),
-                      );
-                    }).toList(),
-                  ),
+                  child: SampleSizeDropdown(),
                 ),
 
-                // Result Dropdown (PASS / FAIL)
                 Expanded(
                   flex: 2,
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: selectedResult,
                     underline: const SizedBox(),
-                    onChanged: (value) {
-                      // Optional: Handle change
-                    },
+                    onChanged: (value) {},
                     items: ['PASS', 'FAIL'].map((result) {
                       return DropdownMenuItem(
                         value: result,
@@ -127,8 +115,16 @@ class _PackingAppearanceState extends State<PackingAppearance> {
               ],
             ),
             title == "Unit Packing"
-            ?  AddImageIcon(title: "Unit pack appearance", id: widget.id,)
-           : AddImageIcon(title: "Shipping pack appearance", id: widget.id,)
+                ? AddImageIcon(
+              title: "Unit pack appearance",
+              id: widget.id,
+              onImageAdded: widget.onChanged,
+            )
+                : AddImageIcon(
+              title: "Shipping pack appearance",
+              id: widget.id,
+              onImageAdded: widget.onChanged,
+            )
           ],
         ),
       ),
@@ -183,15 +179,7 @@ class _PackingAppearanceState extends State<PackingAppearance> {
               ),
               Expanded(
                 flex: 2,
-                child: _dropdown(
-                  sampleSizes,
-                  selectedSamples[index],
-                      (value) {
-                    setState(() {
-                      selectedSamples[index] = value!;
-                    });
-                  },
-                ),
+                child: SampleSizeDropdown(),
               ),
               Expanded(
                 flex: 2,
@@ -230,5 +218,10 @@ class _PackingAppearanceState extends State<PackingAppearance> {
         );
       }).toList(),
     );
+  }
+
+  Future<void> saveChanges() async {
+    setState(() {});
+    widget.onChanged.call();
   }
 }

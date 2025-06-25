@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class Enclosure extends StatefulWidget {
   final String pRowId;
-  const Enclosure({super.key, required this.pRowId});
+  final VoidCallback? onChanged;
+  const Enclosure({super.key, required this.pRowId,this.onChanged});
 
   @override
   State<Enclosure> createState() => _EnclosureState();

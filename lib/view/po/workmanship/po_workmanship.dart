@@ -7,7 +7,13 @@ import '../../../model/po_item_dtl_model.dart';
 
 class PoWorkmanship extends StatefulWidget {
   final String pRowId;
-  const PoWorkmanship({super.key, required this.pRowId});
+  final VoidCallback? onChanged;
+  
+  const PoWorkmanship({
+    super.key, 
+    required this.pRowId,
+    this.onChanged,
+  });
 
   @override
   State<PoWorkmanship> createState() => _PoWorkmanshipState();
@@ -15,6 +21,7 @@ class PoWorkmanship extends StatefulWidget {
 
 class _PoWorkmanshipState extends State<PoWorkmanship> {
   List<POItemDtl> poItems = [];
+  List<POItemDtl> originalPoItems = [];
   bool isLoading = true;
 
   @override
@@ -31,6 +38,8 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
 
       List<Map<String, dynamic>> items = await QRPOItemDtlTable().getByQRHdrID(widget.pRowId);
       poItems = items.map((item) => POItemDtl.fromJson(item)).toList();
+      // Create a deep copy of the original items for undo functionality
+      originalPoItems = items.map((item) => POItemDtl.fromJson(item)).toList();
 
       setState(() {
         isLoading = false;
@@ -40,6 +49,42 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> saveChanges() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      for (var item in poItems) {
+        final originalItem = originalPoItems.firstWhere(
+          (original) => original.qrItemID == item.qrItemID,
+        );
+
+        if (item.inspectedhdr != originalItem.inspectedhdr) {
+          await updateField(item.qrItemID ?? "", item.inspectedhdr ?? "0");
+        }
+      }
+
+      // Update originalPoItems with current values
+      originalPoItems = poItems.map((item) => POItemDtl.fromJson(item.toJson())).toList();
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void resetQuantities() {
+    setState(() {
+      // Reset poItems to original values
+      poItems = originalPoItems.map((item) => POItemDtl.fromJson(item.toJson())).toList();
+    });
   }
 
   final TextStyle headerStyle = const TextStyle(fontWeight: FontWeight.bold);
@@ -101,11 +146,11 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
                 item.poNo ?? '',
                 item.itemCode ?? '',
                 item.workmanshipToInspectionhdr ?? '0',
-                item.inspectedhdr ?? '0',
+                buildEditableField(item.qrItemID ?? '', item),
                 item.criticalhdr ?? '0',
                 item.majorhdr ?? '0',
                 item.minorhdr ?? '0'
-              ].map((data) => Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
+              ].map((data) => data is Widget ? data : Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
             )).toList(),
 
             SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),
@@ -124,6 +169,33 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
         ),
       ),
     );
+  }
+
+  Widget buildEditableField(String id, POItemDtl item) {
+    final controller = TextEditingController(text: (item.inspectedhdr ?? '0').toString());
+    return SizedBox(
+      width: 60.0,
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        style: TextStyle(fontSize: 10.sp),
+        onChanged: (val) {
+          setState(() {
+            item.inspectedhdr = val;
+          });
+          widget.onChanged?.call();
+        },
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        ),
+      ),
+    );
+  }
+
+  Future<void> updateField(String id, String value) async {
+    await QRPOItemDtlTable().updateRecord(id, {'inspectedhdr': value});
   }
 }
 

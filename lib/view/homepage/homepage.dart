@@ -17,7 +17,7 @@ import '../../config/api_route.dart';
 import '../../services/share_pref.dart';
 import '../Inspection/inspection_list.dart';
 import '../sync_inception/sync_inception.dart';
-import '../sync_list/sync_list.dart';
+
 import '../sync_style/sync_style.dart';
 import '../test.dart';
 
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => const SyncList()));
+                                    builder: (_) => const SyncStyle()));
                           }
                           // else {
                           //   Navigator.push(

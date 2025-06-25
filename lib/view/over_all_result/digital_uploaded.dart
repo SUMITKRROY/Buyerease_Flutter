@@ -7,8 +7,12 @@ import 'dart:io';
 
 class DigitalUploaded extends StatefulWidget {
   final String id;
-    DigitalUploaded({
-    super.key, required this.id,
+  final VoidCallback onChanged; // ✅ Add this
+
+  const DigitalUploaded({
+    super.key,
+    required this.id,
+    required this.onChanged,
   });
 
   @override

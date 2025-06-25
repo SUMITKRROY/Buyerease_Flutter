@@ -10,8 +10,9 @@ import '../../config/theame_data.dart';
 
 class BarCode extends StatefulWidget {
   final String id;
+  final VoidCallback onChanged; // <-- Add this
 
-    BarCode({super.key,required this.id});
+  const BarCode({super.key, required this.id, required this.onChanged});
 
   @override
   State<BarCode> createState() => _BarCodeState();
@@ -37,6 +38,7 @@ class _BarCodeState extends State<BarCode> {
           child: Column(
             children: [
               OverAllDropdown(),
+
               /// Card layout
               Card(
                 margin: const EdgeInsets.all(12),
@@ -61,14 +63,23 @@ class _BarCodeState extends State<BarCode> {
                           DropdownButton<String>(
                             value: "A(5)",
                             items: const [
-                              DropdownMenuItem(value: "A(5)", child: Text("A(5)", style: TextStyle(fontSize: 12))),
-                              DropdownMenuItem(value: "B(2)", child: Text("B(2)", style: TextStyle(fontSize: 12))),
+                              DropdownMenuItem(
+                                  value: "A(5)",
+                                  child: Text("A(5)",
+                                      style: TextStyle(fontSize: 12))),
+                              DropdownMenuItem(
+                                  value: "B(2)",
+                                  child: Text("B(2)",
+                                      style: TextStyle(fontSize: 12))),
                             ],
-                            onChanged: (val) {},
+                            onChanged: (val) {
+                              saveChanges();
+                            },
                           )
                         ],
                       ),
                       const SizedBox(height: 16),
+
                       /// Specification & Visual fields
                       Row(
                         children: [
@@ -76,7 +87,8 @@ class _BarCodeState extends State<BarCode> {
                             child: TextField(
                               decoration: const InputDecoration(
                                 labelText: "Specification",
-                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                labelStyle:
+                                    TextStyle(fontSize: 12), // Font size 12
                                 border: OutlineInputBorder(),
                               ),
                             ),
@@ -86,7 +98,8 @@ class _BarCodeState extends State<BarCode> {
                             child: TextField(
                               decoration: const InputDecoration(
                                 labelText: "Visual",
-                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                labelStyle:
+                                    TextStyle(fontSize: 12), // Font size 12
                                 border: OutlineInputBorder(),
                               ),
                             ),
@@ -94,6 +107,7 @@ class _BarCodeState extends State<BarCode> {
                         ],
                       ),
                       const SizedBox(height: 16),
+
                       /// Scan + Result + Camera
                       /// Scan + Result Dropdown + Camera in one row
                       Row(
@@ -104,7 +118,8 @@ class _BarCodeState extends State<BarCode> {
                             child: TextField(
                               decoration: const InputDecoration(
                                 labelText: "Scan",
-                                labelStyle: TextStyle(fontSize: 12), // Font size 12
+                                labelStyle:
+                                    TextStyle(fontSize: 12), // Font size 12
                                 border: OutlineInputBorder(),
                               ),
                             ),
@@ -117,10 +132,18 @@ class _BarCodeState extends State<BarCode> {
                             child: DropdownButtonFormField<String>(
                               value: "PASS",
                               items: const [
-                                DropdownMenuItem(value: "PASS", child: Text("PASS", style: TextStyle(fontSize: 12))),
-                                DropdownMenuItem(value: "FAIL", child: Text("FAIL", style: TextStyle(fontSize: 12))),
+                                DropdownMenuItem(
+                                    value: "PASS",
+                                    child: Text("PASS",
+                                        style: TextStyle(fontSize: 12))),
+                                DropdownMenuItem(
+                                    value: "FAIL",
+                                    child: Text("FAIL",
+                                        style: TextStyle(fontSize: 12))),
                               ],
-                              onChanged: (val) {},
+                              onChanged: (val) {
+                                saveChanges();
+                              },
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                               ),
@@ -128,11 +151,14 @@ class _BarCodeState extends State<BarCode> {
                           ),
                         ],
                       ),
+
                       /// Camera icon
                       Align(
-                        alignment: Alignment.centerRight,
-                        child: AddImageIcon(title: "Unit Barcode", id: widget.id,)
-                      ),
+                          alignment: Alignment.centerRight,
+                          child: AddImageIcon(
+                              title: "Unit Barcode",
+                              id: widget.id,
+                            onImageAdded: widget.onChanged,)),
                     ],
                   ),
                 ),
@@ -144,5 +170,10 @@ class _BarCodeState extends State<BarCode> {
         ),
       ),
     );
+  }
+
+  Future<void> saveChanges() async {
+    setState(() {});
+    widget.onChanged.call();
   }
 }

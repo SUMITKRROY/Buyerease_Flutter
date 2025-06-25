@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 
 import '../../database/database_helper.dart';
+import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../utils/gen_utils.dart';
 
 import '../get_data_handler.dart';
@@ -17,7 +18,8 @@ class ItemInspectionDetailHandler {
 
         required String qrHdrId,
         required String? qrPoItemHdrId,
-    }) async {
+    }) async
+    {
         List<int> importantList = [];
 
         try {
@@ -74,5 +76,36 @@ class ItemInspectionDetailHandler {
         }
 
         return importantList;
+    }
+    Future<void> updateImageTitle(String pRowID, String title) async {
+        try {
+            final contentValues = {
+                QrPoItemDtlImageTable.title: title,
+            };
+            await QrPoItemDtlImageTable().update(pRowID, contentValues);
+            print('Updated QRPOItemDtl_Image Title for pRowID: $pRowID');
+        } catch (e) {
+            print('Error updating QRPOItemDtl_Image title: $e');
+            rethrow;
+        }
+    }
+
+  static  Future<void> updateImageToMakeAgainNotSync(String qrHdrID) async {
+        try {
+            final db = await DatabaseHelper().database;
+            final contentValues = {
+                QrPoItemDtlImageTable.fileSent: 0,
+            };
+            await db.update(
+                QrPoItemDtlImageTable.TABLE_NAME,
+                contentValues,
+                where: '${QrPoItemDtlImageTable.qrHdrID} = ?',
+                whereArgs: [qrHdrID],
+            );
+            print('Updated QRPOItemDtl_Image FileSent=0 for QRHdrID: $qrHdrID');
+        } catch (e) {
+            print('Error updating QRPOItemDtl_Image to make again not sync: $e');
+            rethrow;
+        }
     }
 }

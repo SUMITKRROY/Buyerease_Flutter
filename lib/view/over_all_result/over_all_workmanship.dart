@@ -11,7 +11,9 @@ import '../po/add_workmanship.dart';
 
 class WorkManShip extends StatefulWidget {
   final String id;
-  const WorkManShip({super.key, required this.id});
+  final VoidCallback onChanged; // ✅ Add this
+
+  const WorkManShip({super.key, required this.id, required this.onChanged});
 
   @override
   State<WorkManShip> createState() => _WorkManShipState();
@@ -198,5 +200,9 @@ class _WorkManShipState extends State<WorkManShip> {
         ),
       ),
     );
+  }
+  Future<void> saveChanges() async {
+    setState(() {});
+    widget.onChanged.call();
   }
 }

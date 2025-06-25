@@ -8,7 +8,7 @@ import '../view/register/register.dart';
 import '../view/po/po_page.dart';
 import '../view/details/detail_page1.dart';
 import '../view/Inspection/inspection_list.dart';
-import '../view/sync_list/sync_list.dart';
+
 import '../view/sync_style/sync_style.dart';
 import '../view/sync_inception/sync_inception.dart';
 import '../view/over_all_result/over_all_result.dart';
@@ -35,8 +35,6 @@ class MyRoutes {
         return CustomPageRoute(child: DetailPageOne(id: id), settings: settings);
       case RoutePath.inspection:
         return CustomPageRoute(child: const InspectionList(), settings: settings);
-      case RoutePath.syncList:
-        return CustomPageRoute(child: const SyncList(), settings: settings);
       case RoutePath.syncStyle:
         return CustomPageRoute(child: const SyncStyle(), settings: settings);
       case RoutePath.syncInception:

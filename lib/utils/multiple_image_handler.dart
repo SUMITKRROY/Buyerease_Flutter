@@ -8,18 +8,20 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image/image.dart' as img;
 import 'package:buyerease/utils/fsl_log.dart';
 
+import 'app_constants.dart';
+
 // Placeholder for FEnumerations
-class FEnumerations {
-    static const int photoPermission = 1;
-    static const int permissionRequest = 100;
-    static const int resultLoadImage = 222;
-    static const int imageCapture = 1111;
-    static const int pickfileResultCode = 333;
-    static const int resultCamera = 1;
-    static const int resultGallery = 2;
-    static const int resultCameraDenied = 3;
-    static const int resultReadStorageDenied = 4;
-}
+// class FEnumerations {
+//     static const int photoPermission = 1;
+//     static const int permissionRequest = 100;
+//     static const int resultLoadImage = 222;
+//     static const int imageCapture = 1111;
+//     static const int pickfileResultCode = 333;
+//     static const int resultCamera = 1;
+//     static const int resultGallery = 2;
+//     static const int resultCameraDenied = 3;
+//     static const int resultReadStorageDenied = 4;
+// }
 
 // Placeholder for FClientConstants
 class FClientConstants {
