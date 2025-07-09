@@ -87,38 +87,11 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
     });
   }
 
-  final TextStyle headerStyle = const TextStyle(fontWeight: FontWeight.bold);
-  final TextStyle normalStyle = const TextStyle(fontSize: 14);
 
-  Widget buildCell(String text, {double width = 80, bool isHeader = false}) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        text,
-        style: isHeader ? headerStyle : normalStyle,
-      ),
-    );
-  }
 
-  Widget buildRow(List<String> data, {bool isHeader = false}) {
-    final widths = [50.0, 80.0, 60.0, 110.0, 60.0, 60.0, 60.0, 80.0];
-    return Row(
-      children: [
-        for (int i = 0; i < data.length; i++)
-          buildCell(data[i], width: widths[i], isHeader: isHeader),
-      ],
-    );
-  }
 
-  Widget buildMergedDescription(String text) {
-    return Container(
-      width: 560, // Sum of all cell widths above
-      padding: const EdgeInsets.all(8.0),
-      color: Colors.grey.shade100,
-      child: Text(text, style: const TextStyle(fontSize: 14)),
-    );
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +124,8 @@ class _PoWorkmanshipState extends State<PoWorkmanship> {
                 item.majorhdr ?? '0',
                 item.minorhdr ?? '0'
               ].map((data) => data is Widget ? data : Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
+              customerItemRef: item.customerItemRef,
+              pRowId: widget.pRowId,
             )).toList(),
 
             SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),

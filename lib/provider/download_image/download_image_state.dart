@@ -9,6 +9,10 @@ final class DownloadImageLoading extends DownloadImageState {
   final int count;
   DownloadImageLoading({required this.count});
 }
+final class DownloadImageCount extends DownloadImageState {
+  final int count;
+  DownloadImageCount({required this.count});
+}
 
 final class DownloadImageSuccess extends DownloadImageState {}
 

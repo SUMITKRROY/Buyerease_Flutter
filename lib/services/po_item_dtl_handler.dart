@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer' as developer;
+
 import 'package:buyerease/config/api_route.dart';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/model/sample_collection_model.dart';
@@ -17,7 +20,6 @@ import 'inspection_list/ItemInspectionDetailHandler.dart'; // Placeholder: Defin
 
 class POItemDtlHandler {
   static const String _tag = 'POItemDtlHandler';
-
   // Update POItemDtl in QRPOItemdtl table
   static Future<bool> updatePOItemDtl(POItemDtl poItemDtl) async {
     try {
@@ -587,7 +589,7 @@ class POItemDtlHandler {
       ''';
 
       final result = await db.rawQuery(query, [pInspectionID]);
-
+      developer.log('query of get List: ${result}');
       for (var row in result) {
         final poItemDtl = POItemDtl(
           pRowID: row['QrItemID']?.toString(),
@@ -660,7 +662,8 @@ class POItemDtlHandler {
 
   // Get latest delivery date for POItemDtl
   static Future<String> getPOListItemLatestDelDate(
-      String pInspectionID, POItemDtl poItemDtl) async {
+      String pInspectionID, POItemDtl poItemDtl) async
+  {
     String latestDelDate = '';
     try {
       final db = await DatabaseHelper().database;
@@ -673,8 +676,9 @@ class POItemDtlHandler {
           latestDelDate = row['LatestDelDt'] as String? ?? '';
         }
       }
+      developer.log('row[LatestDelDt]: ${jsonEncode(latestDelDate)}');
       if (result.isEmpty) {
-        print('$_tag: Cursor count = 0 for LatestDelDt');
+        print('$_tag: Cursor count = 0 for LatestDelDt $result');
       }
     } catch (e) {
       print('$_tag: Exception getting latest delivery date: $e');
@@ -751,7 +755,8 @@ class POItemDtlHandler {
 
   // Get inspection details
   static Future<List<String>?> getToInspect(
-      String pRowInspection, int availableQty) async {
+      String pRowInspection, int availableQty) async
+  {
     try {
       final db = await DatabaseHelper().database;
       final query = '''

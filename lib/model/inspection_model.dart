@@ -99,6 +99,7 @@ class InspectionModal {
   String? poListed;
   String? itemListId;
   int? isImportant;
+  int? IsSynced;
 
   InspectionModal({
     this.qrHdrID,
@@ -197,6 +198,7 @@ class InspectionModal {
     this.poListed,
     this.itemListId,
     this.isImportant,
+    this.IsSynced,
   });
 
   factory InspectionModal.fromJson(Map<String, dynamic> json) {
@@ -297,6 +299,7 @@ class InspectionModal {
       poListed: json['POListed'],
       itemListId: json['ItemListId'],
       isImportant: json['IsImportant'],
+      IsSynced: json['IsSynced'],
     );
   }
 

@@ -30,17 +30,17 @@ class MyRoutes {
       // case RoutePath.po:
       //   final id = settings.arguments as String? ?? '';
       //   return CustomPageRoute(child: PoPage(data: id), settings: settings);
-      case RoutePath.details:
-        final id = settings.arguments as String? ?? '';
-        return CustomPageRoute(child: DetailPageOne(id: id), settings: settings);
+      // case RoutePath.details:
+      //   final id = settings.arguments as String? ?? '';
+      //   return CustomPageRoute(child: DetailPageOne(id: id), settings: settings);
       case RoutePath.inspection:
         return CustomPageRoute(child: const InspectionList(), settings: settings);
       case RoutePath.syncStyle:
         return CustomPageRoute(child: const SyncStyle(), settings: settings);
       case RoutePath.syncInception:
         return CustomPageRoute(child: const SyncInception(), settings: settings);
-      case RoutePath.overAllResult:
-        return CustomPageRoute(child: const OverAllResult(id: ''), settings: settings);
+      // case RoutePath.overAllResult:
+      //   return CustomPageRoute(child: const OverAllResult(id: '', pRowId: '', inspectionModal: null,), settings: settings);
       default:
         return CustomPageRoute(
           child: Scaffold(

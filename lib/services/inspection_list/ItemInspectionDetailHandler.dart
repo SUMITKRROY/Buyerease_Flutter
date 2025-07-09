@@ -9,6 +9,7 @@ import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../utils/gen_utils.dart';
 
 import '../get_data_handler.dart';
+import 'InspectionListHandler.dart';
 
 
 class ItemInspectionDetailHandler {
@@ -108,4 +109,62 @@ class ItemInspectionDetailHandler {
             rethrow;
         }
     }
+
+
+    Future<List<String>> generatePKBatch(String tableName, int count) async {
+        String locID = FClientConfig.locID;
+        String startPRowID = await maxId(tableName);
+
+        // Extract numeric part
+        int baseNo = int.parse(startPRowID.substring(3, 10));
+        List<String> ids = [];
+
+        for (int i = 1; i <= count; i++) {
+            int genNo = baseNo + i;
+            String padded = genNo.toString().padLeft(7, '0');
+            ids.add('$locID$padded');
+        }
+
+        return ids;
+    }
+
+
+    Future<String> maxId( String tableName) async {
+        String pRowID = '0000000000';
+
+        try {
+            final db = await DatabaseHelper().database;
+            final List<Map<String, dynamic>> result = await db.rawQuery(
+                "SELECT IFNULL(MAX(pRowID), '0000000000') AS pRowID FROM $tableName"
+            );
+
+            if (result.isNotEmpty && result[0]['pRowID'] != null && result[0]['pRowID'] != 'null') {
+                pRowID = result[0]['pRowID'];
+            }
+
+            print('Max pRowID from DB: $pRowID');
+        } catch (e) {
+            print('Error getting max pRowID: $e');
+        }
+
+        return pRowID;
+    }
+
+    Future<void> updateFinalSync(String pRowID) async {
+        final db = await DatabaseHelper().database;
+
+        final String currentDate = AppConfig.getCurrentDate();
+
+        const String query = '''
+    UPDATE QRFeedBackHdr
+    SET Last_Sync_Dt = ?, IsSynced = 1
+    WHERE pRowID = ?
+  ''';
+
+        await db.rawUpdate(query, [currentDate, pRowID]);
+
+        print('✅ updateFinalSync: Record updated for pRowID = $pRowID');
+    }
+
+
 }

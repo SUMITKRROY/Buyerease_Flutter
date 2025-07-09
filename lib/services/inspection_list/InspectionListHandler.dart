@@ -52,7 +52,8 @@ class InspectionListHandler {
   }
 
   static Future<List<InspectionModal>> getInspectionList(
-      String? searchStr) async {
+      String? searchStr) async
+  {
     final inspectionArrayList = <InspectionModal>[];
     try {
       final database = await DatabaseHelper().database;
@@ -78,7 +79,7 @@ class InspectionListHandler {
       FslLog.i(_logger, "Get inspection list query: $query");
       developer.log("this is the data of the query $query");
       final cursor = await database.rawQuery(query);
-      developer.log("results is ${cursor}");
+      developer.log("results is >>>>>${cursor}");
       for (var row in cursor) {
         final inspectionModel = InspectionModal()
           ..pRowID = row["pRowID"] as String?
@@ -106,7 +107,8 @@ class InspectionListHandler {
           ..factory = row["Factory"] as String?
           ..inspectionLevelDescr = row["InspectionLevelDescr"] as String?
           ..productionStatusRemark = row["ProductionStatusRemark"] as String?
-          ..aqlFormula = row["AQLFormula"] as int?;
+          ..aqlFormula = row["AQLFormula"] as int?
+          ..IsSynced = row["IsSynced"] as int?;
 
         final itemIdLists = await POItemDtlHandler.getItemIdList(inspectionModel.pRowID!);
         FslLog.i(_logger, "Item list: $itemIdLists");
@@ -145,11 +147,6 @@ class InspectionListHandler {
       String? searchStr) async {
     final inspectionArrayList = <InspectionModal>[];
     try {
-      if (!await GenUtils.columnExistsInTable(
-          table: "QRFeedbackhdr", columnToCheck: "IsSynced")) {
-        FslLog.e(_logger, "Column 'IsSynced' not found, altering table...");
-        await GetDataHandler.handleToAlterAsIn("QRFeedbackhdr", "IsSynced");
-      }
 
       final database = await DatabaseHelper().database;
 
@@ -196,8 +193,10 @@ class InspectionListHandler {
           ..acceptedDt = row["AcceptedDt"] as String?
           ..comments = row["Comments"] as String?
           ..factory = row["Factory"] as String?
+          ..inspectionLevelDescr = row["InspectionLevelDescr"] as String?
           ..productionStatusRemark = row["ProductionStatusRemark"] as String?
-          ..aqlFormula = row["AQLFormula"] as int?;
+          ..aqlFormula = row["AQLFormula"] as int?
+          ..IsSynced = row["IsSynced"] as int?;
 
         final itemIdList =
             await POItemDtlHandler.getItemIdList(inspectionModel.pRowID!);
@@ -216,7 +215,7 @@ class InspectionListHandler {
         inspectionArrayList.add(inspectionModel);
       }
 
-      await database.close();
+
       FslLog.i(_logger,
           "Count of synced found QRFeedbackhdr: ${inspectionArrayList.length}");
     } catch (e) {

@@ -1,3 +1,4 @@
+/*
 import 'package:buyerease/model/status_modal.dart';
 
 import '../../utils/app_constants.dart';
@@ -5,176 +6,26 @@ import '../../utils/multiple_image_handler.dart';
 import '../SendDataHandler.dart';
 
 
-public class ChooseDataActivity extends AppCompatActivity implements JsonKey, View.OnClickListener {
+ class ChooseDataActivity  {
 
 
   String TAG = "ChooseDataActivity";
-  UserSession userSession;
-  static boolean active = false;
-  TextView txtSyncCountSection;
 
-  ProgressDialog loadingDialog;
+  static bool active = false;
 
-  ProgressBar progress;
 
-  CheckBox chkGetInspectionData, chkGetMasterData;
-  Button getDataSubmit, sendSubmit, getStyleDataSubmit, sendStyleSubmit;
+
   //    ProgressBar getDataProgressBar;
-  List<StatusModal> statusModalList;
-
-  RecyclerView recyclerView;
-  SyncStatusAdaptor syncStatusAdaptor;
-  int mViewType, mSyncViewType;
-  List<String> listedSyncIds = null;
-  List<String> idsListForSync = new ArrayList<>();
-  List<String> syncDoneProcess = new ArrayList<>();
-  int totalIdsToSync;
-  LinearLayout styleSyncContainer, poSyncContainer;
-
-  Dialog customProgressDialog;
-  ProgressBar progressDataSync;
-  ImageView imgDataSyncSuccess;
-  Button btnSyncImage;
-  ImageView imgImageSyncSuccess;
-  boolean isDataSyncComplete = false;
-  TextView txtImageSyncCount;
-  int totalImageCount = 0;
-  int syncedImageCount = 0;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.choose_activity);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-    setSupportActionBar(toolbar);
-    this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    userSession = new UserSession(ChooseDataActivity.this);
-    getSupportActionBar().setTitle("Buyerease");
-    TextView companyName = (TextView) findViewById(R.id.companyName);
-    String st = GenUtils.truncate(new UserSession(ChooseDataActivity.this).getCompanyName(), FClientConfig.COMPANY_TRUNC_LENGTH);
-    companyName.setText(st);
-    SetInitiateStaticVariable.setInitiateStaticVariable(ChooseDataActivity.this);
-    if (savedInstanceState != null) {
-      mViewType = savedInstanceState.getInt("type", 0);
-      mSyncViewType = savedInstanceState.getInt("mSyncViewType", 0);
-    } else {
-      mViewType = getIntent().getIntExtra("type", 0);
-      mSyncViewType = getIntent().getIntExtra("mSyncViewType", 0);
-    }
-    if (getIntent().hasExtra("list")) {
-      listedSyncIds = getIntent().getStringArrayListExtra("list");
-    }
-
-    styleSyncContainer = (LinearLayout) findViewById(R.id.styleSyncContainer);
-    poSyncContainer = (LinearLayout) findViewById(R.id.poSyncContainer);
-
-    chkGetInspectionData = (CheckBox) findViewById(R.id.chkGetInspectionData);
-    chkGetMasterData = (CheckBox) findViewById(R.id.chkGetMasterData);
-    getDataSubmit = (Button) findViewById(R.id.getDataSubmit);
-    sendSubmit = (Button) findViewById(R.id.sendSubmit);
-    getStyleDataSubmit = (Button) findViewById(R.id.getStyleDataSubmit);
-    sendStyleSubmit = (Button) findViewById(R.id.sendStyleSubmit);
-
-//        getDataProgressBar = (ProgressBar) findViewById(R.id.getDataProgressBar);
-
-    txtSyncCountSection = (TextView) findViewById(R.id.txtSyncCountSection);
-//        if (!chkGetInspectionData.isChecked() && !chkGetMasterData.isChecked()) {
-//            disableGetDataButton();
-//        }
-
-    if (mSyncViewType == FEnumerations.E_VIEW_TYPE_HOLOGRAM_STYLE) {
-      poSyncContainer.setVisibility(View.GONE);
-      styleSyncContainer.setVisibility(View.VISIBLE);
-      getStyleDataSubmit.setOnClickListener(this);
-      sendStyleSubmit.setOnClickListener(this);
-      handleHologramView();
-      handleToCreateHologramDb();
-    } else {
-      poSyncContainer.setVisibility(View.VISIBLE);
-      styleSyncContainer.setVisibility(View.GONE);
-      getDataSubmit.setOnClickListener(this);
-      sendSubmit.setOnClickListener(this);
-      handleView();
-    }
+  List<StatusModel> statusModalList = [];
 
 
-  }
-
-  void handleToCreateHologramDb() {
-    StyleHandler.checkAndCreateTable(ChooseDataActivity.this);
-  }
-
-  void handleHologramView() {
-    if (mViewType == FEnumerations.E_VIEW_ONLY_SEND) {
-      findViewById(R.id.getStyleDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.sendStyleDataCardContainer).setVisibility(View.VISIBLE);
-      findViewById(R.id.syncContainer).setVisibility(View.VISIBLE);
-      InitilizaeStatusHologramView();
-    } else {
-      findViewById(R.id.getStyleDataCardContainer).setVisibility(View.VISIBLE);
-      findViewById(R.id.sendStyleDataCardContainer).setVisibility(View.VISIBLE);
-      findViewById(R.id.syncContainer).setVisibility(View.GONE);
-    }
-  }
 
 
-  void handleView() {
-
-    if (mViewType == FEnumerations.E_VIEW_ONLY_SYNC) {
-      findViewById(R.id.getDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.sendDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.syncContainer).setVisibility(View.VISIBLE);
-      InitilizaeStatusView();
 
 
-    } else if (mViewType == FEnumerations.E_VIEW_SEND_AND_SYNC) {
-      findViewById(R.id.getDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.sendDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.syncContainer).setVisibility(View.VISIBLE);
-      InitilizaeStatusView();
 
 
-    } else {
-      findViewById(R.id.getDataCardContainer).setVisibility(View.VISIBLE);
-      findViewById(R.id.sendDataCardContainer).setVisibility(View.GONE);
-      findViewById(R.id.syncContainer).setVisibility(View.GONE);
 
-
-    }
-
-
-  }
-
-  void InitilizaeStatusHologramView() {
-    if (listedSyncIds != null && listedSyncIds.length > 0) {
-      FslLog.d(TAG, "Select list ids : %s%n " + listedSyncIds.toString());
-      Set<String> hashsetList = new HashSet<String>(listedSyncIds);
-      FslLog.d(TAG, "\nUnique list ids  : %s%n " + hashsetList.toString());
-      idsListForSync.addAll(hashsetList);
-      handleListToSync();
-      viewStatusListOfSyncOfStyleHologram();
-      handleToSynsStyle();
-    }
-
-  }
-
-  void InitilizaeStatusView() {
-    if (listedSyncIds != null && listedSyncIds.length > 0) {
-      totalIdsToSync = listedSyncIds.length;
-    }
-    handleListToSync();
-    handleToSendData();
-  }
-
-  void handleToSendData() {
-    updateStatusUI();
-    if (listedSyncIds != null && listedSyncIds.length > 0) {
-      idsListForSync.add(listedSyncIds[0]);
-      viewStatusListOfSync();
-      getDELToSunc();
-    }
-
-  }
 
   void getDELToSunc() {
     handleToHeaderSync();
@@ -338,7 +189,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
   void handleToSingleImageSync() {
     MyWorkerThread mWorkerThread;
     if (idsListForSync != null && idsListForSync.length > 0) {
-      /* mWorkerThread = new MyWorkerThread(new Handler(), new MyWorkerThread.Callback() {
+      */
+/* mWorkerThread = new MyWorkerThread(new Handler(), new MyWorkerThread.Callback() {
                 @Override
                 public void onImageUploaded(JSONObject result, int pos) {
                     FslLog.d(TAG, " response of sending image  " + result + " pos " + pos);
@@ -360,7 +212,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
             });
             mWorkerThread.start();
             mWorkerThread.prepareHandler();
-            Random random = new Random();*/
+            Random random = new Random();*//*
+
 
 
       updateSyncList(FEnumerations.E_SYNC_IMAGES_TABLE, FEnumerations.E_SYNC_IN_PROCESS_STATUS);
@@ -450,9 +303,11 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
   void handleToWorkmanShipSync() {
 
     if (idsListForSync != null && idsListForSync.length > 0) {
-      /*SendDataHandler.getOnSiteDataData(ChooseDataActivity.this, idsListForSync);
+      */
+/*SendDataHandler.getOnSiteDataData(ChooseDataActivity.this, idsListForSync);
             SendDataHandler.getPkgAppearanceData(ChooseDataActivity.this, idsListForSync);
-            SendDataHandler.getSampleCollectedData(ChooseDataActivity.this, idsListForSync);*/
+            SendDataHandler.getSampleCollectedData(ChooseDataActivity.this, idsListForSync);*//*
+
 
       Map<String, Object> workTables = SendDataHandler.getWorkmanShipData(ChooseDataActivity.this, idsListForSync);
       if (workTables != null && workTables.length > 0) {
@@ -822,7 +677,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
   void handleToSingleEnclosureSync() {
     MyWorkerThread mWorkerThread;
     if (idsListForSync != null && idsListForSync.length > 0) {
-      /*mWorkerThread = new MyWorkerThread(new Handler(), new MyWorkerThread.Callback() {
+      */
+/*mWorkerThread = new MyWorkerThread(new Handler(), new MyWorkerThread.Callback() {
                 @Override
                 public void onImageUploaded(JSONObject result, int pos) {
                     FslLog.d(TAG, " response of sending enclosure  " + result + " pos : " + pos);
@@ -844,7 +700,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
             });
             mWorkerThread.start();
             mWorkerThread.prepareHandler();
-            Random random = new Random();*/
+            Random random = new Random();*//*
+
 
 //            Map<String, Object> imgTables = SendDataHandler.getImagesTableData(ChooseDataActivity.this, idsListForSync);
 //            if (imgTables != null && imgTables.length > 0) {
@@ -1533,7 +1390,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
 
   @Override
   public void onBackPressed() {
-    /*if (this.findViewById(R.id.mainFlatFrofileContainer).getVisibility() == View.GONE) {
+    */
+/*if (this.findViewById(R.id.mainFlatFrofileContainer).getVisibility() == View.GONE) {
             Fragment notifyFragment = getSupportFragmentManager().findFragmentById(R.id.frameContainer);
 
             try {
@@ -1550,7 +1408,8 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
             findViewById(R.id.mainFlatFrofileContainer).setVisibility(View.VISIBLE);
             hideActiobIcon();
             return;
-        }*/
+        }*//*
+
     super.onBackPressed();
   }
 
@@ -1867,3 +1726,4 @@ public class ChooseDataActivity extends AppCompatActivity implements JsonKey, Vi
 
 }
 
+*/

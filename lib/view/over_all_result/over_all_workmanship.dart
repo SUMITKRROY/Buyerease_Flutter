@@ -11,9 +11,10 @@ import '../po/add_workmanship.dart';
 
 class WorkManShip extends StatefulWidget {
   final String id;
+  final String pRowId;
   final VoidCallback onChanged; // ✅ Add this
 
-  const WorkManShip({super.key, required this.id, required this.onChanged});
+  const WorkManShip({super.key, required this.id, required this.onChanged, required this.pRowId});
 
   @override
   State<WorkManShip> createState() => _WorkManShipState();
@@ -30,7 +31,7 @@ class _WorkManShipState extends State<WorkManShip> {
   Future<void> syncData() async {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,widget.pRowId);
       setState(() {
         poItems = items;
         if (items.isNotEmpty) {

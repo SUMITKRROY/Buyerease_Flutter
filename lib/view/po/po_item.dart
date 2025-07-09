@@ -4,13 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:buyerease/database/table/qr_po_item_dtl_table.dart';
 import 'package:buyerease/model/po_item_dtl_model.dart';
 import '../../components/custom_table.dart';
+import '../../services/po_item_dtl_handler.dart';
 
 class PoItem extends StatefulWidget {
   final String pRowId;
   final VoidCallback? onChanged;
-
   const PoItem({super.key, required this.pRowId, this.onChanged});
-
   @override
   State<PoItem> createState() => _PoItemState();
 }
@@ -19,7 +18,7 @@ class _PoItemState extends State<PoItem> {
   List<POItemDtl> poItems = [];
   bool isLoading = true;
 
-  final Map<String, TextEditingController>  availableControllers = {};
+  final Map<String, TextEditingController> availableControllers = {};
   final Map<String, TextEditingController> acceptControllers = {};
   final Map<String, TextEditingController> shortControllers = {};
 
@@ -29,9 +28,12 @@ class _PoItemState extends State<PoItem> {
     shortControllers.clear();
     for (var item in poItems) {
       final id = item.pRowID ?? '';
-      availableControllers[id] = TextEditingController(text: (item.availableQty ?? 0).toString());
-      acceptControllers[id] = TextEditingController(text: (item.acceptedQty ?? 0).toString());
-      shortControllers[id] = TextEditingController(text: (item.shortStockQty ?? 0).toString());
+      availableControllers[id] =
+          TextEditingController(text: (item.availableQty ?? 0).toString());
+      acceptControllers[id] =
+          TextEditingController(text: (item.acceptedQty ?? 0).toString());
+      shortControllers[id] =
+          TextEditingController(text: (item.shortStockQty ?? 0).toString());
     }
   }
 
@@ -54,16 +56,19 @@ class _PoItemState extends State<PoItem> {
       setState(() {
         isLoading = true;
       });
+      poItems =  await POItemDtlHandler.getItemList(context,widget.pRowId);
 
-      List<Map<String, dynamic>> items = await QRPOItemDtlTable().getByQRHdrID(widget.pRowId);
-      poItems = items.map((item) => POItemDtl.fromJson(item)).toList();
-      developer.log('developer length of  QRPOItemDtl: ${poItems.length}');
-
+      // List<Map<String, dynamic>> items =
+      //     await QRPOItemDtlTable().getByQRHdrID(widget.pRowId);
+      // poItems = items.map((item) => POItemDtl.fromJson(item)).toList();
       for (var item in poItems) {
         final id = item.pRowID ?? '';
-        availableControllers[id] = TextEditingController(text: (item.availableQty ?? 0).toString());
-        acceptControllers[id] = TextEditingController(text: (item.acceptedQty ?? 0).toString());
-        shortControllers[id] = TextEditingController(text: (item.shortStockQty ?? 0).toString());
+        availableControllers[id] =
+            TextEditingController(text: (item.availableQty ?? 0).toString());
+        acceptControllers[id] =
+            TextEditingController(text: (item.acceptedQty ?? 0).toString());
+        shortControllers[id] =
+            TextEditingController(text: (item.shortStockQty ?? 0).toString());
       }
 
       setState(() {
@@ -128,9 +133,12 @@ class _PoItemState extends State<PoItem> {
     });
   }
 
-  int getTotalAvailableQty() => poItems.fold(0, (sum, item) => sum + (item.availableQty ?? 0));
-  int getTotalAcceptedQty() => poItems.fold(0, (sum, item) => sum + (item.acceptedQty ?? 0));
-  int getTotalShortQty() => poItems.fold(0, (sum, item) => sum + (item.shortStockQty ?? 0));
+  int getTotalAvailableQty() =>
+      poItems.fold(0, (sum, item) => sum + (item.availableQty ?? 0));
+  int getTotalAcceptedQty() =>
+      poItems.fold(0, (sum, item) => sum + (item.acceptedQty ?? 0));
+  int getTotalShortQty() =>
+      poItems.fold(0, (sum, item) => sum + (item.shortStockQty ?? 0));
 
   @override
   Widget build(BuildContext context) {
@@ -147,14 +155,25 @@ class _PoItemState extends State<PoItem> {
           children: [
             CustomTable(
               rowData: [
-                'Po', 'Item', 'Order', 'Inspested\nTill Date',
-                'Available', 'Accept', 'Short', 'Inspect Later'
-              ].map((e) => Text(e, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp))).toList(),
+                'Po',
+                'Item',
+                'Order',
+                'Inspested\nTill Date',
+                'Available',
+                'Accept',
+                'Short',
+                'Inspect Later'
+              ]
+                  .map((e) => Text(e,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 12.sp)))
+                  .toList(),
               isHeader: true,
             ),
             ...poItems.map((item) {
               final id = item.pRowID ?? '';
-                  final itemId = item.qrItemID ?? '';
+              print(">>>>>>>>>>>>>>>>>>> $id");
+              final itemId = item.qrItemID ?? '';
               return CustomTable(
                 rowData: [
                   item.poNo ?? '',
@@ -167,14 +186,24 @@ class _PoItemState extends State<PoItem> {
                   Checkbox(
                     value: item.furtherInspectionReqd == 1,
                     onChanged: (val) async {
-                      setState(() => item.furtherInspectionReqd = val == true ? 1 : 0);
-                      await updateField(itemId, 'furtherInspectionReqd', val == true ? '1' : '0');
+                      setState(() =>
+                          item.furtherInspectionReqd = val == true ? 1 : 0);
+                      await updateField(itemId, 'furtherInspectionReqd',
+                          val == true ? '1' : '0');
                       widget.onChanged?.call();
                     },
                   ),
-                ].map((data) => data is Widget ? data : Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
-                description: '${item.itemDescr} - ${item.customerItemRef ?? ''}',
+                ]
+                    .map((data) => data is Widget
+                        ? data
+                        : Text(data.toString(),
+                            style: TextStyle(fontSize: 10.sp)))
+                    .toList(),
+                description:
+                    '${item.itemDescr} - ${item.customerItemRef ?? ''}',
                 customerItemRef: item.customerItemRef,
+                pRowId: widget.pRowId,
+                poItemDtl: item,
                 onDelete: () async {
                   bool isDeleting = false;
                   await showDialog<bool>(
@@ -183,10 +212,13 @@ class _PoItemState extends State<PoItem> {
                       builder: (context, setStateDialog) {
                         return AlertDialog(
                           title: const Text('Delete Item'),
-                          content: Text('Are you sure you want to delete ${item.pRowID}?'),
+                          content: Text(
+                              'Are you sure you want to delete ${item.pRowID}?'),
                           actions: [
                             TextButton(
-                              onPressed: isDeleting ? null : () => Navigator.pop(context, false),
+                              onPressed: isDeleting
+                                  ? null
+                                  : () => Navigator.pop(context, false),
                               child: const Text('Cancel'),
                             ),
                             TextButton(
@@ -197,19 +229,26 @@ class _PoItemState extends State<PoItem> {
                                         isDeleting = true;
                                       });
                                       try {
-                                        await QRPOItemDtlTable().deleteRecord(id);
+                                        await QRPOItemDtlTable()
+                                            .deleteRecord(id);
                                         await fetchItemsByQRHdrID();
                                         if (mounted) {
                                           Navigator.pop(context);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Item deleted successfully')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Item deleted successfully')),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
                                           Navigator.pop(context);
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Failed to delete item')),
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Failed to delete item')),
                                           );
                                         }
                                       } finally {
@@ -224,9 +263,11 @@ class _PoItemState extends State<PoItem> {
                                   ? SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
                                     )
-                                  : const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  : const Text('Delete',
+                                      style: TextStyle(color: Colors.red)),
                             ),
                           ],
                         );
@@ -236,13 +277,19 @@ class _PoItemState extends State<PoItem> {
                 },
               );
             }).toList(),
-            SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),
+            SizedBox(
+                width: 390,
+                child: const Divider(thickness: 1, color: Colors.black12)),
             CustomTable(
               rowData: [
-                'Total', '', getTotalOrderQty().toString(), '',
+                'Total',
+                '',
+                getTotalOrderQty().toString(),
+                '',
                 getTotalAvailableQty().toString(),
                 getTotalAcceptedQty().toString(),
-                getTotalShortQty().toString(), ''
+                getTotalShortQty().toString(),
+                ''
               ].map((e) => Text(e, style: TextStyle(fontSize: 10.sp))).toList(),
               isFirstCellClickable: false,
             ),
@@ -258,15 +305,18 @@ class _PoItemState extends State<PoItem> {
     void Function(int?) setValue;
 
     if (field == 'available') {
-      controller = availableControllers[id] ?? TextEditingController(text: (item.availableQty ?? 0).toString());
+      controller = availableControllers[id] ??
+          TextEditingController(text: (item.availableQty ?? 0).toString());
       getValue = () => item.availableQty;
       setValue = (v) => item.availableQty = v;
     } else if (field == 'accept') {
-      controller = acceptControllers[id] ?? TextEditingController(text: (item.acceptedQty ?? 0).toString());
+      controller = acceptControllers[id] ??
+          TextEditingController(text: (item.acceptedQty ?? 0).toString());
       getValue = () => item.acceptedQty;
       setValue = (v) => item.acceptedQty = v;
     } else {
-      controller = shortControllers[id] ?? TextEditingController(text: (item.shortStockQty ?? 0).toString());
+      controller = shortControllers[id] ??
+          TextEditingController(text: (item.shortStockQty ?? 0).toString());
       getValue = () => item.shortStockQty;
       setValue = (v) => item.shortStockQty = v;
     }
@@ -295,7 +345,8 @@ class _PoItemState extends State<PoItem> {
   Future<void> saveChanges() async {
     for (var item in poItems) {
       final id = item.pRowID ?? '';
-      item.availableQty = int.tryParse(availableControllers[id]?.text ?? '0') ?? 0;
+      item.availableQty =
+          int.tryParse(availableControllers[id]?.text ?? '0') ?? 0;
       item.acceptedQty = int.tryParse(acceptControllers[id]?.text ?? '0') ?? 0;
       item.shortStockQty = int.tryParse(shortControllers[id]?.text ?? '0') ?? 0;
       await QRPOItemDtlTable().updateRecordByItemId(id, {
@@ -308,5 +359,4 @@ class _PoItemState extends State<PoItem> {
     setState(() {});
     widget.onChanged?.call();
   }
-
 }

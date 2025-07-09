@@ -19,15 +19,15 @@ class DioApi {
       validateStatus: ((status) => true),
       sendTimeout: const Duration(seconds: 10),
       connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10)))
-    ..interceptors.add(PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-        error: true,
-        compact: true,
-        maxWidth: 120));
+      receiveTimeout: const Duration(seconds: 10)));
+    // ..interceptors.add(PrettyDioLogger(
+    //     requestHeader: true,
+    //     requestBody: true,
+    //     responseBody: true,
+    //     responseHeader: false,
+    //     error: true,
+    //     compact: true,
+    //     maxWidth: 120));
 
   Dio get sendRequest {
     if (isHeader) {

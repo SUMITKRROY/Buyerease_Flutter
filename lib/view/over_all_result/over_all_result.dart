@@ -1,4 +1,7 @@
 
+import 'dart:developer' as developer;
+
+import 'package:buyerease/services/po_item_dtl_handler.dart';
 import 'package:buyerease/view/over_all_result/packing_appearance.dart';
 import 'package:buyerease/view/over_all_result/packing_measurement.dart';
 import 'package:buyerease/view/over_all_result/quality_parameters_result.dart';
@@ -8,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../config/theame_data.dart';
+import '../../model/po_item_dtl_model.dart';
 import 'over_all_workmanship.dart';
 import 'barcode.dart';
 import 'digital_uploaded.dart';
@@ -19,9 +23,10 @@ import 'onsite.dart';
 
 
 class OverAllResult extends StatefulWidget {
-  const OverAllResult({super.key, required this.id});
-
+  const OverAllResult({super.key, required this.id, required this.pRowId, required this.poItemDtl});
   final String id;
+  final POItemDtl poItemDtl;
+  final String pRowId;
 
   @override
   State<OverAllResult> createState() => _OverAllResultState();
@@ -66,6 +71,7 @@ class _OverAllResultState extends State<OverAllResult>
     super.initState();
     _controller = TabController(length: list.length, vsync: this);
 
+developer.log("podetail data >>> ${widget.poItemDtl?.orderQty}");
     _controller?.addListener(() {
       setState(() {
         _selectedIndex = _controller!.index;
@@ -223,12 +229,13 @@ class _OverAllResultState extends State<OverAllResult>
                   children: [
                     ItemQuantity(
                       key: _itemQuantityKey,
-                      id: widget.id,
+
                       onChanged: () {
                         setState(() {
                           _hasUnsavedChanges = true;
                         });
-                      },
+                      }, pRowId: widget.pRowId,
+                      poItemDtl: widget.poItemDtl,
                     ),
                     PackingAppearance(
                       key: _packingAppearanceKey,
@@ -237,7 +244,7 @@ class _OverAllResultState extends State<OverAllResult>
                         setState(() {
                           _hasUnsavedChanges = true;
                         });
-                      },
+                      }, poItemDtl: widget.poItemDtl!,
                     ),
                     PackingMeasurement(
                       key: _packingMeasurementKey,
@@ -246,7 +253,7 @@ class _OverAllResultState extends State<OverAllResult>
                         setState(() {
                           _hasUnsavedChanges = true;
                         });
-                      },
+                      }, pRowId: widget.pRowId,
                     ),
                     BarCode(
                       key: _barcodeKey,
@@ -265,7 +272,7 @@ class _OverAllResultState extends State<OverAllResult>
                         setState(() {
                           _hasUnsavedChanges = true;
                         });
-                      },
+                      }, pRowId: widget.pRowId,
                     ),
                     const SampleCollected(),
                     const ItemMeasurement(),
@@ -287,7 +294,7 @@ class _OverAllResultState extends State<OverAllResult>
                         setState(() {
                           _hasUnsavedChanges = true;
                         });
-                      },
+                      }, pRowId: widget.pRowId,
                     ),
                     TestReports(
                       key: _testReportsKey,

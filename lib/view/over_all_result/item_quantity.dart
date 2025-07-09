@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -7,22 +10,24 @@ import '../../components/remarks.dart';
 import '../../config/theame_data.dart';
 import '../../database/table/qr_po_item_dtl_table.dart';
 import '../../model/po_item_dtl_model.dart';
+import '../../services/po_item_dtl_handler.dart';
 
 class ItemQuantity extends StatefulWidget {
-  final String id;
+  final String pRowId;
+  final POItemDtl? poItemDtl;
   final VoidCallback onChanged; // Add this
 
-  const ItemQuantity({super.key, required this.id, required this.onChanged});
+  const ItemQuantity({super.key, required this.pRowId, required this.onChanged, this.poItemDtl});
 
   @override
   State<ItemQuantity> createState() => _ItemQuantityState();
 }
 
 class _ItemQuantityState extends State<ItemQuantity> {
-  List<POItemDtl> poItems = [];
+  List<POItemDtl>? poItems = [];
   bool isLoading = true;
   String? remark;
-
+String latestDate = "";
   String formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
@@ -51,10 +56,13 @@ class _ItemQuantityState extends State<ItemQuantity> {
 
   Future<void> _loadData() async {
     try {
-      final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      latestDate =    await POItemDtlHandler.getPOListItemLatestDelDate(widget.pRowId,widget.poItemDtl!);
+      print('loading data: ${widget.poItemDtl}');
+      // developer.log('loading data: ${jsonEncode(widget.poItemDtl?.toJson())}');
+      // final qrPoItemDtlTable = QRPOItemDtlTable();
+      // final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,widget.pRowId);
       setState(() {
-        poItems = items;
+        poItems = widget.poItemDtl != null ? [widget.poItemDtl!] : [];
         isLoading = false;
       });
     } catch (e) {
@@ -71,9 +79,7 @@ class _ItemQuantityState extends State<ItemQuantity> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (poItems.isEmpty) {
-      return const Center(child: Text('No data available'));
-    }
+
 
     return Column(
       spacing: 05.h,
@@ -98,9 +104,9 @@ class _ItemQuantityState extends State<ItemQuantity> {
                 isHeader: true,
                 isFirstCellClickable: false,
               ),
-              ...poItems.map((item) => CustomTable(
+              ...?poItems?.map((item) => CustomTable(
                 rowData: [
-                  formatDate(item.latestDelDt),
+                  formatDate(latestDate),
                   item.shipToBreakUP ?? '',
                   item.orderQty ?? '',
                   item.availableQty?.toString() ?? '0',

@@ -23,6 +23,7 @@ class _AddWorkManShipState extends State<AddWorkManShip> {
   Future<void> getDefectMasterList() async {
     final defectList = await POItemDtlHandler.getDefectMasterList();
     setState(() {
+      print(">>>>>${defectList.first.code}");
       defectMasterModalArrayList = defectList;
       if (defectMasterModalArrayList.isNotEmpty) {
         updateAutoComplete();

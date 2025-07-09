@@ -59,8 +59,14 @@ class QrPoItemDtlImageTable {
   // Insert
   Future<void> insert(Map<String, dynamic> map) async {
     final db = await DatabaseHelper().database;
-    await db.insert(TABLE_NAME, map, conflictAlgorithm: ConflictAlgorithm.replace);
+    try {
+      await db.insert(TABLE_NAME, map, conflictAlgorithm: ConflictAlgorithm.replace);
+      print("Insert successful: $map");
+    } catch (e, stack) {
+      print("Insert failed: $e\n$stack\nData: $map");
+    }
   }
+
 
   // Get all
   Future<List<Map<String, dynamic>>> getAll() async {
@@ -85,7 +91,7 @@ class QrPoItemDtlImageTable {
     await db.update(
       TABLE_NAME,
       values,
-      where: '$pRowID = ?',
+      where: '$bePRowID = ?',
       whereArgs: [id],
     );
   }

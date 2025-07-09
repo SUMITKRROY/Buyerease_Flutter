@@ -247,12 +247,12 @@ class QRPOItemDtlTable {
     return null;
   }
 
-  Future<List<POItemDtl>> getByCustomerItemRefAndEnabled(String customerItemRef) async {
+  Future<List<POItemDtl>> getByCustomerItemRefAndEnabled(String customerItemRef,String qrHdrID) async {
     final db = await DatabaseHelper().database;
     final List<Map<String, dynamic>> maps = await db.query(
       TABLE_NAME,
-      where: '$colCustomerItemRef = ? AND $colRecEnable = ?',
-      whereArgs: [customerItemRef, 1],
+      where: '$colCustomerItemRef = ? AND $colQRHdrID = ?',
+      whereArgs: [customerItemRef, qrHdrID],
     );
 
     return List.generate(maps.length, (i) {

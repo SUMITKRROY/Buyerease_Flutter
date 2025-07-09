@@ -1,7 +1,7 @@
 class StatusModel {
   final String tableName;
-  final String title;
-  final int status;
+  String title;
+  int status; // Now mutable
 
   StatusModel({
     required this.tableName,

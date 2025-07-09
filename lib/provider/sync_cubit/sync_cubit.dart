@@ -22,6 +22,7 @@ import '../../database/table/gen_quality_parameter_product_map_table.dart';
 import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../database/table/quality_level_table.dart';
 import '../../database/table/sysdata22_table.dart';
+import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
 import '../master_repo.dart';
 
 part 'sync_state.dart';
@@ -58,7 +59,7 @@ class SyncCubit extends Cubit<SyncState> {
           final tableProcessors = <String, Function(Map<String, dynamic>)>{
             FEnumerations.tableQrpoItemHdr: (data) => QRPOItemHdrTable().insert(data),
             FEnumerations.tableQrpoItemDtl: (data) => QRPOItemDtlTable().insert(data),
-            FEnumerations.tableQrpoItemDtlImage: (data) => QrPoItemDtlImageTable().insert(data),
+            FEnumerations.tableQrpoItemDtlImage: (data) => _processQrpoItemDtlImage([data]),
             FEnumerations.tableQrpoIntimationDetails: (data) => QrPoIntimationDetailsTable().insert(data),
             FEnumerations.tableGenMst: (data) => GenMst().insert(data),
             FEnumerations.tableSysData22: (data) => Sysdata22Table().insert(data),
@@ -89,8 +90,16 @@ class SyncCubit extends Cubit<SyncState> {
             }
 
             print("Processing $tableName: ${tableData.length} ");
-            print("Processing tablename ${tableName}");
-            print("Processing tableData  ${tableData}");
+            // print("Processing tablename ${tableName}");
+            // print("Processing tableData  ${tableData}");
+
+            // Custom handling for QrpoItemDtlImage
+            if (tableName == FEnumerations.tableQrpoItemDtlImage) {
+              // print("Processing tablename ${tableName}");
+              // print("Processing tableData  ${tableData}");
+              _processQrpoItemDtlImage(tableData); // <-- send the full list
+              continue;
+            }
 
             if (tableProcessors.containsKey(tableName)) {
               for (var row in tableData) {
@@ -116,3 +125,35 @@ class SyncCubit extends Cubit<SyncState> {
     }
   }
 }
+
+void _processQrpoItemDtlImage(List<dynamic> dataList) async {
+  developer.log("Processing tableData >>>>> $dataList");
+
+  // Generate a batch of unique IDs first
+  List<String> pkList = await ItemInspectionDetailHandler().generatePKBatch(
+    FEnumerations.tableNameItemMeasurement,
+    dataList.length,
+  );
+
+  int index = 0;
+
+  for (var row in dataList) {
+    if (row is Map<String, dynamic>) {
+      try {
+        final newRow = Map<String, dynamic>.from(row);
+
+        newRow['be_pRowID'] = row['pRowID'];
+        newRow['pRowID'] = pkList[index++];
+
+        print("Inserting: ${newRow['pRowID']}");
+        await QrPoItemDtlImageTable().insert(newRow);
+      } catch (e, stackTrace) {
+        print("Insert failed for $row\nError: $e\n$stackTrace");
+      }
+    } else {
+      print("Invalid row (not Map): $row");
+    }
+  }
+}
+
+

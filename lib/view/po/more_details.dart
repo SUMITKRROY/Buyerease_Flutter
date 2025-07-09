@@ -78,6 +78,8 @@ class _MoreDetailsState extends State<MoreDetails> {
               item.overallInspectionResult ?? '',
               item.hologramNo ?? '',
             ].map((data) => Text(data.toString(), style: TextStyle(fontSize: 10.sp))).toList(),
+            customerItemRef: item.customerItemRef,
+            pRowId: widget.pRowId,
           )).toList(),
           SizedBox(width: 390, child: const Divider(thickness: 1, color: Colors.black12)),
           CustomTable(

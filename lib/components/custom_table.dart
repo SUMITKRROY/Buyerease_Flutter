@@ -1,13 +1,18 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../model/po_item_dtl_model.dart';
 import '../view/over_all_result/over_all_result.dart';
 
 class CustomTable extends StatelessWidget {
+final POItemDtl? poItemDtl;
   final List<Widget> rowData;
   final String? description;
   final bool isHeader;
   final bool isFirstCellClickable;
   final String? customerItemRef;
+  final String? pRowId;
   final Function()? onDelete;
 
   final TextStyle headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp);
@@ -19,7 +24,7 @@ class CustomTable extends StatelessWidget {
     this.isHeader = false,
     this.isFirstCellClickable = true,
     this.customerItemRef,
-    this.onDelete,
+    this.onDelete, this.pRowId, this.poItemDtl,
   });
 
   Widget buildCell(Widget child, {double width = 80}) {
@@ -34,10 +39,11 @@ class CustomTable extends StatelessWidget {
     if (isFirstCellClickable && !isHeader) {
       return InkWell(
         onTap: () {
+          developer.log("poItemdtl =${poItemDtl?.customerItemRef}");
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => OverAllResult(id: customerItemRef ?? ''),
+              builder: (context) => OverAllResult(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl! ,),
             ),
           );
         },
@@ -55,7 +61,7 @@ class CustomTable extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => OverAllResult(id: customerItemRef ?? ''),
+              builder: (context) => OverAllResult(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl! ,),
             ),
           );
         },
@@ -123,3 +129,4 @@ class CustomTable extends StatelessWidget {
     );
   }
 }
+  

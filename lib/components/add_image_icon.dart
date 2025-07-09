@@ -1,17 +1,17 @@
-import 'dart:developer' as developer;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '../database/table/qr_po_item_dtl_image_table.dart';
-import 'dart:typed_data';
-
 import '../database/table/qr_po_item_dtl_table.dart';
 import '../utils/camera.dart';
 
 class AddImageIcon extends StatefulWidget {
   final String title;
   final String id;
+  final String pRowId;
+
   final VoidCallback? onImageAdded;
   final bool isCountShow;
 
@@ -20,7 +20,7 @@ class AddImageIcon extends StatefulWidget {
     required this.title,
     required this.id,
     this.onImageAdded,
-    this.isCountShow = false,
+    this.isCountShow = false, required this.pRowId,
   });
 
   @override
@@ -45,7 +45,7 @@ class _AddImageIconState extends State<AddImageIcon> {
   Future<void> syncData() async {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,   widget.pRowId,);
       if (mounted) {
         setState(() {
           if (items.isNotEmpty) {
@@ -160,20 +160,52 @@ class _AddImageIconState extends State<AddImageIcon> {
               ),
             ),
           ),
+
+        /// 🔄 New PopupMenu instead of IconButton
         IconButton(
-          onPressed: () async {
-            final File? image = await _imagePickerService.pickImage(context);
-            if (image != null) {
-              await _saveImageToDb(image);
-            } else {
-              debugPrint('No image selected.');
-            }
-          },
           icon: const Icon(Icons.camera_alt),
+          onPressed: () => _showImageSourceSheet(context),
         ),
       ],
     );
   }
+  void _showImageSourceSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Take Photo(s)'),
+                onTap: () async {
+                  Navigator.pop(context); // Close sheet
+                    await _imagePickerService.captureMultipleImagesAuto((File img) async {
+                    await _saveImageToDb(img); // 👈 Auto-save each image
+                  });
+
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Select from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context); // Close sheet
+                  final images = await _imagePickerService.pickMultipleImages();
+                  for (var img in images) {
+                    await _saveImageToDb(img);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 }
 
 
@@ -275,3 +307,5 @@ class FullScreenImage extends StatelessWidget {
     );
   }
 }
+
+

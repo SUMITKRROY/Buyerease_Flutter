@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:developer' as developer;
 
@@ -41,6 +42,7 @@ class _InspectionListState extends State<InspectionList> {
     super.initState();
     //loadData();
     getLocalList("");
+
   }
 
   Future<void> getLocalList(String searchStr) async {
@@ -49,6 +51,35 @@ class _InspectionListState extends State<InspectionList> {
     });
     try {
       List<InspectionModal> localList = await InspectionListHandler.getInspectionList(searchStr);
+      setState(() {
+        inspectionList.clear();
+        if (localList.isNotEmpty) {
+          inspectionList.addAll(localList);
+          print("Fetched inspections: ${inspectionList.length}");
+          for (var item in localList) {
+            print("pRowID: ${item.pRowID}, QRHdrID: ${item.qrHdrID}");
+          }
+        } else {
+          Fluttertoast.showToast(msg: "Inspection did not find");
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error fetching local list: $e");
+      Fluttertoast.showToast(msg: "Failed to load inspections");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> getCloseList(String searchStr) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+     
+      List<InspectionModal> localList = await InspectionListHandler.getSyncedInspectionList(searchStr);
       setState(() {
         inspectionList.clear();
         if (localList.isNotEmpty) {
@@ -101,14 +132,23 @@ class _InspectionListState extends State<InspectionList> {
     setState(() {
       isOpen = !isOpen;
     });
+
+    if (isOpen) {
+      getLocalList(searchQuery);
+    } else {
+      getCloseList(searchQuery);
+    }
   }
+
+
+
 
   List<StatusModel> _convertToStatusModels(List<InspectionModal> inspections) {
     return inspections.where((item) => selectedItems.contains(item.pRowID)).map((item) {
       return StatusModel(
         tableName: "Inspection",
         title: "Syncing inspection ${item.pRowID}",
-        status: SyncStatus.pending
+        status: FEnumerations.syncPendingStatus
       );
     }).toList();
   }
@@ -129,24 +169,26 @@ class _InspectionListState extends State<InspectionList> {
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context); // Close the confirmation dialog
-                final statusModels = _convertToStatusModels(inspectionList);
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => SyncStatusPage( )
-                ));
-                // handleSubmitToSync(context);
-                setState(() {
-                  isLoading = true;
-                });
-                
                 // Simulate sync process
-                await Future.delayed(const Duration(seconds: 2));
-                
+               // await Future.delayed(const Duration(seconds: 2));
+
                 setState(() {
                   syncedItems.addAll(selectedItems);
                   selectedItems.clear();
                   isLoading = false;
                 });
+                Navigator.pop(context); // Close the confirmation dialog
+                final statusModels = _convertToStatusModels(inspectionList);
+                developer.log(">>>>>>>>>>>>>>>>>>>${syncedItems}");
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => SyncStatusPage(idsListForSync: syncedItems.toList(),
+
+                  )
+                ));
+                // handleSubmitToSync(context);
+
+                
+
               },
               child: const Text('Sync', style: TextStyle(color: ColorsData.primaryColor)),
             ),
@@ -159,20 +201,12 @@ class _InspectionListState extends State<InspectionList> {
   // Add search function
   List<InspectionModal> getFilteredItems() {
     if (searchQuery.isEmpty) {
-      return inspectionList.where((item) {
-        final isSynced = syncedItems.contains(item.pRowID);
-        return isOpen ? !isSynced : isSynced;
-      }).toList();
+      return inspectionList;
     }
 
-    final query = searchQuery.trim();
-    
-    return inspectionList.where((item) {
-      final isSynced = syncedItems.contains(item.pRowID);
-      final matchesState = isOpen ? !isSynced : isSynced;
-      
-      if (!matchesState) return false;
+    final query = searchQuery.trim().toLowerCase();
 
+    return inspectionList.where((item) {
       // Convert all searchable fields to lowercase strings and handle null values
       final searchableFields = [
         item.pRowID?.toString().toLowerCase() ?? '',
@@ -380,6 +414,7 @@ class _InspectionListState extends State<InspectionList> {
                                   'inspector': item.inspector,
                                   'status': item.status,
                                   'qrHdrID': item.qrHdrID,
+                                  'isSync' : item.IsSynced
                                 })
                               )
                             );

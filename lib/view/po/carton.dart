@@ -191,6 +191,8 @@ class _CartonState extends State<Carton> {
                   _buildEditableField(itemId, 'available', availableControllers[itemId]!, item.cartonAvailable ?? '0'),
                   _buildEditableField(itemId, 'toInspect', toInspectControllers[itemId]!, item.cartonToInspectedhdr ?? '0'),
                 ],
+                customerItemRef: item.customerItemRef,
+                pRowId: widget.pRowId,
               );
             }).toList(),
             const SizedBox(

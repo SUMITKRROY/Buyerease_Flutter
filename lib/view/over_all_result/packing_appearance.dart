@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import '../../database/table/genmst.dart';
 import '../../components/over_all_dropdown.dart';
 import '../../components/remarks.dart';
+import '../../model/po_item_dtl_model.dart';
 
 class PackingAppearance extends StatefulWidget {
   final String id;
+  final POItemDtl poItemDtl;
   final VoidCallback onChanged;
 
-  const PackingAppearance({super.key, required this.id, required this.onChanged});
+  const PackingAppearance({super.key, required this.id, required this.onChanged, required this.poItemDtl});
 
   @override
   _PackingAppearanceState createState() => _PackingAppearanceState();
@@ -118,12 +120,12 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                 ? AddImageIcon(
               title: "Unit pack appearance",
               id: widget.id,
-              onImageAdded: widget.onChanged,
+              onImageAdded: widget.onChanged, pRowId: '',
             )
                 : AddImageIcon(
               title: "Shipping pack appearance",
               id: widget.id,
-              onImageAdded: widget.onChanged,
+              onImageAdded: widget.onChanged, pRowId: '',
             )
           ],
         ),

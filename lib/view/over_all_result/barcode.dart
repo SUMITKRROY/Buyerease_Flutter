@@ -158,7 +158,7 @@ class _BarCodeState extends State<BarCode> {
                           child: AddImageIcon(
                               title: "Unit Barcode",
                               id: widget.id,
-                            onImageAdded: widget.onChanged,)),
+                            onImageAdded: widget.onChanged, pRowId: '',)),
                     ],
                   ),
                 ),

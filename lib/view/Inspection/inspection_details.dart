@@ -2,6 +2,8 @@ import 'dart:developer' as developer;
 
 import 'package:buyerease/database/database_helper.dart';
 import 'package:buyerease/routes/my_routes.dart';
+import 'package:buyerease/utils/app_constants.dart';
+import 'package:buyerease/utils/multiple_image_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -14,6 +16,7 @@ import '../../model/po_item_dtl_model.dart';
 import '../../routes/route_path.dart';
 import '../../services/inspection_level_handler.dart';
 import '../../services/inspection_list/InspectionListHandler.dart';
+import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
 import '../../services/quality_level_handler.dart';
 import '../../services/po_item_dtl_handler.dart';
 import '../po/po_item.dart';
@@ -73,6 +76,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     _loadQualityLevels();
     fetchAndShowStatus();
     getLocalList(widget.data['pRowID']);
+
   }
 
 
@@ -82,7 +86,12 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
       isLoading = true;
     });
     try {
-      List<InspectionModal> localList = await InspectionListHandler.getInspectionList(searchStr);
+     int isSyncStatus = widget.data["isSync"];
+
+      List<InspectionModal> localList =
+          isSyncStatus.isEven
+      ?await InspectionListHandler.getInspectionList(searchStr)
+      :await InspectionListHandler.getSyncedInspectionList(searchStr);
       setState(() {
         inspectionList.clear();
         if (localList.isNotEmpty) {
@@ -233,7 +242,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                         Text(
                           _selectedInspectionDate != null
                               ? "${_selectedInspectionDate!.year}-${_selectedInspectionDate!.month.toString().padLeft(2, '0')}-${_selectedInspectionDate!.day.toString().padLeft(2, '0')}"
-                              : 'Select Date',
+                              : title,
                           style: TextStyle(fontSize: 18),
                         ),
                       ],
@@ -284,114 +293,116 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         await _saveChangesIfChanged();
         return true;
       },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
-          backgroundColor: ColorsData.primaryColor,
-          title: Text(item.pRowID ?? '', style: TextStyle(color: Colors.white)),
-          // title: Text(widget.data['pRowID'] ?? '', style: TextStyle(color: Colors.white)),
-          actions: [
-            TextButton(
-              onPressed:  _saveChanges ,
-              // onPressed: isChanged ? _saveChanges : null,
-              child: Text('SAVE', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-        body: ListView(
-          padding: EdgeInsets.all(16),
-          children: [
-            _buildExpandableSection(
-              title: item.inspectionDt ?? '',
-              isExpanded: _isFirstSectionExpanded,
-              onToggle: () {
-                setState(() {
-                  _isFirstSectionExpanded = !_isFirstSectionExpanded;
-                });
-              },
-              children: [
-                _infoRow('Customer', item.customer ?? ''),
-                _infoRow('Vendor', item.vendor ?? ''),
-                _infoRow('Inspector', item.inspector ?? ''),
-                _infoRow('Activity', item.activity ?? ''),
-                _infoRow('Location', item.vendorAddress ?? ''),
-                _infoRowWithTextField('Vendor Representative', item.vendorContact ?? ''),
+      child: SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            leading: const BackButton(color: Colors.white),
+            backgroundColor: ColorsData.primaryColor,
+            title: Text(item.pRowID ?? '', style: TextStyle(color: Colors.white)),
+            // title: Text(widget.data['pRowID'] ?? '', style: TextStyle(color: Colors.white)),
+            actions: [
+              TextButton(
+                onPressed:  _saveChanges ,
+                // onPressed: isChanged ? _saveChanges : null,
+                child: Text('SAVE', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+          body: ListView(
+            padding: EdgeInsets.all(16),
+            children: [
+              _buildExpandableSection(
+                title: item.inspectionDt ?? '',
+                isExpanded: _isFirstSectionExpanded,
+                onToggle: () {
+                  setState(() {
+                    _isFirstSectionExpanded = !_isFirstSectionExpanded;
+                  });
+                },
+                children: [
+                  _infoRow('Customer', item.customer ?? ''),
+                  _infoRow('Vendor', item.vendor ?? ''),
+                  _infoRow('Inspector', item.inspector ?? ''),
+                  _infoRow('Activity', item.activity ?? ''),
+                  _infoRow('Location', item.vendorAddress ?? ''),
+                  _infoRowWithTextField('Vendor Representative', item.vendorContact ?? ''),
 
-              ],
-            ),
-            SizedBox(height: 16),
-            _buildExpandableSection(
-              title: 'Inspection detail',
-              isExpanded: _isSecondSectionExpanded,
-              onToggle: () {
-                setState(() {
-                  _isSecondSectionExpanded = !_isSecondSectionExpanded;
-                });
-              },
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _dropdownField('Inspection Level', ['${item.inspectionLevelDescr}']),
+                ],
+              ),
+              SizedBox(height: 16),
+              _buildExpandableSection(
+                title: 'Inspection detail',
+                isExpanded: _isSecondSectionExpanded,
+                onToggle: () {
+                  setState(() {
+                    _isSecondSectionExpanded = !_isSecondSectionExpanded;
+                  });
+                },
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: _dropdownField('Inspection Level', ['${item.inspectionLevelDescr}']),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _dropdownField('Quality Level Major', ['${item.qlMajorDescr}']),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: _dropdownField('Quality Level Major', ['${item.qlMajorDescr}']),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  _dropdownField('Quality Level Minor', ['${item.qlMinorDescr}']),
+                  SizedBox(height: 16),
+                  _dropdownField('Status', statusList),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(child: _radioOption('Report Level')),
+                  SizedBox(width: 16),
+                  Expanded(child: _radioOption('Material Level')),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _timeField('Arrival Time')),
+                  Expanded(child: _timeField('Start Time')),
+                  Expanded(child: _timeField('Complete Time')),
+                ],
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _remarksController,
+                onChanged: (_) => _saveChangesIfChanged(),
+                decoration: InputDecoration(
+                  labelText: 'Remark',
+                  border: OutlineInputBorder(),
                 ),
-                SizedBox(height: 16),
-                _dropdownField('Quality Level Minor', ['${item.qlMinorDescr}']),
-                SizedBox(height: 16),
-                _dropdownField('Status', statusList),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(child: _radioOption('Report Level')),
-                SizedBox(width: 16),
-                Expanded(child: _radioOption('Material Level')),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _timeField('Arrival Time')),
-                Expanded(child: _timeField('Start Time')),
-                Expanded(child: _timeField('Complete Time')),
-              ],
-            ),
-            SizedBox(height: 16),
-            TextFormField(
-              controller: _remarksController,
-              onChanged: (_) => _saveChangesIfChanged(),
-              decoration: InputDecoration(
-                labelText: 'Remark',
-                border: OutlineInputBorder(),
+                maxLines: 3,
               ),
-              maxLines: 3,
-            ),
-            SizedBox(height: 24),
-            OutlinedButton(
-              onPressed: () async {
-                await _saveChangesIfChanged();
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> PoPage(pRowId: widget.data['pRowID'],)));
-              },
-              child: Text('GO TO  PO DETAILS'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(double.infinity, 48),
-                textStyle: TextStyle(fontSize: 16),
+              SizedBox(height: 24),
+              OutlinedButton(
+                onPressed: () async {
+                  await _saveChangesIfChanged();
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> PoPage(pRowId: widget.data['pRowID'],)));
+                },
+                child: Text('GO TO  PO DETAILS'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 48),
+                  textStyle: TextStyle(fontSize: 16),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

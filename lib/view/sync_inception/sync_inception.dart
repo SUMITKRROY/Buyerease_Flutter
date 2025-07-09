@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/provider/defect_master/defect_master_cubit.dart';
 import 'package:buyerease/provider/sync_cubit/sync_cubit.dart';
+import 'package:buyerease/services/sync/SendDataHandler.dart';
 import 'package:buyerease/utils/app_constants.dart';
 
 import 'package:buyerease/utils/toast.dart';
@@ -17,6 +18,7 @@ import '../../database/database_helper.dart';
 import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../provider/download_image/download_image_cubit.dart';
 import '../../provider/login_cubit/login_cubit.dart';
+import '../../provider/sync_to_server/sync_to_server_cubit.dart';
 import '../../routes/route_path.dart';
 import '../networks/endpoints.dart';
 import '../post/post_api_call.dart';
@@ -33,6 +35,7 @@ class _SyncInceptionState extends State<SyncInception> {
   bool imagesDownloaded = false;
   int totalImages = 0;
   int downloadedImages = 0;
+  late ValueNotifier<int> downloadProgressNotifier;
 
   StreamSubscription? progressSubscription;
   String deviceID = '';
@@ -40,11 +43,12 @@ class _SyncInceptionState extends State<SyncInception> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getId();
     getUserId();
+    downloadProgressNotifier = ValueNotifier(0);
   }
+
 
   Future<Object?> getId() async {
     var deviceInfo = DeviceInfoPlugin();
@@ -134,11 +138,12 @@ class _SyncInceptionState extends State<SyncInception> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text("Image Download Progress"),
-              content: Column(
+        return AlertDialog(
+          title: const Text("Image Download Progress"),
+          content: ValueListenableBuilder<int>(
+            valueListenable: downloadProgressNotifier,
+            builder: (context, value, _) {
+              return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
@@ -147,22 +152,23 @@ class _SyncInceptionState extends State<SyncInception> {
                       imagesDownloaded
                           ? const Icon(Icons.check_circle, color: Colors.green)
                           : totalImages > 0
-                              ? Text("$downloadedImages/$totalImages")
-                              : const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
+                          ? Text("$value/$totalImages")
+                          : const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ],
                   ),
                 ],
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -212,23 +218,19 @@ class _SyncInceptionState extends State<SyncInception> {
             ),
             BlocListener<DownloadImageCubit, DownloadImageState>(
               listener: (context, state) {
-                if (state is DownloadImageLoading) {
-                  setState(() {
-                    downloadedImages = state.count;
-                  });
+                if (state is DownloadImageCount) {
+                  downloadProgressNotifier.value = state.count;
                 } else if (state is DownloadImageSuccess) {
                   setState(() {
                     imagesDownloaded = true;
                   });
                   checkDownloadComplete();
                 } else if (state is DownloadImageFailure) {
-                  setState(() {
-                    downloadedImages++;
-                  });
                   checkDownloadComplete();
                 }
               },
             ),
+
           ],
           child: Center(
             child: Column(
@@ -267,7 +269,7 @@ class _SyncInceptionState extends State<SyncInception> {
   }
 
   void checkDownloadComplete() {
-    if (downloadedImages >= totalImages && totalImages > 0) {
+    if (downloadProgressNotifier.value >= totalImages && totalImages > 0) {
       setState(() {
         imagesDownloaded = true;
       });
@@ -281,23 +283,33 @@ class _SyncInceptionState extends State<SyncInception> {
 
   Future<List<String>> fetchAllItemIds() async {
     List<String> itemIds = [];
+
     try {
-      final Database db = await DatabaseHelper().database;
-      final List<Map<String, dynamic>> result = await db.rawQuery(
-        'SELECT DISTINCT ${QrPoItemDtlImageTable.pRowID} FROM ${QrPoItemDtlImageTable.TABLE_NAME} WHERE ${QrPoItemDtlImageTable.recEnable}=1',
-      );
-      for (final row in result) {
-        final imageName = row[QrPoItemDtlImageTable.pRowID];
+      final db = await DatabaseHelper().database;
+
+      const query = '''
+      SELECT DISTINCT BE_pRowID 
+      FROM QRPOItemDtl_Image 
+      WHERE recEnable = 1
+    ''';
+      final List<Map<String, dynamic>> result = await db.rawQuery(query);
+
+      for (int i = 0; i < result.length; i++) {
+        final row = result[i];
+        final imageName = row['BE_pRowID'];
+
         if (imageName != null) {
-          print('Image RowID: $imageName');
           itemIds.add(imageName.toString());
         }
       }
-    } catch (e) {
-      print('Error fetching item IDs: $e');
+
+    } catch (e, stackTrace) {
+      print("[Error] Exception occurred while fetching item IDs: $e");
+      print(stackTrace);
     }
     return itemIds;
   }
+
 
   Future<void> startImageDownload(List<String> itemIds) async {
     if (itemIds.isEmpty) {
@@ -316,4 +328,7 @@ class _SyncInceptionState extends State<SyncInception> {
 
     context.read<DownloadImageCubit>().downloadImages(itemIds);
   }
+
+
+
 }

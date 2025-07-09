@@ -7,12 +7,13 @@ import 'dart:io';
 
 class DigitalUploaded extends StatefulWidget {
   final String id;
+  final String pRowId;
   final VoidCallback onChanged; // ✅ Add this
 
   const DigitalUploaded({
     super.key,
     required this.id,
-    required this.onChanged,
+    required this.onChanged, required this.pRowId,
   });
 
   @override
@@ -43,7 +44,7 @@ class _DigitalUploadedState extends State<DigitalUploaded> {
   Future<void> syncData() async {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,widget.pRowId);
       setState(() {
         if(items.isNotEmpty){
           qrHdrID = items.first.qrHdrID ?? "";
@@ -148,7 +149,7 @@ class _DigitalUploadedState extends State<DigitalUploaded> {
                   'Add Images',
                   style: TextStyle(fontSize: 15),
                 ),
-                AddImageIcon(title: "none", id: widget.id, isCountShow: true,)
+                AddImageIcon(title: "none", id: widget.id, isCountShow: true, pRowId: '',)
               ],
             ),
           ),

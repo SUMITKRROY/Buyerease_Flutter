@@ -43,8 +43,10 @@ class QRPOItemHdrTable {
       "PKG_App_Unit_InspectionResultID";
   static const String pkgAppShippingMarkSampleSizeID =
       "PKG_App_ShippingMark_SampleSizeID";
-  static const String pkgAppShippingMarkSampleSizeValue = "PKG_App_ShippingMark_SampleSizeValue";
-  static const String pkgAppShippingMarkInspectionResultID = "PKG_App_ShippingMark_InspectionResultID";
+  static const String pkgAppShippingMarkSampleSizeValue =
+      "PKG_App_ShippingMark_SampleSizeValue";
+  static const String pkgAppShippingMarkInspectionResultID =
+      "PKG_App_ShippingMark_InspectionResultID";
   static const String pkgAppInnerInspectionResultID =
       "PKG_App_Inner_InspectionResultID";
 
@@ -54,37 +56,48 @@ class QRPOItemHdrTable {
   static const String pkgMeInspectionResultID = "PKG_Me_InspectionResultID";
   static const String pkgMeRemark = "PKG_Me_Remark";
   static const String pkgMePalletSampleSizeID = "PKG_Me_Pallet_SampleSizeID";
-  static const String pkgMePalletSampleSizeValue = "PKG_Me_Pallet_SampleSizeValue";
+  static const String pkgMePalletSampleSizeValue =
+      "PKG_Me_Pallet_SampleSizeValue";
   static const String pkgMePalletFindingL = "PKG_Me_Pallet_FindingL";
   static const String pkgMePalletFindingB = "PKG_Me_Pallet_FindingB";
   static const String pkgMePalletFindingH = "PKG_Me_Pallet_FindingH";
   static const String pkgMePalletFindingWt = "PKG_Me_Pallet_FindingWt";
   static const String pkgMePalletFindingQty = "PKG_Me_Pallet_FindingQty";
-  static const String pkgMePalletInspectionResultID = "PKG_Me_Pallet_InspectionResultID";
+  static const String pkgMePalletInspectionResultID =
+      "PKG_Me_Pallet_InspectionResultID";
   static const String pkgMeMasterSampleSizeID = "PKG_Me_Master_SampleSizeID";
-  static const String pkgMeMasterSampleSizeValue = "PKG_Me_Master_SampleSizeValue";
+  static const String pkgMeMasterSampleSizeValue =
+      "PKG_Me_Master_SampleSizeValue";
   static const String pkgMeMasterFindingL = "PKG_Me_Master_FindingL";
   static const String pkgMeMasterFindingB = "PKG_Me_Master_FindingB";
   static const String pkgMeMasterFindingH = "PKG_Me_Master_FindingH";
   static const String pkgMeMasterFindingWt = "PKG_Me_Master_FindingWt";
   static const String pkgMeMasterFindingQty = "PKG_Me_Master_FindingQty";
-  static const String pkgMeMasterInspectionResultID = "PKG_Me_Master_InspectionResultID";
+  static const String pkgMeMasterInspectionResultID =
+      "PKG_Me_Master_InspectionResultID";
   static const String pkgMeInnerSampleSizeID = "PKG_Me_Inner_SampleSizeID";
-  static const String pkgMeInnerSampleSizeValue = "PKG_Me_Inner_SampleSizeValue";
+  static const String pkgMeInnerSampleSizeValue =
+      "PKG_Me_Inner_SampleSizeValue";
   static const String pkgMeInnerFindingL = "PKG_Me_Inner_FindingL";
   static const String pkgMeInnerFindingB = "PKG_Me_Inner_FindingB";
   static const String pkgMeInnerFindingH = "PKG_Me_Inner_FindingH";
   static const String pkgMeInnerFindingWt = "PKG_Me_Inner_FindingWt";
   static const String pkgMeInnerFindingQty = "PKG_Me_Inner_FindingQty";
-  static const String pkgMeInnerInspectionResultID = "PKG_Me_Inner_InspectionResultID";
+  static const String pkgMeInnerInspectionResultID =
+      "PKG_Me_Inner_InspectionResultID";
   static const String pkgMeUnitSampleSizeID = "PKG_Me_Unit_SampleSizeID";
   static const String pkgMeUnitSampleSizeValue = "PKG_Me_Unit_SampleSizeValue";
   static const String pkgMeUnitFindingL = "PKG_Me_Unit_FindingL";
   static const String pkgMeUnitFindingB = "PKG_Me_Unit_FindingB";
   static const String pkgMeUnitFindingH = "PKG_Me_Unit_FindingH";
   static const String pkgMeUnitFindingWt = "PKG_Me_Unit_FindingWt";
-  static const String pkgMeUnitInspectionResultID = "PKG_Me_Unit_InspectionResultID";
+  static const String pkgMeUnitInspectionResultID =
+      "PKG_Me_Unit_InspectionResultID";
   static const String pkgMePalletFindingCBM = "PKG_Me_Pallet_FindingCBM";
+  static const String pkgMePalletDigitals = "PKG_Me_Pallet_Digitals";
+  static const String pkgMeMasterDigitals = "PKG_Me_Master_Digitals";
+  static const String pkgMeInnerDigitals = "PKG_Me_Inner_Digitals";
+  static const String pkgMeUnitDigitals = "PKG_Me_Unit_Digitals";
   static const String pkgMeMasterFindingCBM = "PKG_Me_Master_FindingCBM";
   static const String pkgMeInnerFindingCBM = "PKG_Me_Inner_FindingCBM";
   static const String pkgMeUnitFindingCBM = "PKG_Me_Unit_FindingCBM";
@@ -93,35 +106,46 @@ class QRPOItemHdrTable {
   static const String barcodeInspectionResultID = "Barcode_InspectionResultID";
   static const String barcodeRemark = "Barcode_Remark";
   static const String barcodePalletSampleSizeID = "Barcode_Pallet_SampleSizeID";
-  static const String barcodePalletSampleSizeValue = "Barcode_Pallet_SampleSizeValue";
+  static const String barcodePalletSampleSizeValue =
+      "Barcode_Pallet_SampleSizeValue";
   static const String barcodePalletVisual = "Barcode_Pallet_Visual";
   static const String barcodePalletScan = "Barcode_Pallet_Scan";
-  static const String barcodePalletInspectionResultID = "Barcode_Pallet_InspectionResultID";
+  static const String barcodePalletInspectionResultID =
+      "Barcode_Pallet_InspectionResultID";
   static const String barcodeMasterSampleSizeID = "Barcode_Master_SampleSizeID";
-  static const String barcodeMasterSampleSizeValue = "Barcode_Master_SampleSizeValue";
+  static const String barcodeMasterSampleSizeValue =
+      "Barcode_Master_SampleSizeValue";
   static const String barcodeMasterVisual = "Barcode_Master_Visual";
   static const String barcodeMasterScan = "Barcode_Master_Scan";
-  static const String barcodeMasterInspectionResultID = "Barcode_Master_InspectionResultID";
+  static const String barcodeMasterInspectionResultID =
+      "Barcode_Master_InspectionResultID";
   static const String barcodeInnerSampleSizeID = "Barcode_Inner_SampleSizeID";
-  static const String barcodeInnerSampleSizeValue = "Barcode_Inner_SampleSizeValue";
+  static const String barcodeInnerSampleSizeValue =
+      "Barcode_Inner_SampleSizeValue";
   static const String barcodeInnerVisual = "Barcode_Inner_Visual";
   static const String barcodeInnerScan = "Barcode_Inner_Scan";
-  static const String barcodeInnerInspectionResultID = "Barcode_Inner_InspectionResultID";
+  static const String barcodeInnerInspectionResultID =
+      "Barcode_Inner_InspectionResultID";
   static const String barcodeUnitSampleSizeID = "Barcode_Unit_SampleSizeID";
-  static const String barcodeUnitSampleSizeValue = "Barcode_Unit_SampleSizeValue";
+  static const String barcodeUnitSampleSizeValue =
+      "Barcode_Unit_SampleSizeValue";
   static const String barcodeUnitVisual = "Barcode_Unit_Visual";
   static const String barcodeUnitScan = "Barcode_Unit_Scan";
-  static const String barcodeUnitInspectionResultID = "Barcode_Unit_InspectionResultID";
+  static const String barcodeUnitInspectionResultID =
+      "Barcode_Unit_InspectionResultID";
 
-  static const String onsiteTestInspectionResultID = "OnSiteTest_InspectionResultID";
+  static const String onsiteTestInspectionResultID =
+      "OnSiteTest_InspectionResultID";
   static const String onsiteTestRemark = "OnSiteTest_Remark";
   static const String onsiteTestIsApplicable = "OnSiteTest_IsApplicable";
 
-  static const String workmanShipQRInspectionLevel = "WorkmanShip_QRInspectionLevel";
+  static const String workmanShipQRInspectionLevel =
+      "WorkmanShip_QRInspectionLevel";
   static const String workmanShipSampleSizeID = "WorkmanShip_SampleSizeID";
   static const String workmanShipQLMajor = "WorkmanShip_QLMajor";
   static const String workmanShipQLMinor = "WorkmanShip_QLMinor";
-  static const String workmanShipInspectionResultID = "WorkmanShip_InspectionResultID";
+  static const String workmanShipInspectionResultID =
+      "WorkmanShip_InspectionResultID";
   static const String workmanShipRemark = "WorkmanShip_Remark";
 
   static const String overallInspectionResultID = "Overall_InspectionResultID";
@@ -133,12 +157,16 @@ class QRPOItemHdrTable {
   static const String recUser = "recUser";
 
   static const String sampleCodeID = "SampleCodeID";
-  static const String itemMeasurementInspectionResultID = "ItemMeasurement_InspectionResultID";
+  static const String itemMeasurementInspectionResultID =
+      "ItemMeasurement_InspectionResultID";
   static const String itemMeasurementRemark = "ItemMeasurement_Remark";
-  static const String productSpecificationInspectionResultID = "ProductSpecification_InspectionResultID";
-  static const String productSpecificationRemark = "ProductSpecification_Remark";
+  static const String productSpecificationInspectionResultID =
+      "ProductSpecification_InspectionResultID";
+  static const String productSpecificationRemark =
+      "ProductSpecification_Remark";
 
-  static const String fabricInspectionInspectionResultID = "FabricInspection_InspectionResultID";
+  static const String fabricInspectionInspectionResultID =
+      "FabricInspection_InspectionResultID";
   static const String fabricInspectionRemark = "FabricInspection_Remark";
   static const String fabricInspectionInHouseQty = "FabricInspectionInHouseQty";
   static const String fabricInspectionDt = "FabricInspectionDt";
@@ -156,7 +184,6 @@ class QRPOItemHdrTable {
   static const String criticalDefectPieces = "CriticalDefectPieces";
   static const String majorDefectPieces = "MajorDefectPieces";
   static const String minorDefectPieces = "MinorDefectPieces";
-
 
   static const String CREATE = '''
 CREATE TABLE IF NOT EXISTS $TABLE_NAME (
@@ -229,6 +256,10 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
   $pkgMeUnitFindingH REAL DEFAULT 0,
   $pkgMeUnitFindingWt REAL DEFAULT 0,
   $pkgMeUnitInspectionResultID TEXT DEFAULT '',
+  $pkgMeMasterDigitals TEXT DEFAULT '',
+  $pkgMePalletDigitals TEXT DEFAULT '',
+  $pkgMeUnitDigitals TEXT DEFAULT '',
+  $pkgMeInnerDigitals TEXT DEFAULT '',
   $pkgMePalletFindingCBM REAL DEFAULT 0,
   $pkgMeMasterFindingCBM REAL DEFAULT 0,
   $pkgMeInnerFindingCBM REAL DEFAULT 0,
@@ -304,7 +335,6 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
 )
 ''';
 
-
   // Insert a record
   Future<void> insert(Map<String, dynamic> map) async {
     final db = await DatabaseHelper().database;
@@ -313,7 +343,6 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
       map,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-
   }
 
   // Get all records

@@ -13,9 +13,11 @@ import '../../model/po_item_dtl_model.dart';
 
 class PackingMeasurement extends StatefulWidget {
   final String id;
+  final String pRowId;
+
   final VoidCallback onChanged; // ✅ Add this
 
-  const PackingMeasurement({super.key, required this.id, required this.onChanged});
+  const PackingMeasurement({super.key, required this.id, required this.onChanged, required this.pRowId});
 
   @override
   State<PackingMeasurement> createState() => _PackingMeasurementState();
@@ -45,7 +47,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
   Future<void> _loadData() async {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id);
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,widget.pRowId);
       setState(() {
         poItems = items;
         isLoading = false;
@@ -131,7 +133,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                     /// Table Header
                     Row(
                       children: [
-                        for (var col in ["L", "B", "H", "Wt.", "CRM", "Quantity"])
+                        for (var col in ["L", "B", "H", "Wt.", "CBM", "Quantity"])
                           Expanded(
                             child: Text(
                               col,
@@ -207,7 +209,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                         ),
 
                         // Camera icon and count
-                        AddImageIcon(title: "Unit pack", id: widget.id,)
+                        AddImageIcon(title: "Unit pack", id: widget.id, pRowId: '',)
                       ],
                     ),
                   ],

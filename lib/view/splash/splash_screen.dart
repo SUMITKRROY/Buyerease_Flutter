@@ -29,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     WidgetsBinding.instance.addObserver(this);
     _initializeAnimation();
     database();
+
   }
 
   void _initializeAnimation() {

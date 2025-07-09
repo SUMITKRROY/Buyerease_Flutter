@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImagePickerService {
-  final picker = ImagePicker();
+  final ImagePicker picker = ImagePicker();
 
+  /// Picks a single image (camera or gallery) using bottom sheet
   Future<File?> pickImage(BuildContext context) async {
     Completer<File?> completer = Completer<File?>();
 
@@ -21,16 +22,8 @@ class ImagePickerService {
                 title: const Text('Photo Library'),
                 onTap: () async {
                   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    final File file = File(pickedFile.path);
-                    Navigator.of(context).pop();
-                    completer.complete(file);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nothing is selected')),
-                    );
-                    completer.complete(null);
-                  }
+                  Navigator.of(context).pop();
+                  completer.complete(pickedFile != null ? File(pickedFile.path) : null);
                 },
               ),
               ListTile(
@@ -38,16 +31,8 @@ class ImagePickerService {
                 title: const Text('Camera'),
                 onTap: () async {
                   final pickedFile = await picker.pickImage(source: ImageSource.camera);
-                  if (pickedFile != null) {
-                    final File file = File(pickedFile.path);
-                    Navigator.of(context).pop();
-                    completer.complete(file);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Nothing is selected')),
-                    );
-                    completer.complete(null);
-                  }
+                  Navigator.of(context).pop();
+                  completer.complete(pickedFile != null ? File(pickedFile.path) : null);
                 },
               ),
             ],
@@ -58,4 +43,27 @@ class ImagePickerService {
 
     return completer.future;
   }
+
+  /// Picks multiple images from gallery
+  Future<List<File>> pickMultipleImages() async {
+    final pickedFiles = await picker.pickMultiImage(); // No UI needed, system picker opens directly
+    return pickedFiles.map((e) => File(e.path)).toList();
+  }
+
+  /// Repeatedly picks images from camera until user cancels
+  Future<void> captureMultipleImagesAuto(Function(File) onImageCaptured) async {
+    while (true) {
+      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        final file = File(pickedFile.path);
+        onImageCaptured(file); // Call save for each image
+      } else {
+        break; // User cancelled camera
+      }
+    }
+  }
+
+
+
 }

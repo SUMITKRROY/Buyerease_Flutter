@@ -116,7 +116,7 @@ class _ParameterDetailScreenState extends State<ParameterDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AddImageIcon(title: "Unit pack appearance", id: widget.id,),
+                  AddImageIcon(title: "Unit pack appearance", id: widget.id, pRowId: '',),
                   const SizedBox(width: 20),
                   Text(
                     'Add Photo',

@@ -4,6 +4,7 @@ import 'package:buyerease/provider/defect_master/defect_master_cubit.dart';
 import 'package:buyerease/provider/download_image/download_image_cubit.dart';
 import 'package:buyerease/provider/login_cubit/login_cubit.dart';
 import 'package:buyerease/provider/sync_cubit/sync_cubit.dart';
+import 'package:buyerease/provider/sync_to_server/sync_to_server_cubit.dart';
 import 'package:buyerease/view/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,6 +70,7 @@ class MyApp extends StatelessWidget {
             BlocProvider<SyncCubit>(create: (context) => SyncCubit()),
             BlocProvider<DefectMasterCubit>(create: (context) => DefectMasterCubit()),
             BlocProvider<DownloadImageCubit>(create: (context) => DownloadImageCubit()),
+            BlocProvider<SyncToServerCubit>(create: (context) => SyncToServerCubit()),
           ],
 
           child: MaterialApp(
