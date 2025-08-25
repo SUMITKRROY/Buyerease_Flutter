@@ -12,7 +12,9 @@ class InspLevelHeaderTable {
   static const String recDirty = "recDirty";
   static const String recEnable = "recEnable";
   static const String recUser = "recUser";
+  static const String recAddDt = "recAddDt";
   static const String recDt = "recDt";
+  static const String ediDt = "ediDt";
   static const String isDefault = "IsDefault";
 
   static const String CREATE = '''
@@ -24,9 +26,9 @@ class InspLevelHeaderTable {
     $recDirty INTEGER DEFAULT 1,
     $recEnable INTEGER DEFAULT 1,
     $recUser TEXT DEFAULT '',
-    recAddDt TEXT DEFAULT (datetime('now','localtime')),
-    $recDt TEXT DEFAULT (datetime('now','localtime')),
-    ediDt TEXT,
+    $recAddDt TEXT DEFAULT '',
+    $recDt TEXT DEFAULT '',
+    $ediDt TEXT DEFAULT '',
     $isDefault INTEGER DEFAULT 0
   )
 ''';

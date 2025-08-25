@@ -5,13 +5,14 @@ import '../view/login/login.dart';
 import '../view/community/community_code_screen.dart';
 import '../view/homepage/homepage.dart';
 import '../view/register/register.dart';
-import '../view/po/po_page.dart';
+
 import '../view/details/detail_page1.dart';
 import '../view/Inspection/inspection_list.dart';
 
 import '../view/sync_style/sync_style.dart';
 import '../view/sync_inception/sync_inception.dart';
-import '../view/over_all_result/over_all_result.dart';
+import '../view/item_level/item_level_tab.dart';
+import '../view/Inspection/intimation_details_screen.dart';
 import 'page_route.dart';
 
 class MyRoutes {
@@ -25,8 +26,8 @@ class MyRoutes {
         return CustomPageRoute(child: const CommunityCodeScreen(), settings: settings);
       case RoutePath.homepage:
         return CustomPageRoute(child: const HomePage(), settings: settings);
-      case RoutePath.register:
-        return CustomPageRoute(child: const Register(), settings: settings);
+      // case RoutePath.register:
+      //   return CustomPageRoute(child: const Register(), settings: settings);
       // case RoutePath.po:
       //   final id = settings.arguments as String? ?? '';
       //   return CustomPageRoute(child: PoPage(data: id), settings: settings);
@@ -39,6 +40,9 @@ class MyRoutes {
         return CustomPageRoute(child: const SyncStyle(), settings: settings);
       case RoutePath.syncInception:
         return CustomPageRoute(child: const SyncInception(), settings: settings);
+      // case RoutePath.intimationDetails:
+      //   final data = settings.arguments as Map<String, dynamic>?;
+      //   return CustomPageRoute(child: IntimationDetailsScreen(data: data), settings: settings);
       // case RoutePath.overAllResult:
       //   return CustomPageRoute(child: const OverAllResult(id: '', pRowId: '', inspectionModal: null,), settings: settings);
       default:

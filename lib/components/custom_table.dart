@@ -2,8 +2,9 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../model/inspection_model.dart';
 import '../model/po_item_dtl_model.dart';
-import '../view/over_all_result/over_all_result.dart';
+import '../view/item_level/item_level_tab.dart';
 
 class CustomTable extends StatelessWidget {
 final POItemDtl? poItemDtl;
@@ -13,6 +14,7 @@ final POItemDtl? poItemDtl;
   final bool isFirstCellClickable;
   final String? customerItemRef;
   final String? pRowId;
+final InspectionModal inspectionModal;
   final Function()? onDelete;
 
   final TextStyle headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp);
@@ -24,7 +26,7 @@ final POItemDtl? poItemDtl;
     this.isHeader = false,
     this.isFirstCellClickable = true,
     this.customerItemRef,
-    this.onDelete, this.pRowId, this.poItemDtl,
+    this.onDelete, this.pRowId, this.poItemDtl, required this.inspectionModal,
   });
 
   Widget buildCell(Widget child, {double width = 80}) {
@@ -43,7 +45,7 @@ final POItemDtl? poItemDtl;
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => OverAllResult(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl! ,),
+              builder: (context) => ItemLevelTab(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl!, inspectionModal:  inspectionModal,),
             ),
           );
         },
@@ -61,7 +63,7 @@ final POItemDtl? poItemDtl;
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => OverAllResult(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl! ,),
+              builder: (context) => ItemLevelTab(id: customerItemRef ?? '', pRowId: pRowId ??'' ,poItemDtl: poItemDtl!, inspectionModal: inspectionModal ,),
             ),
           );
         },
@@ -100,8 +102,8 @@ final POItemDtl? poItemDtl;
           Expanded(
             child: Text(
               text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              // maxLines: 2,
+              overflow: TextOverflow.visible,
               style: const TextStyle(fontSize: 14),
               softWrap: true,
             ),

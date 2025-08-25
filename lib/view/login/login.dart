@@ -16,7 +16,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:buyerease/database/database_helper.dart';
 import 'package:buyerease/components/custom_text.dart';
 import 'package:buyerease/components/custom_text_form_field.dart';
-import '../post/post_api_call.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Login extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:async';
 import 'package:buyerease/database/table/user_master_table.dart';
@@ -20,8 +21,8 @@ import '../../provider/download_image/download_image_cubit.dart';
 import '../../provider/login_cubit/login_cubit.dart';
 import '../../provider/sync_to_server/sync_to_server_cubit.dart';
 import '../../routes/route_path.dart';
-import '../networks/endpoints.dart';
-import '../post/post_api_call.dart';
+
+
 
 class SyncInception extends StatefulWidget {
   const SyncInception({super.key});
@@ -196,6 +197,9 @@ class _SyncInceptionState extends State<SyncInception> {
                   // Show loading dialog while getting image data
                   _showLoadingDialog(context);
 
+                  // ⏳ Wait 5 seconds before fetching images
+                  await Future.delayed(const Duration(seconds: 5));
+
                   // Get all item IDs for image download
                   final ids = await fetchAllItemIds();
                   
@@ -292,13 +296,14 @@ class _SyncInceptionState extends State<SyncInception> {
       FROM QRPOItemDtl_Image 
       WHERE recEnable = 1
     ''';
-      final List<Map<String, dynamic>> result = await db.rawQuery(query);
 
-      for (int i = 0; i < result.length; i++) {
-        final row = result[i];
+      final List<Map<String, dynamic>> result = await db.rawQuery(query);
+      developer.log("image file name prowId $result");
+
+      for (final row in result) {
         final imageName = row['BE_pRowID'];
 
-        if (imageName != null) {
+        if (imageName != null && imageName.toString().trim().isNotEmpty) {
           itemIds.add(imageName.toString());
         }
       }
@@ -307,8 +312,10 @@ class _SyncInceptionState extends State<SyncInception> {
       print("[Error] Exception occurred while fetching item IDs: $e");
       print(stackTrace);
     }
+
     return itemIds;
   }
+
 
 
   Future<void> startImageDownload(List<String> itemIds) async {

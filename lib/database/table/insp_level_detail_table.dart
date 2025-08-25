@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
   $recEnable INTEGER DEFAULT 1,
   $recUser TEXT DEFAULT '',
   $recAddUser TEXT DEFAULT '',
-  $recAddDt TEXT DEFAULT (datetime('now','localtime')),
-  $recDt TEXT DEFAULT (datetime('now','localtime')),
+  $recAddDt TEXT DEFAULT '',
+  $recDt TEXT DEFAULT '',
   $ediDt TEXT DEFAULT ''
 )
 ''';

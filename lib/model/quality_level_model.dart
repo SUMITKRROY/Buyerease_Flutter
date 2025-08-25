@@ -11,6 +11,8 @@ class QualityLevelModel {
     this.qualityLevel,
   });
 
+
+
   factory QualityLevelModel.fromMap(Map<String, dynamic> map) {
     return QualityLevelModel(
       pRowID: map['pRowID']?.toString(),
@@ -19,4 +21,4 @@ class QualityLevelModel {
       qualityLevel: map['QualityLevel']?.toString(),
     );
   }
-} 
+}

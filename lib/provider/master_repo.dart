@@ -149,7 +149,7 @@ class MasterRepo {
 
       FslLog.d("API_InspectionSend", "Sending inspection data...");
       FslLog.vc("API_InspectionSend", jsonEncode(inspectionData));
-      developer.log("responce data ${json.encode(inspectionData)}");
+      developer.log("API_InspectionSend ${json.encode(inspectionData)}");
       final response = await dio.post(
         ApiRoute.sendInspection,
         data: json.encode(inspectionData),
@@ -166,4 +166,57 @@ class MasterRepo {
       rethrow;
     }
   }
+
+/*  Future<Response> sendSingleImageData({
+    required Map<String, dynamic> inspectionData,
+  }) async {
+    try {
+      Dio dio = DioApi().sendRequest;
+
+      FslLog.d("API_InspectionSend", "Sending image data...");
+      FslLog.vc("API_InspectionSend", jsonEncode(inspectionData));
+      developer.log("API_InspectionSend ${json.encode(inspectionData)}");
+      final response = await dio.post(
+        ApiRoute.uploadFile,
+        data: json.encode(inspectionData),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      FslLog.d("API_InspectionSend", "Response: ${response.statusCode} - ${response.data}");
+
+      return response;
+    } catch (e, stackTrace) {
+      FslLog.e("API_InspectionSend", "Error sending inspection data: $e", stackTrace);
+      rethrow;
+    }
+  }*/
+  Future<Response> sendSingleImageData({
+    required Map<String, dynamic> inspectionData,
+  }) async {
+    try {
+      Dio dio = DioApi().sendRequest;
+
+      FslLog.d("API_InspectionSend", "Sending image data...");
+      FslLog.vc("API_InspectionSend", jsonEncode(inspectionData));
+      developer.log("API_InspectionSend ${json.encode(inspectionData)}");
+
+      final response = await dio.post(
+        ApiRoute.uploadFile,
+        data: json.encode(inspectionData),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      FslLog.d("API_InspectionSend", "Response: ${response.statusCode} - ${response.data}");
+
+      return response;
+    } catch (e, stackTrace) {
+      FslLog.e("API_InspectionSend", "Error sending inspection data: $e", stackTrace);
+      rethrow;
+    }
+  }
+
 }

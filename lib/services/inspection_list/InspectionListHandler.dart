@@ -6,15 +6,16 @@ import '../../database/database_helper.dart';
 import '../../model/inspection_model.dart';
 import '../../utils/gen_utils.dart';
 import '../get_data_handler.dart';
-import '../po_item_dtl_handler.dart';
-import 'ItemInspectionDetailHandler.dart';
+import '../poitemlist/po_item_dtl_handler.dart';
+import '../ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 
 class InspectionListHandler {
   static const String _logger = "InspectionListHandler";
 
   static Future<bool> updatePOItemHdr(
-      Database db, InspectionModal inspectionModel) async {
+      InspectionModal inspectionModel) async {
     try {
+      final db = await DatabaseHelper().database;
       final contentValues = <String, dynamic>{
         "VendorContact": inspectionModel.vendorContact,
         "ArrivalTime": inspectionModel.arrivalTime,
@@ -25,6 +26,7 @@ class InspectionListHandler {
         "QLMinor": inspectionModel.qlMinor,
         "QLMajorDescr": inspectionModel.qlMajorDescr,
         "QLMinorDescr": inspectionModel.qlMinorDescr,
+        "InspectionLevelDescr": inspectionModel.inspectionLevelDescr,
         "Status": inspectionModel.status,
         "recDt": AppConfig.getCurrentDate(),
         "AcceptedDt": AppConfig.getCurrentDate(),
@@ -32,7 +34,7 @@ class InspectionListHandler {
         "InspectionDt": inspectionModel.inspectionDt,
         "ProductionStatusRemark": inspectionModel.productionStatusRemark,
       };
-
+developer.log("developer log contentValues $contentValues");
       int rows = await db.update(
         "QRFeedbackhdr",
         contentValues,

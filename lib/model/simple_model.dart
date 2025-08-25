@@ -1,9 +1,7 @@
-// File: sample_model.dart
-
 class SampleModel {
   String? sampleCode;
   String? mainDescr;
-  String? sampleVal;
+  int? sampleVal; // changed to int
 
   SampleModel({
     this.sampleCode,
@@ -13,9 +11,9 @@ class SampleModel {
 
   factory SampleModel.fromJson(Map<String, dynamic> json) {
     return SampleModel(
-      sampleCode: json['SampleCode'],
-      mainDescr: json['MainDescr'],
-      sampleVal: json['SampleVal'],
+      sampleCode: json['SampleCode']?.toString(),
+      mainDescr: json['MainDescr']?.toString(),
+      sampleVal: _parseToInt(json['numVal1']),
     );
   }
 
@@ -23,7 +21,15 @@ class SampleModel {
     return {
       'SampleCode': sampleCode,
       'MainDescr': mainDescr,
-      'SampleVal': sampleVal,
+      'numVal1': sampleVal,
     };
+  }
+
+  // Helper method to safely parse int from any number type
+  static int? _parseToInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt(); // truncate decimal
+    return int.tryParse(value.toString());
   }
 }

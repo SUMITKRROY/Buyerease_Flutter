@@ -6,6 +6,7 @@ class ImageModal {
     String? length;
     String? fileName;
     String? fileContent;
+    String? imagePathID;
 
     ImageModal({
         this.pRowID,
@@ -14,16 +15,18 @@ class ImageModal {
         this.length,
         this.fileName,
         this.fileContent,
+        this.imagePathID,
     });
 
     factory ImageModal.fromJson(Map<String, dynamic> json) {
         return ImageModal(
             pRowID: json['pRowID'],
-            qrHdrID: json['qrHdrID'],
-            qrPOItemHdrID: json['qrPOItemHdrID'],
+            qrHdrID: json['QRHdrID'],
+            qrPOItemHdrID: json['QRPOItemHdrID'],
             length: json['length'],
-            fileName: json['fileName'],
+            fileName: json['ImageName'],
             fileContent: json['fileContent'],
+            imagePathID: json['ImagePathID'],
         );
     }
 

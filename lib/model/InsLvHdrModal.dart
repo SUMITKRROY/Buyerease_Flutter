@@ -3,7 +3,7 @@ class InsLvHdrModal {
     String pRowID;
     String LocID;
     String InspDescr;
-    String InspAbbrv;
+    String inspAbbrv;
     int recDirty;
     int recEnable;
     String recUser;
@@ -14,7 +14,7 @@ class InsLvHdrModal {
         required this.pRowID,
         required this.LocID,
         required this.InspDescr,
-        required this.InspAbbrv,
+        required this.inspAbbrv,
         required this.recDirty,
         required this.recEnable,
         required this.recUser,
@@ -28,7 +28,7 @@ class InsLvHdrModal {
             pRowID: map['pRowID'],
             LocID: map['LocID'],
             InspDescr: map['InspDescr'],
-            InspAbbrv: map['InspAbbrv'],
+            inspAbbrv: map['InspAbbrv'],
             recDirty: map['recDirty'],
             recEnable: map['recEnable'],
             recUser: map['recUser'],
@@ -43,7 +43,7 @@ class InsLvHdrModal {
             pRowID: json['pRowID'],
             LocID: json['LocID'],
             InspDescr: json['InspDescr'],
-            InspAbbrv: json['InspAbbrv'],
+            inspAbbrv: json['InspAbbrv'],
             recDirty: json['recDirty'],
             recEnable: json['recEnable'],
             recUser: json['recUser'],
@@ -58,7 +58,7 @@ class InsLvHdrModal {
             'pRowID': pRowID,
             'LocID': LocID,
             'InspDescr': InspDescr,
-            'InspAbbrv': InspAbbrv,
+            'InspAbbrv': inspAbbrv,
             'recDirty': recDirty,
             'recEnable': recEnable,
             'recUser': recUser,

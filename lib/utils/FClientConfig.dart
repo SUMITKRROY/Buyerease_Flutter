@@ -1,6 +1,6 @@
 class FClientConfig {
     /// Maximum log file size in KB
-    static const int logFileMaxSizeInKB = 6000;
+    static const int logFileMaxSizeInKB = 10240;
 
     /// External storage directory (can be set at runtime)
     static String? externalStorageDir;
@@ -21,7 +21,7 @@ class FClientConfig {
     static const int companyTruncLength = 15;
 
     /// Location ID
-    static const String locId = "DEL";
+    static const String locID = "DEL";
 
     /// Timer values
     static const int resendButtonDelay = 30; // seconds

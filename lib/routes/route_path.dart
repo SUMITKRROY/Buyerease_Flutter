@@ -14,4 +14,5 @@ class RoutePath {
   static const String syncInception = "/sync-inception";
   static const String overAllResult = "/overall-result";
   static const String chatbot = "/chatbot";
+  static const String intimationDetails = "/intimation-details";
 } 

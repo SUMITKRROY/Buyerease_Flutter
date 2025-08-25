@@ -4,7 +4,7 @@
 
 import 'digitals_upload_model.dart';
 
-class WorkmanshipModel {
+class WorkManShipModel {
   String? pRowID;
   String? code;
   String? description;
@@ -18,7 +18,7 @@ class WorkmanshipModel {
   String? inspectionId;
   List<DigitalsUploadModel>? listImages;
 
-  WorkmanshipModel({
+  WorkManShipModel({
     this.pRowID,
     this.code,
     this.description,
@@ -33,8 +33,8 @@ class WorkmanshipModel {
     this.listImages,
   });
 
-  factory WorkmanshipModel.fromJson(Map<String, dynamic> json) {
-    return WorkmanshipModel(
+  factory WorkManShipModel.fromJson(Map<String, dynamic> json) {
+    return WorkManShipModel(
       pRowID: json['pRowID'],
       code: json['Code'],
       description: json['Description'],

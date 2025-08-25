@@ -1,28 +1,39 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:buyerease/database/database_helper.dart';
+import 'package:buyerease/model/simple_model.dart';
 import 'package:buyerease/routes/my_routes.dart';
 import 'package:buyerease/utils/app_constants.dart';
 import 'package:buyerease/utils/multiple_image_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
 import '../../config/theame_data.dart';
 import '../../database/table/sysdata22_table.dart';
+import '../../model/InsLvHdrModal.dart';
 import '../../model/inspection_level_model.dart';
+import '../../model/po_item_pkg_app_detail_model.dart';
 import '../../model/quality_level_model.dart';
 import '../../model/inspection_model.dart';
 import '../../model/po_item_dtl_model.dart';
+import '../../model/sync/SysData22Model.dart';
 import '../../routes/route_path.dart';
+import '../../services/InsLvHdrHandler.dart';
+import '../../services/general/GeneralMasterHandler.dart';
+import '../../services/general/GeneralModel.dart';
 import '../../services/inspection_level_handler.dart';
 import '../../services/inspection_list/InspectionListHandler.dart';
-import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
+import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../../services/quality_level_handler.dart';
-import '../../services/po_item_dtl_handler.dart';
-import '../po/po_item.dart';
-import '../po/po_page.dart';
+import '../../services/poitemlist/po_item_dtl_handler.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../services/sync/SysData22Handler.dart';
+import '../po_level/po_level_tab.dart';
+import 'intimation_details_screen.dart';
 
 class InspectionDetailScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -37,16 +48,41 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   bool _isFirstSectionExpanded = true;
   bool _isSecondSectionExpanded = true;
 
+  TextEditingController txtInspectionLevel = TextEditingController();
+  TextEditingController txtQualityLevel = TextEditingController();
+  TextEditingController txtQualityLevelMinor = TextEditingController();
+  TextEditingController txtTypeofInspection = TextEditingController();
+  TextEditingController txtStatus = TextEditingController();
+  TextEditingController txtLocation = TextEditingController();
+  TextEditingController txtArrivalTime = TextEditingController();
+  TextEditingController txtStartTimeLevel = TextEditingController();
+  TextEditingController txtCompleteTime = TextEditingController();
+  int _mInspStartTimeHour = -1;
+  int _mInspStartTimeMinute = -1;
+
+  int _mArrivalTimeHour = -1;
+  int _mArrivalTimeMinute = -1;
+
+  int _mCompleteTimeHour = -1;
+  int _mCompleteTimeMinute = -1;
+
+
+
+
+
+
   bool isLoading = true;
-  List<Map<String, dynamic>> inspectionData = [];
   Set<String> selectedItems = {};
   bool isOpen = true; // Track open/closed state
   Set<String> syncedItems = {}; // Track synced items
+  String? _selectedStatus;
+
   String searchQuery = ''; // Add search query state
   List<InspectionModal> inspectionList = [];
+  late InspectionModal inspectionModal;
   TextEditingController _venderContact = TextEditingController();
   TextEditingController _remarksController = TextEditingController();
-  
+
   // Add time state variables
   TimeOfDay? _arrivalTime;
   TimeOfDay? _startTime;
@@ -63,7 +99,14 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   List<QualityLevelModel> _qualityLevels = [];
   String? _selectedQualityLevelMajor;
   String? _selectedQualityLevelMinor;
+  String? pRowIdOfInspectLevel;
+  String? pRowIdOfQualityMajorLevel;
+  String? pRowIdOfQualityMinorLevel;
+  String? pRowIdOfStatus;
+  int? availableQty ;
+
   List<String> statusList = [];
+  List< Map<String,dynamic>> statusList1 = [];
 
   DateTime? _selectedInspectionDate;
 
@@ -75,54 +118,89 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     _loadInspectionLevels();
     _loadQualityLevels();
     fetchAndShowStatus();
+  //  setFirstTimeValueInSpinnerAndTimer();
     getLocalList(widget.data['pRowID']);
 
   }
-
-
 
   Future<void> getLocalList(String searchStr) async {
     setState(() {
       isLoading = true;
     });
     try {
-     int isSyncStatus = widget.data["isSync"];
+      int isSyncStatus = widget.data["isSync"];
 
-      List<InspectionModal> localList =
-          isSyncStatus.isEven
-      ?await InspectionListHandler.getInspectionList(searchStr)
-      :await InspectionListHandler.getSyncedInspectionList(searchStr);
+      List<InspectionModal> localList = isSyncStatus.isEven
+          ? await InspectionListHandler.getInspectionList(searchStr)
+          : await InspectionListHandler.getSyncedInspectionList(searchStr);
       setState(() {
         inspectionList.clear();
         if (localList.isNotEmpty) {
           inspectionList.addAll(localList);
           final first = inspectionList.first;
+          inspectionModal = first;
           _selectedQualityLevelMajor = first.qlMajorDescr;
           _selectedQualityLevelMinor = first.qlMinorDescr;
           _selectedInspectionLevel = first.inspectionLevelDescr;
           _venderContact.text = first.vendorContact ?? '';
           _remarksController.text = first.comments ?? '';
-          _arrivalTime = (first.arrivalTime != null && first.arrivalTime!.isNotEmpty) ? _parseTimeOfDay(first.arrivalTime!) : null;
-          _startTime = (first.inspStartTime != null && first.inspStartTime!.isNotEmpty) ? _parseTimeOfDay(first.inspStartTime!) : null;
-          _completeTime = (first.completeTime != null && first.completeTime!.isNotEmpty) ? _parseTimeOfDay(first.completeTime!) : null;
-          _selectedInspectionDate = first.inspectionDt != null && first.inspectionDt!.isNotEmpty
-            ? DateTime.parse(first.inspectionDt!)
-            : DateTime.now();
-         // Fluttertoast.showToast(msg: ">>>${_venderContact.text}");
+          availableQty = first.availableQty ?? 0;
+          _selectedStatus = first
+              .status; // <- Assuming 'status' is a field in InspectionModal
+
+          _arrivalTime =
+          (first.arrivalTime != null && first.arrivalTime!.isNotEmpty)
+              ? _parseTimeOfDay(first.arrivalTime!)
+              : null;
+          _startTime =
+          (first.inspStartTime != null && first.inspStartTime!.isNotEmpty)
+              ? _parseTimeOfDay(first.inspStartTime!)
+              : null;
+          _completeTime =
+          (first.completeTime != null && first.completeTime!.isNotEmpty)
+              ? _parseTimeOfDay(first.completeTime!)
+              : null;
+          _selectedInspectionDate =
+          first.inspectionDt != null && first.inspectionDt!.isNotEmpty
+              ? DateFormat('dd-MMM-yyyy').parse(first.inspectionDt!)
+              : DateTime.now();
+          // Fluttertoast.showToast(msg: ">>>${_venderContact.text}");
+          pRowIdOfInspectLevel = _selectedInspectionLevel;
+
+            // Use the SAME selected item for both ID and description
+            pRowIdOfInspectLevel = first.inspectionLevel;
+
+          fetchAndShowStatus1();
+            onChangeInspectionLevel();
+
         } else {
-       //   Fluttertoast.showToast(msg: "Inspection did not find");
+          //   Fluttertoast.showToast(msg: "Inspection did not find");
         }
         isLoading = false;
       });
+      if (inspectionList.isNotEmpty) {
+        _qualityParameter();
+      }
     } catch (e) {
       debugPrint("Error fetching local list: $e");
-    //  Fluttertoast.showToast(msg: "Failed to load inspections");
+      //  Fluttertoast.showToast(msg: "Failed to load inspections");
     } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
+
+  Future<void> _qualityParameter() async {
+    final first =  inspectionList.first;
+    // final listData = await ItemInspectionDetailHandler().getListQualityParameter(
+    //
+    //     inspectionModal: first,
+    //     QRHdrID: first.qrHdrID ?? "",
+    //     QRPOItemHdrID: first.qrID ?? '');
+    // developer.log(" ListData ${jsonEncode(listData)}");
+  }
+
 
   // Helper to parse HH:mm string to TimeOfDay
   TimeOfDay _parseTimeOfDay(String time) {
@@ -132,15 +210,39 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
 
   void fetchAndShowStatus() async {
     Sysdata22Table table = Sysdata22Table();
-     statusList = await table.getAndPrintMainDescrWhereStatus();
-
+    statusList = await table.getAndPrintMainDescrWhereStatus();
+    statusList1 = await table.getMainDescrAndMainID();
+    developer.log("sysdata22Modal123 ${ (statusList1)}");
     // You can use statusList here if needed
     print("Fetched ${statusList.length} status entries.");
+
   }
 
+  void fetchAndShowStatus1() async {
+
+    // Status
+    if (inspectionModal.status != null && inspectionModal.status!.isNotEmpty) {
+      final List<SysData22Modal>  statusList = await SysData22Handler.getSysData22ListAccToID( FEnumerations.statusGenId, inspectionModal.status!);
+      developer.log("sysdata22Modal123 ${jsonEncode(statusList)}");
+      if (statusList.isNotEmpty) {
+        txtStatus.text = statusList[0].mainDescr;
+      }
+    } else {
+      final List<SysData22Modal> statusList = await SysData22Handler.getSysData22List( FEnumerations.statusGenId);
+      developer.log("sysdata22Modal >>> ${jsonEncode(statusList)}");
+      if (statusList.isNotEmpty) {
+        txtStatus.text = statusList[0].mainDescr;
+        pRowIdOfStatus = statusList[0].mainID;
+        inspectionModal.status = pRowIdOfStatus;
+      }
+    }
+  }
 
   Future<void> _loadInspectionLevels() async {
     final levels = await InspectionLevelHandler.getInspectionLevels();
+    List<InsLvHdrModal> level2 = await InsLvHdrHandler.getInsLvHdrList();
+    developer.log("level2: ${level2.first}");
+
     setState(() {
       _inspectionLevels = levels;
       if (levels.isNotEmpty) {
@@ -162,12 +264,16 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   }
 
   List<POItemDtl> pOItemDtlList = [];
+    POItemDtl poItemDtl = POItemDtl();
 
   Future<void> getList(BuildContext context, String pRowID) async {
-    pOItemDtlList.addAll(await POItemDtlHandler.getItemList(context, pRowID));
+    pOItemDtlList.addAll(await POItemDtlHandler.getItemList(pRowID));
+
+
   }
 
-  Future<void> _selectTime(BuildContext context, bool isArrival, bool isStart, bool isComplete) async {
+  Future<void> _selectTime(BuildContext context, bool isArrival, bool isStart,
+      bool isComplete) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -217,20 +323,23 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 title == "Inspection detail"
-                ? Text(title, style: TextStyle(fontSize: 18))
+                    ? Text(title, style: TextStyle(fontSize: 18))
                     : InkWell(
                   onTap: () async {
-                    DateTime initialDate = _selectedInspectionDate ?? DateTime.now();
+                    DateTime initialDate =
+                        _selectedInspectionDate ?? DateTime.now();
                     DateTime? picked = await showDatePicker(
                       context: context,
-                      initialDate: initialDate.isBefore(DateTime.now()) ? DateTime.now() : initialDate,
+                      initialDate: initialDate.isBefore(DateTime.now())
+                          ? DateTime.now()
+                          : initialDate,
                       firstDate: DateTime.now(),
                       lastDate: DateTime(2100),
                     );
                     if (picked != null) {
                       setState(() {
                         _selectedInspectionDate = picked;
-                        inspectionList.first.inspectionDt = picked.toIso8601String().split('T').first; // 'yyyy-MM-dd'
+                        inspectionList.first.inspectionDt = DateFormat('dd-MMM-yyyy').format(picked); // e.g., 18-Aug-2025
                       });
                       await _saveChangesIfChanged();
                     }
@@ -241,16 +350,19 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                       children: [
                         Text(
                           _selectedInspectionDate != null
-                              ? "${_selectedInspectionDate!.year}-${_selectedInspectionDate!.month.toString().padLeft(2, '0')}-${_selectedInspectionDate!.day.toString().padLeft(2, '0')}"
+                              ? DateFormat('dd-MMM-yy').format(_selectedInspectionDate!)
                               : title,
                           style: TextStyle(fontSize: 18),
                         ),
+
                       ],
                     ),
                   ),
                 ),
                 Icon(
-                  isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   color: ColorsData.primaryColor,
                 ),
               ],
@@ -267,10 +379,19 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
           backgroundColor: ColorsData.primaryColor,
-          title: Text('Loading...', style: TextStyle(color: Colors.white)),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context, true); // 👈 return true
+            },
+          ),
+          title: const Text(
+            'Loading...',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
+
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -278,7 +399,12 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     if (inspectionList.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context, true); // 👈 return true
+            },
+          ),
           backgroundColor: ColorsData.primaryColor,
           title: Text('No Data', style: TextStyle(color: Colors.white)),
         ),
@@ -287,6 +413,9 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     }
 
     final item = inspectionList.first;
+    item.aqlFormula == 0
+        ? _selectedLevel = "Report Level"
+        : _selectedLevel = "Material Level";
 
     return WillPopScope(
       onWillPop: () async {
@@ -296,13 +425,19 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
       child: SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            leading: const BackButton(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context, true); // 👈 return true
+              },
+            ),
             backgroundColor: ColorsData.primaryColor,
-            title: Text(item.pRowID ?? '', style: TextStyle(color: Colors.white)),
+            title:
+            Text(item.pRowID ?? '', style: TextStyle(color: Colors.white)),
             // title: Text(widget.data['pRowID'] ?? '', style: TextStyle(color: Colors.white)),
             actions: [
               TextButton(
-                onPressed:  _saveChanges ,
+                onPressed: _saveChanges,
                 // onPressed: isChanged ? _saveChanges : null,
                 child: Text('SAVE', style: TextStyle(color: Colors.white)),
               ),
@@ -325,8 +460,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                   _infoRow('Inspector', item.inspector ?? ''),
                   _infoRow('Activity', item.activity ?? ''),
                   _infoRow('Location', item.vendorAddress ?? ''),
-                  _infoRowWithTextField('Vendor Representative', item.vendorContact ?? ''),
-
+                  _infoRowWithTextField(
+                      'Vendor Representative', item.vendorContact ?? ''),
                 ],
               ),
               SizedBox(height: 16),
@@ -344,7 +479,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: _dropdownField('Inspection Level', ['${item.inspectionLevelDescr}']),
+                          child: _dropdownField('Inspection Level',
+                              ['${item.inspectionLevelDescr}']),
                         ),
                       ),
                       SizedBox(width: 16),
@@ -357,7 +493,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                     ],
                   ),
                   SizedBox(height: 16),
-                  _dropdownField('Quality Level Minor', ['${item.qlMinorDescr}']),
+                  _dropdownField(
+                      'Quality Level Minor', ['${item.qlMinorDescr}']),
                   SizedBox(height: 16),
                   _dropdownField('Status', statusList),
                 ],
@@ -393,7 +530,14 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               OutlinedButton(
                 onPressed: () async {
                   await _saveChangesIfChanged();
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=> PoPage(pRowId: widget.data['pRowID'],)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              PoLevelTab(
+                                pRowId: widget.data['pRowID'],
+                                inspectionModal: inspectionList.first, poItemDtl: poItemDtl,
+                              )));
                 },
                 child: Text('GO TO  PO DETAILS'),
                 style: OutlinedButton.styleFrom(
@@ -413,8 +557,13 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          SizedBox(width: 120, child: Text(label, style: TextStyle(color: Colors.grey))),
-          Expanded(child: Text(value, style: TextStyle(fontWeight: FontWeight.w500))),
+          SizedBox(
+              width: 120,
+              child: Text(label,
+                  style: TextStyle(color: Colors.grey, fontSize: 12))),
+          Expanded(
+              child: Text(value,
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12))),
         ],
       ),
     );
@@ -427,19 +576,25 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: TextStyle(color: Colors.grey)),
+            child:
+            Text(label, style: TextStyle(color: Colors.grey, fontSize: 12)),
           ),
           Expanded(
             child: TextFormField(
               controller: _venderContact,
               onChanged: (_) => _saveChangesIfChanged(),
+              style: TextStyle(fontSize: 12), // <--- Add this line
               decoration: InputDecoration(
                 hintText: hint,
+                hintStyle: TextStyle(fontSize: 12),
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                border: UnderlineInputBorder(), // <-- Only underline
+                contentPadding:
+                EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                border: UnderlineInputBorder(),
+                // <-- Only underline
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey), // Customize color if needed
+                  borderSide: BorderSide(
+                      color: Colors.grey), // Customize color if needed
                 ),
                 focusedBorder: UnderlineInputBorder(),
               ),
@@ -452,23 +607,44 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
 
   Widget _dropdownField(String label, List<String> items) {
     if (label == 'Inspection Level') {
-      return DropdownButtonFormField<String>(
+
+      return
+        DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(),
           labelStyle: TextStyle(fontSize: 12.sp),
         ),
         value: _selectedInspectionLevel,
-        items: _inspectionLevels.map((level) => DropdownMenuItem(
-          value: level.inspAbbrv,
-          child: Text('${level.inspAbbrv}', style: TextStyle(fontSize: 12.sp)),
-        )).toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedInspectionLevel = value;
-          });
-          _saveChangesIfChanged();
-        },
+        items: _inspectionLevels
+            .map((level) =>
+            DropdownMenuItem(
+              value: level.inspAbbrv,
+              child: Text('${level.inspAbbrv}',
+                  style: TextStyle(fontSize: 12.sp)),
+            ))
+            .toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedInspectionLevel = value;
+              // Find the selected item
+              final selected = _inspectionLevels.firstWhere(
+                    (level) => level.inspAbbrv == value,
+              );
+
+              // Use the SAME selected item for both ID and description
+              pRowIdOfInspectLevel = selected.pRowID;
+
+              // Update the modal with consistent data
+              if (inspectionList.isNotEmpty) {
+                inspectionList.first.inspectionLevel = selected.pRowID;        // ID
+                inspectionList.first.inspectionLevelDescr = selected.inspAbbrv; // Description from same item
+              }
+
+              onChangeInspectionLevel();
+            });
+            _saveChangesIfChanged();
+          },
       );
     } else if (label == 'Quality Level Major') {
       return DropdownButtonFormField<String>(
@@ -478,14 +654,25 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
           labelStyle: TextStyle(fontSize: 12.sp),
         ),
         value: _selectedQualityLevelMajor,
-        items: _qualityLevels.map((level) => DropdownMenuItem(
-          value: level.qualityLevel!,
-          child: Text(level.qualityLevel ?? '', style: TextStyle(fontSize: 12.sp)),
-        )).toList(),
+        items: _qualityLevels
+            .map((level) =>
+            DropdownMenuItem(
+              value: level.qualityLevel,
+              child: Text(level.qualityLevel ?? '',
+                  style: TextStyle(fontSize: 12.sp)),
+            ))
+            .toList(),
         onChanged: (value) {
           setState(() {
             _selectedQualityLevelMajor = value;
+            // Find the selected QualityLevelModal and update pRowIdOfQualityMajorLevel
+            final selected = _qualityLevels.firstWhere(
+              (level) => level.qualityLevel == value,
+
+            );
+            pRowIdOfQualityMajorLevel = selected.pRowID;
           });
+          onChangeInspectionLevel();
           _saveChangesIfChanged();
         },
       );
@@ -497,29 +684,94 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
           labelStyle: TextStyle(fontSize: 12.sp),
         ),
         value: _selectedQualityLevelMinor,
-        items: _qualityLevels.map((level) => DropdownMenuItem(
-          value: level.qualityLevel!,
-          child: Text('${level.qualityLevel ?? ''}', style: TextStyle(fontSize: 12.sp)),
-        )).toList(),
+        items: _qualityLevels
+            .map((level) =>
+            DropdownMenuItem(
+              value: level.qualityLevel!,
+              child: Text('${level.qualityLevel ?? ''}',
+                  style: TextStyle(fontSize: 12.sp)),
+            ))
+            .toList(),
         onChanged: (value) {
           setState(() {
+
             _selectedQualityLevelMinor = value;
+            // Find the selected QualityLevelModal and update pRowIdOfQualityMinorLevel
+            final selected = _qualityLevels.firstWhere(
+              (level) => level.qualityLevel == value,
+
+            );
+            onChangeInspectionLevel();
+            pRowIdOfQualityMinorLevel = selected.pRowID;
           });
           _saveChangesIfChanged();
         },
       );
+    } else if (label == 'Status') {
+      // final uniqueStatusList = statusList.toSet().toList(); // remove duplicates
+      final uniqueStatusList = statusList1.toSet().toList();
+      return DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          labelStyle: TextStyle(fontSize: 12), // you can keep .sp if using flutter_screenutil
+        ),
+        value: uniqueStatusList.any((s) => s["MainID"] == _selectedStatus)
+            ? _selectedStatus
+            : null, // keep MainID as selected value
+        items: uniqueStatusList.map((status) {
+          return DropdownMenuItem<String>(
+            value: status["MainID"], // 👈 backend value
+            child: Text(
+              status["MainDescr"], // 👈 UI label
+              style: TextStyle(fontSize: 12),
+            ),
+          );
+        }).toList(),
+        onChanged: (val) {
+          setState(() {
+            _selectedStatus = val; // store MainID
+            onChangeInspectionLevel();
+          });
+          _saveChangesIfChanged();
+        },
+      );
+      /*return DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+          labelStyle: TextStyle(fontSize: 12.sp),
+        ),
+        value: uniqueStatusList.contains(_selectedStatus)
+            ? _selectedStatus
+            : null, // 👈 Fix here
+        items: uniqueStatusList.map((status) {
+          return DropdownMenuItem<String>(
+            value: status,
+            child: Text(status, style: TextStyle(fontSize: 12.sp)),
+          );
+        }).toList(),
+        onChanged: (val) {
+          setState(() {
+            _selectedStatus = val;
+            onChangeInspectionLevel();
+          });
+          _saveChangesIfChanged();
+        },
+      );*/
     }
-    
+
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
         labelStyle: TextStyle(fontSize: 12.sp),
       ),
-      items: items.map((e) => DropdownMenuItem(
-        value: e,
-        child: Text(e, style: TextStyle(fontSize: 12.sp))
-      )).toList(),
+      items: items
+          .map((e) =>
+          DropdownMenuItem(
+              value: e, child: Text(e, style: TextStyle(fontSize: 12.sp))))
+          .toList(),
       onChanged: (val) {},
     );
   }
@@ -540,7 +792,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               groupValue: _selectedLevel,
               onChanged: (value) {
                 setState(() {
-                 // _selectedLevel = value!;
+                  // _selectedLevel = value!;
                 });
               },
               activeColor: ColorsData.primaryColor,
@@ -548,8 +800,12 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
             Text(
               label,
               style: TextStyle(
-                color: _selectedLevel == label ? ColorsData.primaryColor : Colors.black,
-                fontWeight: _selectedLevel == label ? FontWeight.bold : FontWeight.normal,
+                color: _selectedLevel == label
+                    ? ColorsData.primaryColor
+                    : Colors.black,
+                fontWeight: _selectedLevel == label
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
           ],
@@ -585,7 +841,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
               ),
               IconButton(
                 icon: Icon(Icons.access_time, color: ColorsData.primaryColor),
-                onPressed: () => _selectTime(context, isArrival, isStart, isComplete),
+                onPressed: () =>
+                    _selectTime(context, isArrival, isStart, isComplete),
               ),
             ],
           ),
@@ -597,42 +854,65 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   bool get isChanged {
     if (inspectionList.isEmpty) return false;
     final item = inspectionList.first;
-    return
-      (_selectedInspectionLevel != null && _selectedInspectionLevel != item.inspectionLevelDescr) ||
-      (_selectedQualityLevelMajor != null && _selectedQualityLevelMajor != item.qlMajorDescr) ||
-      (_selectedQualityLevelMinor != null && _selectedQualityLevelMinor != item.qlMinorDescr);
+    return (_selectedInspectionLevel != null &&
+        _selectedInspectionLevel != item.inspectionLevelDescr) ||
+        (_selectedQualityLevelMajor != null &&
+            _selectedQualityLevelMajor != item.qlMajorDescr) ||
+        (_selectedQualityLevelMinor != null &&
+            _selectedQualityLevelMinor != item.qlMinorDescr);
   }
 
   void _saveChanges() async {
     if (inspectionList.isEmpty) return;
     final item = inspectionList.first;
+item.inspectionLevel = pRowIdOfInspectLevel;
+item.inspectionLevelDescr = _selectedInspectionLevel;
+    // Store the original status to check if it changed
+    String? originalStatus = item.status;
 
-    // Update fields from UI
+    // ✅ Update fields from UI
     item.vendorContact = _venderContact.text;
-    item.inspectionLevelDescr = _selectedInspectionLevel ?? item.inspectionLevelDescr;
+    item.inspectionLevelDescr =
+        _selectedInspectionLevel ?? item.inspectionLevelDescr;
     item.qlMajorDescr = _selectedQualityLevelMajor ?? item.qlMajorDescr;
     item.qlMinorDescr = _selectedQualityLevelMinor ?? item.qlMinorDescr;
     item.comments = _remarksController.text;
+    // ✅ Add this line
+    item.status = _selectedStatus ?? item.status;
 
-    // Convert TimeOfDay to string (HH:mm) for DB
-    item.arrivalTime = _arrivalTime != null ? _formatTimeOfDay(_arrivalTime!) : item.arrivalTime;
-    item.inspStartTime = _startTime != null ? _formatTimeOfDay(_startTime!) : item.inspStartTime;
-    item.completeTime = _completeTime != null ? _formatTimeOfDay(_completeTime!) : item.completeTime;
+    // ✅ Convert time fields
+    item.arrivalTime = _arrivalTime != null
+        ? _formatTimeOfDay(_arrivalTime!)
+        : item.arrivalTime;
+    item.inspStartTime =
+    _startTime != null ? _formatTimeOfDay(_startTime!) : item.inspStartTime;
+    item.completeTime = _completeTime != null
+        ? _formatTimeOfDay(_completeTime!)
+        : item.completeTime;
 
-    // Get the database instance
-    final db = await DatabaseHelper().database;
-
-    // Call your update method
+    // ✅ Update inspection date
+    final dateFormatter = DateFormat('dd-MMM-yyyy');
     item.inspectionDt = _selectedInspectionDate != null
-      ? _selectedInspectionDate!.toIso8601String().split('T').first
-      : item.inspectionDt;
-    await InspectionListHandler.updatePOItemHdr(db, item);
+        ? dateFormatter.format(_selectedInspectionDate!)
+        : item.inspectionDt;
+
+    // ✅ Update in DB
+    await InspectionListHandler.updatePOItemHdr(item);
 
     Fluttertoast.showToast(msg: "Changes saved!");
 
     setState(() {
       inspectionList[0] = item;
     });
+    if (_selectedStatus != null && _selectedStatus != originalStatus) {
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => IntimationDetailsScreen(
+                pRowId: widget.data['pRowID'],
+                inspectionModal: inspectionList.first,)));
+    }
   }
 
   Future<void> _saveChangesIfChanged() async {
@@ -641,6 +921,87 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
     }
   }
 
+  int? aqlFormula; // represents inspectionModal.AQLFormula
+  int selectedRadio = 0;
+
+
+
+
+
+
+  Future<void> onChangeInspectionLevel() async {
+    if (pRowIdOfInspectLevel != null) {
+      for (int i = 0; i < pOItemDtlList.length; i++) {
+        final item = pOItemDtlList[i];
+        poItemDtl = item;
+        if (inspectionModal.qlMinor == "DEL0000013" ||
+            inspectionModal.qlMajor == "DEL0000013" ||
+            inspectionModal.activityID == "SYS0000001") {
+
+          List<String>? toInspDtl = await POItemDtlHandler.getToInspect(
+
+            pRowIdOfInspectLevel!,
+            item.availableQty ?? 0,
+          );
+
+          if (toInspDtl != null) {
+            item.sampleSizeInspection = null;
+            item.inspectedQty = 0;
+            item.allowedinspectionQty = 0;
+
+            // String sampleCode = toInspDtl[0]; // Not used here
+
+            item.minorDefectsAllowed = 0;
+            item.majorDefectsAllowed = 0;
+          }
+
+        } else {
+          List<String>? toInspDtl = await POItemDtlHandler.getToInspect(
+            pRowIdOfInspectLevel!,
+            item.availableQty ?? 0,
+          );
+
+          if (toInspDtl != null) {
+            item.sampleSizeInspection = toInspDtl[1];
+            item.inspectedQty = double.parse(toInspDtl[2]).round();
+            item.allowedinspectionQty = double.parse(toInspDtl[2]).round();
+
+            String sampleCode = toInspDtl[0];
+
+      /*      List<String>? minorDefect = await POItemDtlHandler.getDefectAccepted(
+
+              pRowIdOfQualityMinorLevel,
+              sampleCode,
+            );*/
+
+       /*     item.minorDefectsAllowed = (minorDefect != null && minorDefect.length > 1)
+                ? int.tryParse(minorDefect[1]) ?? 0
+                : 0;
+
+            List<String>? majorDefect = await POItemDtlHandler.getDefectAccepted(
+
+              pRowIdOfQualityMajorLevel!,
+              sampleCode,
+            );
+
+            item.majorDefectsAllowed = (majorDefect != null && majorDefect.length > 1)
+                ? int.tryParse(majorDefect[1]) ?? 0
+                : 0;*/
+            handleUpdateData();
+          }
+
+
+        }
+      }
+    }
+  }
+  Future<void> handleUpdateData() async {
+    bool status = false;
+    for (var i = 0; i < pOItemDtlList.length; i++) {
+      status = await POItemDtlHandler.updatePOItemHdrOnInspection(pOItemDtlList[i]);
+      status = await POItemDtlHandler.updatePOItemDtlOnInspection(pOItemDtlList[i]);
+    }
+  }
   @override
   void dispose() {
     _saveChangesIfChanged();

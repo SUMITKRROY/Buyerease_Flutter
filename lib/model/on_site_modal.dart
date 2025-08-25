@@ -1,7 +1,7 @@
 import 'dart:core';
  
 
-class OnSIteModal {
+class OnSiteModal {
     String? pRowID;
     String? locID;
     String? onSiteTestID;
@@ -16,7 +16,7 @@ class OnSIteModal {
     String? qrHdrID;
     String? qrpoItemHdrID;
 
-    OnSIteModal({
+    OnSiteModal({
         this.pRowID,
         this.locID,
         this.onSiteTestID,

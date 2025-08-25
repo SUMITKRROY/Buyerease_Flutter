@@ -15,6 +15,7 @@ class SyncDataHandler {
     tableList.add(FEnumerations.syncHeaderTable);
     tableList.add(FEnumerations.syncSizeQuantityTable);
     tableList.add(FEnumerations.syncImagesTable);
+    tableList.add(FEnumerations.syncImagesTable1);
     tableList.add(FEnumerations.syncWorkmanshipTable);
     tableList.add(FEnumerations.syncItemMeasurementTable);
     tableList.add(FEnumerations.syncFindingTable);

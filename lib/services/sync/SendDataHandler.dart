@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:developer' as developer;
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 
 import '../../model/sync/ImageModal.dart';
@@ -14,7 +18,6 @@ import '../../database/database_helper.dart';
 class SendDataHandler {
   static String TAG = "SyncDataHandler";
 
-
   Future<Map<String, dynamic>> getHdrTableData(List<String> hdrIdList) async {
     Map<String, dynamic> params = {};
 
@@ -28,7 +31,7 @@ class SendDataHandler {
     return params;
   }
 
-  Future<Map<String, dynamic>>  getSizeQtyData( List<String> hdrIdList) async {
+  Future<Map<String, dynamic>> getSizeQtyData(List<String> hdrIdList) async {
     Map<String, dynamic> params = {};
 
     if (hdrIdList.isNotEmpty) {
@@ -40,7 +43,8 @@ class SendDataHandler {
     return params;
   }
 
-  Future<Map<String, dynamic>>  getImagesTableData(  List<String> hdrIdList) async {
+  Future<Map<String, dynamic>> getImagesTableData(
+      List<String> hdrIdList) async {
     Map<String, dynamic> params = {};
 
     if (hdrIdList != null && hdrIdList.isNotEmpty) {
@@ -60,15 +64,15 @@ class SendDataHandler {
     if (hdrIdList.isNotEmpty) {
       for (String id in hdrIdList) {
         List<ImageModal> images = await SendDataHandler.getImageFilesJson(id);
+        developer.log("json object imagesList >> ${jsonEncode(images)}");
         imageList.addAll(images);
       }
     }
-
+    developer.log("json object imagesList >> ${jsonEncode(imageList)}");
     return imageList;
   }
 
-
-  Future<List?> getEnclosureFileArrayData( List<String> hdrIdList) async {
+  Future<List?> getEnclosureFileArrayData(List<String> hdrIdList) async {
     List<dynamic>? jsonArrays;
 
     if (hdrIdList.isNotEmpty) {
@@ -80,87 +84,99 @@ class SendDataHandler {
     return jsonArrays;
   }
 
-
-  Future<Map<String, dynamic>> getWorkmanShipData(  List<String> hdrIdList) async {
+  Future<Map<String, dynamic>> getWorkmanShipData(
+      List<String> hdrIdList) async {
     Map<String, dynamic> params = {};
 
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRAuditBatchDetails'] = await getQRAuditBatchDetailOrWorkManShipsJson( hdrIdList[i]);
+        params['QRAuditBatchDetails'] =
+            await getQRAuditBatchDetailOrWorkManShipsJson(hdrIdList[i]);
       }
     }
 
     return params;
   }
 
-  Future<Map<String, dynamic>?> getItemMeasurementData( List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getItemMeasurementData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRPOItemDtl_ItemMeasurement'] = await getQRPOItemDtl_ItemMeasurementJson( hdrIdList[i]);
+        params['QRPOItemDtl_ItemMeasurement'] =
+            await getQRPOItemDtl_ItemMeasurementJson(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getFindingData( List<String> hdrIdList) async {
+  Future<Map<String, dynamic>?> getFindingData(List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRFindings'] = await getQRFindingsJson(  hdrIdList[i]);
+        params['QRFindings'] = await getQRFindingsJson(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getQualityParameterData(  List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getQualityParameterData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRQualiltyParameterFields'] = await getQRQualiltyParameterFields(  hdrIdList[i]);
+        params['QRQualiltyParameterFields'] =
+            await getQRQualiltyParameterFields(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getFitnessCheckData( List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getFitnessCheckData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRPOItemFitnessCheck'] = await getQRPOItemFitnessCheckJson( hdrIdList[i]);
+        params['QRPOItemFitnessCheck'] =
+            await getQRPOItemFitnessCheckJson(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getProductionStatusData(List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getProductionStatusData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRPOItemFitnessCheck'] = await getQRProductionStatusJson( hdrIdList[i]);
+        params['QRPOItemFitnessCheck'] =
+            await getQRProductionStatusJson(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getIntimationData( List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getIntimationData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (int i = 0; i < hdrIdList.length; i++) {
-        params['QRPOIntimationDetails'] = await getQRPOIntimationDetailsJson( hdrIdList[i]);
+        params['QRPOIntimationDetails'] =
+            await getQRPOIntimationDetailsJson(hdrIdList[i]);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getQREnclosureData(List<String> hdrIdList) async {
+  Future<Map<String, dynamic>?> getQREnclosureData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
@@ -171,7 +187,8 @@ class SendDataHandler {
     return params;
   }
 
-  Future<Map<String, dynamic>?> getDigitalsColumnFromMultipleData(List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getDigitalsColumnFromMultipleData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
@@ -182,7 +199,8 @@ class SendDataHandler {
     return params;
   }
 
-  Future<Map<String, dynamic>?> getOnSiteDataData(List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getOnSiteDataData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
@@ -193,18 +211,21 @@ class SendDataHandler {
     return params;
   }
 
-  Future<Map<String, dynamic>?> getSampleCollectedData(List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getSampleCollectedData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
       for (var hdrId in hdrIdList) {
-        params['QRPOItemDtl_Sample_Purpose'] = await getSampleCollectedJsonData(hdrId);
+        params['QRPOItemDtl_Sample_Purpose'] =
+            await getSampleCollectedJsonData(hdrId);
       }
     }
     return params;
   }
 
-  Future<Map<String, dynamic>?> getPkgAppearanceData(List<String> hdrIdList) async{
+  Future<Map<String, dynamic>?> getPkgAppearanceData(
+      List<String> hdrIdList) async {
     Map<String, dynamic>? params;
     if (hdrIdList.isNotEmpty) {
       params = {};
@@ -214,10 +235,6 @@ class SendDataHandler {
     }
     return params;
   }
-
-
-
-
 
   Future<Map<String, dynamic>?> getSelectedInspectionIdsData(
       BuildContext context, List<String>? hdrIdList) async {
@@ -247,9 +264,6 @@ class SendDataHandler {
 
     return null;
   }
-
-
-
 
   Future<List<Map<String, dynamic>>> getQRFeedbackhdrJson(String hdrID) async {
     List<Map<String, dynamic>> jsonArrayList = [];
@@ -281,7 +295,6 @@ class SendDataHandler {
       print('Query Executed: $query');
       jsonArrayList = await db.rawQuery(query, [hdrID]);
 
-
       print('Query Result: $jsonArrayList');
     } catch (e) {
       print('Error in getQRFeedbackhdrJson: $e');
@@ -290,9 +303,7 @@ class SendDataHandler {
     return jsonArrayList;
   }
 
-
-
-  Future<List<Map<String, dynamic>>> getQRPOItemHdrJson( String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemHdrJson(String hdrID) async {
     List<Map<String, dynamic>> jsonArrayList = [];
     final db = await DatabaseHelper().database;
     try {
@@ -312,7 +323,7 @@ class SendDataHandler {
     return jsonArrayList;
   }
 
-  Future<List<Map<String, dynamic>>> getQRPOItemdtlJson(  String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemdtlJson(String hdrID) async {
     List<Map<String, dynamic>> jsonArrayList = [];
     final db = await DatabaseHelper().database;
     try {
@@ -361,7 +372,7 @@ class SendDataHandler {
     return jsonArrayList;
   }
 
-  Future<List<Map<String, dynamic>>> getSizeQtyJson(  String hdrID) async {
+  Future<List<Map<String, dynamic>>> getSizeQtyJson(String hdrID) async {
     List<Map<String, dynamic>> result = [];
     final db = await DatabaseHelper().database;
     try {
@@ -383,8 +394,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRAuditBatchDetailOrWorkManShipsJson(  String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRAuditBatchDetailOrWorkManShipsJson(
+      String hdrID) async {
     List<Map<String, dynamic>> result = [];
     final db = await DatabaseHelper().database;
     try {
@@ -430,8 +441,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRPOItemDtlImageJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemDtlImageJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -462,8 +473,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRPOItemDtlItemMeasurementJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemDtlItemMeasurementJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -498,9 +509,6 @@ class SendDataHandler {
 
     return result;
   }
-
-
-
 
   Future<List<Map<String, dynamic>>> getQRFindingsJson(String hdrID) async {
     final db = await DatabaseHelper().database;
@@ -537,8 +545,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRQualiltyParameterFields(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRQualiltyParameterFields(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -569,8 +577,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRProductionStatusJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRProductionStatusJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -592,8 +600,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRPOItemFitnessCheckJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemFitnessCheckJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -624,8 +632,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRPOIntimationDetailsJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getQRPOIntimationDetailsJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -651,7 +659,6 @@ class SendDataHandler {
 
     return result;
   }
-
 
   Future<List<Map<String, dynamic>>> getQREnclosureJson(String hdrID) async {
     final db = await DatabaseHelper().database;
@@ -679,9 +686,8 @@ class SendDataHandler {
     return result;
   }
 
-
-
-  Future<List<Map<String, dynamic>>> getFilesQREnclosureJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getFilesQREnclosureJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -706,9 +712,8 @@ class SendDataHandler {
     return result;
   }
 
-
-
-  Future<List<Map<String, dynamic>>> getDigitalsColumnFromMultipleJson(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getDigitalsColumnFromMultipleJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
     List<Map<String, dynamic>> result = [];
 
@@ -787,8 +792,8 @@ class SendDataHandler {
     return result;
   }
 
-
-  Future<List<Map<String, dynamic>>> getQRPOItemDtl_ImageJson( String hdrId) async {
+  Future<List<Map<String, dynamic>>> getQRPOItemDtl_ImageJson(
+      String hdrId) async {
     List<Map<String, dynamic>> jsonArrayList = [];
 
     try {
@@ -816,17 +821,82 @@ class SendDataHandler {
 
       jsonArrayList = await db.rawQuery(query, [hdrId]);
 
-      print('json from QRPOItemDtl_Image table: $jsonArrayList');
+      developer.log('json from QRPOItemDtl_Image table: $query $hdrId');
+      developer.log('json from QRPOItemDtl_Image table: $jsonArrayList');
     } catch (e) {
       print('Error retrieving image JSON: $e');
     }
 
     return jsonArrayList;
   }
+/* static Future<List<ImageModal>> getImageFilesJson( String hdrID) async {
+    try {
+      final db = await DatabaseHelper().database;
+      String query = '''
+      SELECT i.pRowID, i.LocID, i.QRHdrID, IFNULL(i.QRPOItemHdrID,'') AS QRPOItemHdrID,
+             IFNULL(i.QRPOItemDtlID,'') AS QRPOItemDtlID, IFNULL(i.ItemID,'') AS ItemID,
+             IFNULL(i.ColorID,'') AS ColorID, IFNULL(i.Title,'') AS Title, i.ImageName,
+             i.fileContent, i.ImageExtn, IFNULL(i.ImageSymbol,'') AS ImageSymbol,
+             i.ImageSqn, i.recUser, IFNULL(i.BE_pRowID,'NULL') AS BE_pRowID,
+             IFNULL(i.FileSent,0) AS FileSent
+      FROM QRPOItemDtl_Image i
+      INNER JOIN QRFeedbackhdr hdr ON hdr.pRowID = i.QRHdrID
+      WHERE i.QRHdrID = ? AND i.recEnable = 1
+    ''';
 
-  static Future<List<ImageModal>> getImageFilesJson(
-      String hdrID) async
-  {
+      return await getFileContentFromTableToSendSeparateImageColumn( query, hdrID);
+    } catch (e) {
+      print('Error in getImageFilesJson: $e');
+      return [];
+    }
+  }
+
+static  Future<List<ImageModal>> getFileContentFromTableToSendSeparateImageColumn(
+       String query,  String hdrID) async {
+    List<ImageModal> imageModals = [];
+    final db = await DatabaseHelper().database;
+    try {
+      final List<Map<String, dynamic>> result = await db.rawQuery(query, [hdrID]);
+      print('result :>> ${result}');
+      for (var row in result) {
+        int fileSent = row['FileSent'] ?? 0;
+
+        if (fileSent == 0) {
+          String? filePath = row['fileContent'];
+
+          if (filePath != null && filePath != 'null' && filePath.isNotEmpty) {
+            File file = File(filePath);
+            if (await file.exists()) {
+              ImageModal imageModal = ImageModal();
+              imageModal.pRowID = row['pRowID']?.toString() ?? '';
+              imageModal.qrHdrID = row['QRHdrID']?.toString() ?? '';
+              imageModal.qrPOItemHdrID = row['QRPOItemHdrID']?.toString() ?? '';
+
+              String fileExt = row['ImageExtn'] ?? 'jpg';
+              imageModal.fileName = '${imageModal.qrHdrID}_${imageModal.pRowID}.$fileExt';
+              imageModal.fileContent = filePath;
+              imageModal.length = ''; // Not used in Java, kept as placeholder
+
+              imageModals.add(imageModal);
+            } else {
+              print('FILE NOT FOUND: $filePath');
+            }
+          } else {
+            print('FILE CONTENT IS NULL for pRowID: ${row['pRowID']}');
+          }
+        } else {
+          print('FILE ALREADY SYNC for pRowID: ${row['pRowID']}');
+        }
+      }
+
+      print('JSON list images from table: ${imageModals.length}');
+    } catch (e) {
+      print('Error in getFileContentFromTableToSendSeparateImageColumn: $e');
+    }
+
+    return imageModals;
+  }*/
+  static Future<List<ImageModal>> getImageFilesJson(String hdrID) async {
     List<ImageModal> imageList = [];
 
     try {
@@ -843,25 +913,98 @@ class SendDataHandler {
                IFNULL(i.ImageSymbol, '') AS ImageSymbol,
                i.ImageSqn, i.recUser,
                IFNULL(i.BE_pRowID, 'NULL') AS BE_pRowID,
-               IFNULL(i.FileSent, 0) AS FileSent
+               IFNULL(i.FileSent, 0) AS FileSent,
+               IFNULL(i.ImagePathID, '') AS ImagePathID
         FROM QRPOItemDtl_Image i
         INNER JOIN QRFeedbackhdr hdr ON hdr.pRowID = i.QRHdrID
         WHERE i.QRHdrID IN (?)
           AND i.recEnable = 1
       ''';
 
-      final List<Map<String, dynamic>> results = await db.rawQuery(query, [hdrID]);
+      final List<Map<String, dynamic>> results =
+          await db.rawQuery(query, [hdrID]);
 
       imageList = results.map((map) => ImageModal.fromJson(map)).toList();
-
-      debugPrint("json from QRPOItemDtl_Image table: $imageList");
+      // imageList = await getFileContentFromTableToSendSeparateImageColumn(query,hdrID);
+      print("JSON from QRPOItemDtl_Image table: ${results}");
+      print("JSON from QRPOItemDtl_Image table: ${jsonEncode(imageList)}");
+      developer.log("json from QRPOItemDtl_Image table   >>.: $imageList");
     } catch (e) {
       debugPrint("Error in getImageFilesJson: $e");
     }
 
     return imageList;
   }
-  Future<List<Map<String, dynamic>>> getQRPOItemDtl_ItemMeasurementJson(String hdrID) async {
+
+static  Future<List<ImageModal>> getFileContentFromTableToSendSeparateImageColumn(
+ String query,String hdrID) async {
+    List<ImageModal>? imageModals;
+
+    try {
+      final db = await DatabaseHelper().database;
+
+      final List<Map<String, dynamic>> result =
+      await db.rawQuery(query, [hdrID]);
+      print("JSON from QRPOItemDtl_Image table>>: ${result}");
+      if (result.isNotEmpty) {
+        imageModals = [];
+
+        for (var row in result) {
+          int sentFile = row['FileSent'] ?? 0;
+
+          if (sentFile == 0) {
+            String? fileContent = row['fileContent'];
+
+            if (fileContent != null && fileContent.isNotEmpty && fileContent != 'null') {
+              Uri uri = Uri.parse(fileContent);
+              File testFile = File(uri.path);
+
+              if (await testFile.exists()) {
+                ImageModal imageModal = ImageModal();
+                imageModal.pRowID = row['pRowID']?.toString();
+                imageModal.qrHdrID = row['QRHdrID']?.toString();
+                imageModal.qrPOItemHdrID = row['QRPOItemHdrID']?.toString();
+                imageModal.length = "";
+
+                String fileExtn = 'jpg'; // default extension
+                String? _fileEx = row['ImageExtn'];
+                if (_fileEx != null && _fileEx.isNotEmpty && _fileEx != 'null') {
+                  fileExtn = _fileEx;
+                }
+
+                String fileName = '${row['QRHdrID']}_${row['pRowID']}.$fileExtn';
+                imageModal.fileName = fileName;
+                imageModal.fileContent = fileContent;
+                print("JSON from QRPOItemDtl_Image table: ${jsonEncode(imageModal)}");
+                imageModals.add(imageModal);
+              } else {
+                debugPrint("FILE NOT FOUND: $fileContent");
+              }
+            } else {
+              debugPrint("FILE CONTENT IS NULL");
+            }
+          } else {
+            debugPrint("FILE ALREADY SYNCED");
+          }
+        }
+      }
+
+
+
+      if (imageModals != null) {
+        debugPrint("List of images from table: ${imageModals.length}");
+      } else {
+        debugPrint("No images found in table");
+      }
+    } catch (e) {
+      debugPrint("Error: $e");
+    }
+
+    return imageModals!;
+  }
+
+  Future<List<Map<String, dynamic>>> getQRPOItemDtl_ItemMeasurementJson(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
 
     final String query = '''
@@ -904,7 +1047,6 @@ class SendDataHandler {
     }
   }
 
-
   Future<List<Map<String, dynamic>>> getPkgAppJsonData(String hdrID) async {
     final db = await DatabaseHelper().database;
 
@@ -928,8 +1070,8 @@ class SendDataHandler {
     }
   }
 
-
-  Future<List<Map<String, dynamic>>> getSampleCollectedJsonData(String hdrID) async {
+  Future<List<Map<String, dynamic>>> getSampleCollectedJsonData(
+      String hdrID) async {
     final db = await DatabaseHelper().database;
 
     try {
@@ -942,8 +1084,6 @@ class SendDataHandler {
       return [];
     }
   }
-
-
 
 // void handleToHeaderSync({
 //   required List<String> idsListForSync,
@@ -987,6 +1127,4 @@ class SendDataHandler {
 //     }
 //   }
 // }
-
-
 }

@@ -19,7 +19,7 @@ class InsLvHdrHandler {
                 'pRowID': insLvHdrModal.pRowID,
                 'LocID': insLvHdrModal.LocID,
                 'InspDescr': insLvHdrModal.InspDescr,
-                'InspAbbrv': insLvHdrModal.InspAbbrv,
+                'InspAbbrv': insLvHdrModal.inspAbbrv,
                 'recDirty': insLvHdrModal.recDirty,
                 'recEnable': insLvHdrModal.recEnable,
                 'recUser': insLvHdrModal.recUser,
@@ -46,7 +46,7 @@ class InsLvHdrHandler {
     }
 
     // Get InsLvHdr List
-    static Future<List<InsLvHdrModal>> getInsLvHdrList(BuildContext context) async {
+    static Future<List<InsLvHdrModal>> getInsLvHdrList() async {
         try {
             final Database db = await DatabaseHelper().database;
             final List<Map<String, dynamic>> queryResult =
@@ -57,7 +57,7 @@ class InsLvHdrHandler {
                 lGeneral.add(InsLvHdrModal.fromMap(row));
             }
 
-            db.close();
+
             return lGeneral;
         } catch (e) {
             print("Exception in getInsLvHdrList: $e");
@@ -66,7 +66,7 @@ class InsLvHdrHandler {
     }
     // Get data according to a particular list
     static Future<List<InsLvHdrModal>> getDataAccordingToParticularList(
-        BuildContext context, String pRowID) async {
+          String pRowID) async {
         try {
             final Database db = await DatabaseHelper().database;
             final List<Map<String, dynamic>> queryResult = await db.rawQuery(
@@ -77,7 +77,7 @@ class InsLvHdrHandler {
                 lGeneral.add(InsLvHdrModal.fromMap(row));
             }
 
-            db.close();
+
             return lGeneral;
         } catch (e) {
             print("Exception in getDataAccordingToParticularList: $e");

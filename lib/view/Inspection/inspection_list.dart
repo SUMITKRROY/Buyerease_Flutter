@@ -4,21 +4,19 @@ import 'dart:developer' as developer;
 
 import 'package:buyerease/main.dart';
 import 'package:buyerease/model/status_modal.dart';
+import 'package:buyerease/services/poitemlist/po_item_dtl_handler.dart';
 import 'package:buyerease/utils/app_constants.dart';
 import 'package:buyerease/utils/loading.dart';
 import 'package:buyerease/utils/logout.dart';
 import 'package:buyerease/view/Inspection/inspection_details.dart';
 import 'package:buyerease/view/sync_inception/sync_status_adaptor.dart';
 import 'package:flutter/material.dart';
-
-import '../../database/database_helper.dart';
+import '../../database/table/sysdata22_table.dart';
 import '../../model/inspection_model.dart';
 import '../../services/inspection_list/InspectionListHandler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
-import '../details/detail_page1.dart';
-import '../networks/endpoints.dart';
-import '../post/post_api_call.dart';
+import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
+
 import 'package:buyerease/config/theame_data.dart';
 
 class InspectionList extends StatefulWidget {
@@ -36,49 +34,102 @@ class _InspectionListState extends State<InspectionList> {
   Set<String> syncedItems = {}; // Track synced items
   String searchQuery = ''; // Add search query state
   List<InspectionModal> inspectionList = [];
+  List< Map<String,dynamic>> statusList1 = [];
+  Map<String, String> statusMap = {};
+
 
   @override
   void initState() {
     super.initState();
     //loadData();
+    fetchAndShowStatus();
     getLocalList("");
 
+  }
+  void _saveChanges() async {
+    if (inspectionList.isEmpty) return;
+    final item = inspectionList.first;
+
+    // Store the original status to check if it changed
+    String? originalStatus = item.status;
+
+
+    item.status = " " ;
+
+
+
+
+    // ✅ Update in DB
+    await InspectionListHandler.updatePOItemHdr(item);
+
+    Fluttertoast.showToast(msg: "Changes saved!");
+
+    setState(() {
+      inspectionList[0] = item;
+    });
+
+  }
+
+
+
+  void fetchAndShowStatus() async {
+    Sysdata22Table table = Sysdata22Table();
+    statusList1 = await table.getMainDescrAndMainID();
+
+    // Build a lookup: MainID -> MainDescr
+    statusMap = { for (var s in statusList1) s["MainID"]: s["MainDescr"] };
+
+    developer.log("sysdata22Modal123 $statusList1");
+    developer.log("statusMap $statusMap");
+    setState(() {}); // refresh UI if needed
   }
 
   Future<void> getLocalList(String searchStr) async {
     setState(() {
       isLoading = true;
     });
+
     try {
       List<InspectionModal> localList = await InspectionListHandler.getInspectionList(searchStr);
-      setState(() {
-        inspectionList.clear();
-        if (localList.isNotEmpty) {
-          inspectionList.addAll(localList);
-          print("Fetched inspections: ${inspectionList.length}");
-          for (var item in localList) {
-            print("pRowID: ${item.pRowID}, QRHdrID: ${item.qrHdrID}");
+
+      inspectionList.clear();
+      if (localList.isNotEmpty) {
+        inspectionList.addAll(localList);
+        print("Fetched inspections: ${inspectionList.length}");
+
+        // Run async calls separately, not inside setState
+        for (var item in localList) {
+          print("pRowID: ${item.pRowID}, status: ${item.status} QRHdrID: ${item.qrHdrID}");
+          if (item.status.toString() == "0 ") {
+            item.status = "";
+           // await InspectionListHandler.clearStatus(item.pRowID!);
           }
-        } else {
-          Fluttertoast.showToast(msg: "Inspection did not find");
+
         }
+      } else {
+        Fluttertoast.showToast(msg: "Inspection did not find");
+      }
+
+      // Now update the state after async work
+      setState(() {
         isLoading = false;
       });
+
     } catch (e) {
       debugPrint("Error fetching local list: $e");
       Fluttertoast.showToast(msg: "Failed to load inspections");
-    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
+
   Future<void> getCloseList(String searchStr) async {
     setState(() {
       isLoading = true;
     });
     try {
-     
+
       List<InspectionModal> localList = await InspectionListHandler.getSyncedInspectionList(searchStr);
       setState(() {
         inspectionList.clear();
@@ -187,7 +238,7 @@ class _InspectionListState extends State<InspectionList> {
                 ));
                 // handleSubmitToSync(context);
 
-                
+
 
               },
               child: const Text('Sync', style: TextStyle(color: ColorsData.primaryColor)),
@@ -342,8 +393,8 @@ class _InspectionListState extends State<InspectionList> {
           ),
         ],
       ),
-      body: isLoading 
-        ? const Center(child: Loading()) 
+      body: isLoading
+        ? const Center(child: Loading())
         : Column(
           children: [
             Padding(
@@ -374,7 +425,7 @@ class _InspectionListState extends State<InspectionList> {
               ),
             ),
             Expanded(
-              child: filteredItems.isEmpty 
+              child: filteredItems.isEmpty
                 ? Center(
                     child: Text(
                       searchQuery.isEmpty
@@ -392,36 +443,47 @@ class _InspectionListState extends State<InspectionList> {
                     itemBuilder: (context, index) {
                       final item = filteredItems[index];
                       final isSelected = selectedItems.contains(item.pRowID);
-                      
+
                       return GestureDetector(
-                        onTap: () {
-                          developer.log("item qrHdrID ${item.qrHdrID}");
+                        onTap: () async {
+                          developer.log("item qrHdrID ${jsonEncode(item)}");
+
                           if (selectedItems.isEmpty) {
-                            Navigator.push(
+                            // ✅ Await Navigator.push so result isn't always null
+                            final result = await Navigator.push<bool>(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => InspectionDetailScreen(data: {
-                                  'pRowID': item.pRowID,
-                                  'inspectionDt': item.inspectionDt,
-                                  'activity': item.activity,
-                                  'customer': item.customer,
-                                  'poListed': item.poListed,
-                                  'itemListId': item.itemListId,
-                                  'vendor': item.vendor,
-                                  'vendorContact': item.vendorContact,
-                                  'vendorAddress': item.vendorAddress,
-                                  'qr': item.qr,
-                                  'inspector': item.inspector,
-                                  'status': item.status,
-                                  'qrHdrID': item.qrHdrID,
-                                  'isSync' : item.IsSynced
-                                })
-                              )
+                                builder: (_) => InspectionDetailScreen(
+                                  data: {
+                                    'pRowID': item.pRowID,
+                                    'inspectionDt': item.inspectionDt,
+                                    'activity': item.activity,
+                                    'customer': item.customer,
+                                    'poListed': item.poListed,
+                                    'itemListId': item.itemListId,
+                                    'vendor': item.vendor,
+                                    'vendorContact': item.vendorContact,
+                                    'vendorAddress': item.vendorAddress,
+                                    'qr': item.qr,
+                                    'inspector': item.inspector,
+                                    'status': item.status,
+                                    'qrHdrID': item.qrHdrID,
+                                    'isSync': item.IsSynced,
+                                  },
+                                ),
+                              ),
                             );
+
+                            developer.log("object >>>>>>> $result");
+
+                            if (result != true) {
+                              refreshUi();
+                            }
                           } else {
                             toggleSelection(item.pRowID ?? "");
                           }
                         },
+
                         onLongPress: () {
                           toggleSelection(item.pRowID ?? "");
                         },
@@ -480,7 +542,11 @@ class _InspectionListState extends State<InspectionList> {
                                 _buildInfoRow('Vendor Address', item.vendorAddress ?? ""),
                                 _buildInfoRow('QR', item.qr ?? ""),
                                 _buildInfoRow('Inspector', item.inspector ?? ""),
-                                _buildInfoRow('Status', item.status ?? ""),
+                                _buildInfoRow(
+                                  'Status',
+                                  statusMap[item.status] ?? item.status ?? "", // show MainDescr, fallback to ID
+                                ),
+
                               ],
                             ),
                           ),
@@ -508,7 +574,7 @@ class _InspectionListState extends State<InspectionList> {
             ),
           ),
           Expanded(
-            child: Text(value ?? ''),
+            child: Text(value),
           ),
         ],
       ),
@@ -556,5 +622,11 @@ class _InspectionListState extends State<InspectionList> {
       }
     }
   }
+void refreshUi(){
+    setState(() {
+      //getLocalList("");
+      toggleOpenClosed();
+    });
 
+}
 }

@@ -4,8 +4,8 @@
 // import 'package:flutter/material.dart';
 // import 'package:intl/intl.dart';
 //
-// import '../over_all_result/over_all_result.dart';
-// import '../po/po_page.dart';
+// import '../over_all_result/item_level_tab.dart';
+// import '../po/po_level_tab.dart';
 //
 // class DetailPageOne extends StatefulWidget {
 //   const DetailPageOne({super.key, required this.id});

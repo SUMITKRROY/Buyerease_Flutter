@@ -1,8 +1,38 @@
 import 'package:buyerease/database/database_helper.dart';
 import 'package:buyerease/model/quality_level_model.dart';
 
+import '../model/quality_modal/quality_level_modal.dart';
+
 class QualityLevelHandler {
   static const String _tag = 'QualityLevelHandler';
+
+  static Future<bool> insertQualityLevelMaster(QualityLevelModal qualityLevelModel) async {
+    try {
+      final db = await DatabaseHelper().database;
+      final data = qualityLevelModel.toJson();
+
+      // Try to update first
+      int rows = await db.update(
+        'QualityLevel',
+        data,
+        where: 'pRowID = ?',
+        whereArgs: [qualityLevelModel.pRowID],
+      );
+
+      if (rows == 0) {
+        // No rows updated, insert instead
+        int result = await db.insert('QualityLevel', data);
+        print('QualityLevel insert result: $result');
+      } else {
+        print('QualityLevel update result: $rows');
+      }
+
+      return true;
+    } catch (e) {
+      print('Exception while inserting QualityLevel: $e');
+      return false;
+    }
+  }
 
   static Future<List<QualityLevelModel>> getQualityLevels() async {
     final List<QualityLevelModel> qualityLevels = [];
@@ -27,4 +57,40 @@ class QualityLevelHandler {
     }
     return qualityLevels;
   }
+
+
+  static Future<List<QualityLevelModel>> getDataAccordingToParticularList(String pRowID) async {
+    final db = await DatabaseHelper().database;
+
+    final String query = '''
+    SELECT * FROM QualityLevel
+    WHERE pRowID = ?
+  ''';
+
+    final List<Map<String, dynamic>> result = await db.rawQuery(query, [pRowID]);
+
+    return result.map((row) => QualityLevelModel.fromMap(row)).toList();
+  }
+
+  static Future<List<QualityLevelModel>> getQualityLevelList() async {
+    final List<QualityLevelModel> resultList = [];
+
+    try {
+      final db = await DatabaseHelper().database;
+
+      final String query = 'SELECT * FROM QualityLevel';
+      final List<Map<String, dynamic>> result = await db.rawQuery(query);
+
+      for (var row in result) {
+        resultList.add(QualityLevelModel.fromMap(row));
+      }
+    } catch (e) {
+      print('Error in getQualityLevelList: $e');
+    }
+
+    return resultList;
+  }
+
+
+
 } 

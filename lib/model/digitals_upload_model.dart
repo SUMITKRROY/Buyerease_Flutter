@@ -8,6 +8,8 @@ class DigitalsUploadModel {
   String? imageName;
   String? imageExtn;
   String? selectedPicPath;
+  String? fileContent;
+
   List<String>? imageArray;
 
   DigitalsUploadModel({
@@ -15,6 +17,7 @@ class DigitalsUploadModel {
     this.title,
     this.imageName,
     this.imageExtn,
+    this.fileContent,
     this.selectedPicPath,
     this.imageArray,
   });

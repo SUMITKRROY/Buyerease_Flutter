@@ -1,11 +1,11 @@
-class SampleCollectedModel {
+class SampleCollectedModal {
   String? pRowID;
   String? locID;
   String? samplePurposeID;
   int? sampleNumber;
   String? recDt;
 
-  SampleCollectedModel({
+  SampleCollectedModal({
     this.pRowID,
     this.locID,
     this.samplePurposeID,
@@ -13,8 +13,8 @@ class SampleCollectedModel {
     this.recDt,
   });
 
-  factory SampleCollectedModel.fromJson(Map<String, dynamic> json) {
-    return SampleCollectedModel(
+  factory SampleCollectedModal.fromJson(Map<String, dynamic> json) {
+    return SampleCollectedModal(
       pRowID: json['pRowID'],
       locID: json['locID'],
       samplePurposeID: json['samplePurposeID'],

@@ -187,6 +187,7 @@ class FEnumerations {
   static const String syncHeaderTable = "HEADER";
   static const String syncSizeQuantityTable = "SIZE QUANTITY";
   static const String syncImagesTable = "IMAGE";
+  static const String syncImagesTable1 = "TOTAL IMAGE";
   static const String syncWorkmanshipTable = "WORKMANSHIP";
   static const String syncItemMeasurementTable = "ITEM MEASUREMENT";
   static const String syncFindingTable = "FINDING";

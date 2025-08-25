@@ -58,32 +58,45 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812), // iPhone 13 Pro Max dimensions
+      designSize: const Size(375, 812), // default — will override inside builder
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MultiBlocProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => TimerData()),
-            BlocProvider<CommunityCodeCubit>(create: (context) => CommunityCodeCubit()),
-            BlocProvider<LoginCubit>(create: (context) => LoginCubit()),
-            BlocProvider<SyncCubit>(create: (context) => SyncCubit()),
-            BlocProvider<DefectMasterCubit>(create: (context) => DefectMasterCubit()),
-            BlocProvider<DownloadImageCubit>(create: (context) => DownloadImageCubit()),
-            BlocProvider<SyncToServerCubit>(create: (context) => SyncToServerCubit()),
-          ],
+        final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+        final designSize = isTablet ? const Size(768, 1024) : const Size(375, 812);
 
-          child: MaterialApp(
-            title: 'BuyersEase',
-            debugShowCheckedModeBanner: false,
-            theme: lightMode,
-            // darkTheme: darkMode,
-            // themeMode: ThemeMode.system,
-            initialRoute: RoutePath.splash,
-            onGenerateRoute: MyRoutes.generateRoute,
-          ),
+        return ScreenUtilInit(
+          designSize: designSize,
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) {
+            return MultiProvider(
+              providers: [
+                ChangeNotifierProvider(create: (_) => TimerData()),
+              ],
+              child: MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (_) => CommunityCodeCubit()),
+                  BlocProvider(create: (_) => LoginCubit()),
+                  BlocProvider(create: (_) => SyncCubit()),
+                  BlocProvider(create: (_) => DefectMasterCubit()),
+                  BlocProvider(create: (_) => DownloadImageCubit()),
+                  BlocProvider(create: (_) => SyncToServerCubit()),
+                ],
+                child: MaterialApp(
+                  title: 'BuyersEase',
+                  debugShowCheckedModeBanner: false,
+                  theme: lightMode,
+                  initialRoute: RoutePath.splash,
+                  onGenerateRoute: MyRoutes.generateRoute,
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 }
+
+

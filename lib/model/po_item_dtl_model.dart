@@ -104,6 +104,7 @@ class POItemDtl {
   String? pkgMePalletInspectionResultID;
   String? pkgMeUnitInspectionResultID;
   String? pkgMeInnerInspectionResultID;
+  String? pkgMeShippingInspectionResultID;
   String? pkgMeRemark;
   String? onSiteTestRemark;
   String? qtyRemark;
@@ -189,6 +190,7 @@ class POItemDtl {
   String? qrItemBaseMaterialAddOnInfo;
   String? barcodeInspectionResult;
   String? onSiteTestInspectionResult;
+  String? onSiteTestInspectionResultID;
   String? itemMeasurementInspectionResult;
   String? workmanshipInspectionResult;
   String? overallInspectionResult;

@@ -1,16 +1,25 @@
 
+import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
+import 'dart:typed_data';   // 👈 add this
 
+import 'package:buyerease/model/po_item_dtl_model.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '../database/table/qr_po_item_dtl_image_table.dart';
 import '../database/table/qr_po_item_dtl_table.dart';
+import '../model/digitals_upload_model.dart';
+import '../model/po_item_pkg_app_detail_model.dart';
+import '../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
+import '../utils/app_constants.dart';
 import '../utils/camera.dart';
 
 class AddImageIcon extends StatefulWidget {
   final String title;
   final String id;
   final String pRowId;
+  final POItemDtl poItemDtl;
 
   final VoidCallback? onImageAdded;
   final bool isCountShow;
@@ -20,7 +29,7 @@ class AddImageIcon extends StatefulWidget {
     required this.title,
     required this.id,
     this.onImageAdded,
-    this.isCountShow = false, required this.pRowId,
+    this.isCountShow = false, required this.pRowId, required this.poItemDtl,
   });
 
   @override
@@ -29,7 +38,8 @@ class AddImageIcon extends StatefulWidget {
 
 class _AddImageIconState extends State<AddImageIcon> {
   final ImagePickerService _imagePickerService = ImagePickerService();
-
+  late POItemDtl poItemDtl;
+  POItemPkgAppDetail pOItemPkgAppDetail =  POItemPkgAppDetail();
   bool loading = true;
   bool noData = false;
   String qrHdrID = "";
@@ -39,6 +49,7 @@ class _AddImageIconState extends State<AddImageIcon> {
   @override
   void initState() {
     super.initState();
+    poItemDtl = widget.poItemDtl!;
     syncData();
   }
 
@@ -46,13 +57,12 @@ class _AddImageIconState extends State<AddImageIcon> {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
       final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,   widget.pRowId,);
+      developer.log("developer ${jsonEncode(poItemDtl)}");
       if (mounted) {
         setState(() {
-          if (items.isNotEmpty) {
-            qrHdrID = items.first.qrHdrID ?? "";
-            qrPOItemHdrID = items.first.qrpoItemHdrID ?? "";
-          }
-        });
+          qrHdrID = poItemDtl.qrHdrID ?? "";
+          qrPOItemHdrID = poItemDtl.qrpoItemHdrID ?? "";
+                });
       }
       await getImageCount();
     } catch (e) {
@@ -117,23 +127,19 @@ class _AddImageIconState extends State<AddImageIcon> {
     }
 
     final localPath = await _saveImageLocally(imageFile);
-    final now = DateTime.now().toIso8601String();
 
-    final map = {
-      'QRHdrID': qrHdrID,
-      'title': widget.title,
-      'LocID': "DEL",
-      'imageName': "ImNameDEL",
-      'QRPOItemHdrID': qrPOItemHdrID,
-      'ImagePathID': localPath,
-      'recDt': now,
-      'recAddDt': now,
-    };
+    // ✅ Read file as bytes & encode to Base64
+    Uint8List bytes = await imageFile.readAsBytes();
+    String base64Content = base64Encode(bytes);
 
-    await QrPoItemDtlImageTable().insert(map);
+    await addASDigitalPkgAppear(
+      imagePathList: [localPath],
+      title: widget.title,
+      fileContent: null, // 👈 pass it here
+    );
+
     await getImageCount();
 
-    // ✅ Trigger the parent callback after successful save
     widget.onImageAdded?.call();
   }
 
@@ -205,7 +211,44 @@ class _AddImageIconState extends State<AddImageIcon> {
       },
     );
   }
+  Future<void> addASDigitalPkgAppear({
+    required List<String> imagePathList,
+    required String title,
+    String? fileContent, // 👈 new
+  }) async {
+    if (imagePathList.isNotEmpty) {
+      for (String imagePath in imagePathList) {
+        DigitalsUploadModel modal = DigitalsUploadModel(
+          selectedPicPath: imagePath,
+          title: title,
+          imageExtn: FEnumerations.imageExtn,
+          fileContent: fileContent, // 👈 save base64 content
+          pRowID: await ItemInspectionDetailHandler().generatePK(
+            FEnumerations.tableNameQrpoItemDtlImage,
+          ),
+        );
 
+        String? pRowId = await updateDBWithImage(modal);
+        if (pRowId != null) {
+          print("Inserted new image with pRowId $pRowId");
+          getImageCount();
+        }
+      }
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Attachment added successfully')),
+      // );
+    }
+  }
+
+
+  Future<String?> updateDBWithImage(DigitalsUploadModel digitalsUploadModal) {
+
+    return ItemInspectionDetailHandler().updateImage(
+      qrHdrID:  poItemDtl.qrHdrID ?? "", qrPOItemHdrID: poItemDtl.qrpoItemHdrID ?? "", digitalsUploadModal: digitalsUploadModal,
+    );
+
+  }
 }
 
 
@@ -306,6 +349,7 @@ class FullScreenImage extends StatelessWidget {
       ),
     );
   }
+
 }
 
 

@@ -7,7 +7,7 @@ import 'package:buyerease/database/database_helper.dart';
 import '../model/digitals_upload_model.dart';
 import '../model/hologram_model.dart';
 import '../model/inspection_model.dart';
-import '../model/item_measurement_model.dart';
+import '../model/item_measurement_modal.dart';
 import '../model/po_item_dtl_model.dart';
 import '../model/quality_parameter_model.dart';
 import '../model/workmanship_model.dart';
@@ -459,19 +459,19 @@ class GenUtils {
     return jsonEncode(digitalsUploadModal.toJson());
   }
 
-  static String serializeItemMeasurementModal(ItemMeasurementModel itemMeasurementModal) {
+  static String serializeItemMeasurementModal(ItemMeasurementModal itemMeasurementModal) {
     return jsonEncode(itemMeasurementModal.toJson());
   }
 
-  static ItemMeasurementModel deSerializeItemMeasurement(String json) {
-    return ItemMeasurementModel.fromJson(jsonDecode(json));
+  static ItemMeasurementModal deSerializeItemMeasurement(String json) {
+    return ItemMeasurementModal.fromJson(jsonDecode(json));
   }
 
-  static WorkmanshipModel deSerializeWorkmanship(String json) {
-    return WorkmanshipModel.fromJson(jsonDecode(json));
+  static WorkManShipModel deSerializeWorkmanship(String json) {
+    return WorkManShipModel.fromJson(jsonDecode(json));
   }
 
-  static String serializeWorkmanship(WorkmanshipModel workManShipModel) {
+  static String serializeWorkmanship(WorkManShipModel workManShipModel) {
     return jsonEncode(workManShipModel.toJson());
   }
 
@@ -568,6 +568,10 @@ class GenUtils {
     
     return columns;
   }
+  static String convertToBase64(String data) {
+    String base64String = base64.encode(utf8.encode(data));
+    return base64String;
+  }
 }
 
 // Helper classes
@@ -600,6 +604,8 @@ class ListDialogClickListener {
     required this.onCancel,
   });
 }
+
+
 
 // This is a mock class for demonstrating Intent functionality
 // In Flutter, Intents are typically handled differently

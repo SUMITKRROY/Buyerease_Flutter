@@ -11,6 +11,10 @@ final class SyncToServerSuccess extends SyncToServerState {
   final dynamic responseData;
 
   SyncToServerSuccess(this.responseData);
+}final class SyncToSingleImageSuccess extends SyncToServerState {
+  final String pRowId;
+
+  SyncToSingleImageSuccess(this.pRowId);
 }
 
 final class SyncToServerFailure extends SyncToServerState {

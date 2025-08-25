@@ -1,13 +1,21 @@
-import 'dart:developer' as Developer;
+import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/utils/app_constants.dart';
 
 import '../../model/status_modal.dart';
+import '../../model/sync/ImageModal.dart';
 import '../../provider/sync_to_server/sync_to_server_cubit.dart';
-import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
+import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../../services/sync/SendDataHandler.dart';
 import '../../services/sync/SyncDataHandler.dart';
 
@@ -56,7 +64,7 @@ class _SyncStatusPageState extends State<SyncStatusPage> {
     });
   }
 
-  void startSyncStep() {
+  Future<void> startSyncStep() async {
     if (_currentSyncStep < tableList.length) {
       String tableName = tableList[_currentSyncStep];
       developer.log("Starting sync for: $tableName");
@@ -70,6 +78,9 @@ class _SyncStatusPageState extends State<SyncStatusPage> {
           break;
         case 'IMAGE':
           handleToImageSync(idsListForSync: idsListForSync);
+          break;
+          case 'TOTAL IMAGE':
+         await handleToSingleImageSync();
           break;
         case 'WORKMANSHIP':
           handleToWorkmanShipSync(idsListForSync: idsListForSync);
@@ -131,14 +142,16 @@ class _SyncStatusPageState extends State<SyncStatusPage> {
     });
   }
 
-  void updateSyncTitleList(String tableName, String title) {
+  void updateSyncTitleList(String tableName, String message) {
     setState(() {
-      final index = statusModalList.indexWhere((e) => e.tableName == tableName);
-      if (index != -1) {
-        statusModalList[index].title = title;
-      }
+      final modal = statusModalList.firstWhere(
+            (modal) => modal.tableName == tableName,
+
+      );
+      modal.title = message;
     });
   }
+
 
   void handleToHeaderSync(
       {required BuildContext context,
@@ -231,8 +244,11 @@ class _SyncStatusPageState extends State<SyncStatusPage> {
             "MsgDetail": ""
           }
         };
-
-        await context.read<SyncToServerCubit>().sendInspection(inspectionData);
+developer.log("inspectionData data detail: $inspectionData");
+       bool success =  await context.read<SyncToServerCubit>().sendInspection(inspectionData);
+       if(success){
+         //handleToSingleImageSync();
+       }
       } else {
         updateSyncList("IMAGE", FEnumerations.syncFailedStatus);
         updateSyncTitleList("IMAGE", "No image data found.");
@@ -242,6 +258,88 @@ class _SyncStatusPageState extends State<SyncStatusPage> {
       updateSyncList("IMAGE", FEnumerations.syncFailedStatus);
       updateSyncTitleList("IMAGE", e.toString());
       moveToNextStep();
+    }
+  }
+
+
+ Future <void> handleToSingleImageSync() async {
+    if (idsListForSync == null || idsListForSync.isEmpty) return;
+
+    updateSyncList(FEnumerations.syncImagesTable, FEnumerations.syncInProcessStatus);
+
+    List<ImageModal> imagesList   = await SendDataHandler().getImagesFileArrayData(idsListForSync);
+    if (imagesList.isEmpty) {
+      updateSyncList(FEnumerations.syncImagesTable, FEnumerations.syncSuccessStatus);
+      print("NO DATA FOUND FROM IMAGES TO SYNC.");
+      return;
+    }
+    developer.log("json object imagesList ${jsonEncode(imagesList)}");
+    List<String> syncedList = [];
+
+    for (var imageModal in imagesList) {
+      // Map<String, dynamic> data = {
+      //   "FileType": 0,
+      //   "FileData": {
+      //     "pRowID": imageModal.pRowID,
+      //     "QRHdrID": imageModal.qrHdrID,
+      //     "QRPOItemHdrID": imageModal.qrPOItemHdrID,
+      //     "Length": imageModal.length,
+      //     "FileName": imageModal.fileName,
+      //     "fileContent":imageModal.fileContent
+      //   }
+      // };
+
+      Map<String, dynamic> data = {};
+      Map<String, dynamic> fileData = {};
+      data['FileType'] = '0';
+
+// Read the file
+      File file = File(imageModal.imagePathID ?? '');
+      if (!await file.exists()) return;
+
+      Uint8List bytes = await file.readAsBytes(); // this is already Uint8List
+
+// Decode the image
+      img.Image? bitmap = img.decodeImage(bytes.buffer.asUint8List()); // ensures Uint8List
+      if (bitmap != null) {
+        img.Image resized = img.copyResize(bitmap, width: 800); // example resizing
+        String base64Str = base64Encode(img.encodeJpg(resized));
+        String fileExtn = 'jpg'; // default extension
+        String fileName = '${imageModal.qrHdrID}_${imageModal.pRowID}.$fileExtn';
+
+         fileData = {
+          'pRowID': imageModal.pRowID,
+          'QRHdrID': imageModal.qrHdrID,
+          'QRPOItemHdrID': imageModal.qrPOItemHdrID,
+          'Length': imageModal.length,
+          'FileName': fileName,
+          'fileContent': base64Str,
+        };
+      }
+       data = {
+        "FileType": 0,
+        "FileData": fileData
+      };
+      updateSyncTitleList(
+          FEnumerations.syncImagesTable,
+          "${syncedList.length + 1}/${imagesList.length} Syncing..."
+      );
+      developer.log("json object $data");
+      String success = await context.read<SyncToServerCubit>().sendSingleImageData(data);
+
+      if (success.isNotEmpty) {
+        syncedList.add(success);
+        await ItemInspectionDetailHandler().updateImageToSync(success);
+
+        updateSyncTitleList(
+            FEnumerations.syncImagesTable,
+            "${syncedList.length}/${imagesList.length} Synced"
+        );
+
+        if (syncedList.length == imagesList.length) {
+          updateSyncList(FEnumerations.syncImagesTable, FEnumerations.syncSuccessStatus);
+        }
+      }
     }
   }
 
@@ -647,6 +745,9 @@ if(success){
   Widget build(BuildContext context) {
     return BlocListener<SyncToServerCubit, SyncToServerState>(
       listener: (context, state) {
+        if (_currentSyncStep >= tableList.length) {
+          return; // stop listening once all tables are done
+        }
         String currentTable = tableList[_currentSyncStep];
         developer.log("Current table Name $currentTable");
 
@@ -744,5 +845,21 @@ class SyncStatusItem extends StatelessWidget {
             )
           : null,
     );
+  }
+}
+Future<String> convertImageToBase64(String imagePath) async {
+  try {
+    File imageFile = File(imagePath);
+
+    // Read the file as bytes
+    List<int> imageBytes = await imageFile.readAsBytes();
+
+    // Convert bytes to Base64 string
+    String base64Image = base64Encode(imageBytes);
+
+    return base64Image;
+  } catch (e) {
+    print("Error converting image to Base64: $e");
+    return "";
   }
 }

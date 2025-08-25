@@ -1,4 +1,4 @@
-class SysData22Model {
+class SysData22Modal {
   String genID;
   String mainID;
   String subID;
@@ -14,7 +14,7 @@ class SysData22Model {
   String moduleAccess;
   String moduleID;
 
-  SysData22Model({
+  SysData22Modal({
     required this.genID,
     required this.mainID,
     required this.subID,
@@ -50,8 +50,8 @@ class SysData22Model {
     };
   }
 
-  factory SysData22Model.fromMap(Map<String, dynamic> map) {
-    return SysData22Model(
+  factory SysData22Modal.fromMap(Map<String, dynamic> map) {
+    return SysData22Modal(
       genID: map['GenID'] ?? '',
       mainID: map['MainID'] ?? '',
       subID: map['SubID'] ?? '',

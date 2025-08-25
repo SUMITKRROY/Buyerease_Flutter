@@ -76,22 +76,38 @@ class Sysdata22Table {
 // Get and print MainDescr values where MasterName is "Status", grouped by MainID and ordered by MainID
   Future<List<String>> getAndPrintMainDescrWhereStatus() async {
     final db = await DatabaseHelper().database;
+
     final List<Map<String, dynamic>> result = await db.query(
-    TABLE_NAME ,
-    where : "$masterName = ?" ,
-    whereArgs: ['Status'],
-    groupBy:  "$mainID ",
-    orderBy:   "$mainID");
+      TABLE_NAME,
+      columns: ['MainDescr', 'MainID'],
+      where: "$masterName = ?",
+      whereArgs: ['Status'],
+      groupBy: "MainID",
+      orderBy: "MainID",
+    );
 
-    // Extract and print MainDescr from each row
-    List<String> status = result.map((row) => row[mainDescr] as String).toList();
+    // Combine MainID + MainDescr into strings
+    List<String> status = result.map(
+            (row) => "${row['MainID']} - ${row['MainDescr']}"
+    ).toList();
 
-    // Print each MainDescr
+    // Print each combined status
     for (var s in status) {
-      print('Status: $s');
+      print('Status is here: $s');
     }
 
     return status;
+  }
+  Future<List<Map<String, dynamic>>> getMainDescrAndMainID() async {
+    final db = await DatabaseHelper().database;
+    return await db.query(
+      Sysdata22Table.TABLE_NAME,
+      columns: [Sysdata22Table.mainDescr, Sysdata22Table.mainID],
+      where: "$masterName = ?",
+      whereArgs: ['Status'],
+      orderBy: "MainID",
+      distinct: true
+    );
   }
 
   // Delete a record by GenID

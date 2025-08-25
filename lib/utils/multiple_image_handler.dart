@@ -71,6 +71,7 @@ class GenUtils {
             ),
         );
     }
+ 
 }
 
 // Callback for bitmap result

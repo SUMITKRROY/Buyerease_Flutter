@@ -378,6 +378,16 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
     );
   }
 
+
+  Future<void> updateRecordByItemId(String rowID, Map<String, dynamic> values) async {
+    final db = await DatabaseHelper().database;
+    await db.update(
+      TABLE_NAME,
+      values,
+      where: '$pRowID = ?',
+      whereArgs: [rowID],
+    );
+  }
   // Delete a record by pRowID
   Future<int> deleteRecord(String rowID) async {
     final db = await DatabaseHelper().database;
@@ -387,4 +397,30 @@ CREATE TABLE IF NOT EXISTS $TABLE_NAME (
       whereArgs: [rowID],
     );
   }
+
+  Future<List<Map<String, dynamic>>> getByItemID(String itemID) async {
+    final db = await DatabaseHelper().database;
+    return await db.rawQuery('''
+    SELECT $overallInspectionResultID, * 
+    FROM $TABLE_NAME 
+    WHERE $itemID = ?
+  ''', [itemID]);
+  }
+// Update Overall_InspectionResultID by ItemID
+  Future<void> updateOverallInspectionResultByItemID(
+      String itemIDValue, String newValue) async {
+    final db = await DatabaseHelper().database;
+    await db.rawUpdate(
+      '''
+    UPDATE $TABLE_NAME
+    SET $overallInspectionResultID = ?
+    WHERE $itemID = ?
+    ''',
+      [newValue, itemIDValue],
+    );
+  }
+
+
+
+
 }

@@ -2,7 +2,7 @@ import 'package:buyerease/config/api_route.dart';
 import 'package:buyerease/database/database_helper.dart';
 import 'package:buyerease/database/table/qr_feedback_hdr_table.dart';
 import 'package:buyerease/database/table/qr_po_item_dtl_table.dart';
-import 'package:buyerease/services/po_item_dtl_handler.dart';
+import 'package:buyerease/services/poitemlist/po_item_dtl_handler.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:developer' as developer;
 
@@ -10,7 +10,7 @@ import '../../model/inspection_model.dart';
 import '../../utils/gen_utils.dart';
 
 import 'get_data_handler.dart';
-import 'inspection_list/ItemInspectionDetailHandler.dart';
+import 'ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 
 class InspectionListHandler {
   static const String TAG = "InspectionListHandler";

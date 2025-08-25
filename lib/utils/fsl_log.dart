@@ -2,12 +2,10 @@ import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
-// Placeholder for FClientConfig (to be implemented)
-class FClientConfig {
-    static const int logFileMaxSizeInKB = 1024; // Default max size: 1MB
-    static final String locID = "DEL";
-}
+import 'FClientConfig.dart';
+
 
 class FslLog {
     static File? _logFile;
@@ -135,5 +133,27 @@ class FslLog {
     // Get file size in KB
     static int _fileSize(File file) {
         return file.lengthSync() ~/ 1024;
+    }
+
+
+    static Future<void> shareLog() async {
+        try {
+            if (_logFile == null || !await _logFile!.exists()) {
+// Try to initialize if not already done
+                bool init = await initializeLog();
+                if (!init || _logFile == null) {
+                    developer.log('No log file available to share', name: 'FslLog');
+                    return;
+                }
+            }
+
+            await Share.shareXFiles(
+                [XFile(_logFile!.path)],
+                text: 'Application Log File',
+            );
+        } catch (e, stackTrace) {
+            developer.log('Error sharing log file: $e',
+                name: 'FslLog', stackTrace: stackTrace);
+        }
     }
 }

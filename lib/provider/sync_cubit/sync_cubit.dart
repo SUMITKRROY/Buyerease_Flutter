@@ -17,12 +17,14 @@ import 'package:buyerease/database/table/size_quantity_table.dart';
 import 'package:buyerease/database/table/test_report_table.dart';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/utils/app_constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
+import '../../database/database_helper.dart';
 import '../../database/table/gen_quality_parameter_product_map_table.dart';
 import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../database/table/quality_level_table.dart';
 import '../../database/table/sysdata22_table.dart';
-import '../../services/inspection_list/ItemInspectionDetailHandler.dart';
+import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../master_repo.dart';
 
 part 'sync_state.dart';
@@ -60,7 +62,7 @@ class SyncCubit extends Cubit<SyncState> {
             FEnumerations.tableQrpoItemHdr: (data) => QRPOItemHdrTable().insert(data),
             FEnumerations.tableQrpoItemDtl: (data) => QRPOItemDtlTable().insert(data),
             FEnumerations.tableQrpoItemDtlImage: (data) => _processQrpoItemDtlImage([data]),
-            FEnumerations.tableQrpoIntimationDetails: (data) => QrPoIntimationDetailsTable().insert(data),
+ /*         // FEnumerations.tableQrpoIntimationDetails: (data) => QrPoIntimationDetailsTable().insert(data),*/
             FEnumerations.tableGenMst: (data) => GenMst().insert(data),
             FEnumerations.tableSysData22: (data) => Sysdata22Table().insert(data),
             FEnumerations.tableQualityLevel: (data) => QualityLevelTable().insert(data),
@@ -98,6 +100,14 @@ class SyncCubit extends Cubit<SyncState> {
               // print("Processing tablename ${tableName}");
               // print("Processing tableData  ${tableData}");
               _processQrpoItemDtlImage(tableData); // <-- send the full list
+              continue;
+            }
+
+            // Custom handling for QrpoItemDtlImage
+            if (tableName == FEnumerations.tableQrpoIntimationDetails) {
+              print("Processing tablename ${tableName}");
+              print("Processing tableData  ${tableData}");
+              handleQRPOIntimationDetails(tableData); // <-- send the full list
               continue;
             }
 
@@ -154,6 +164,127 @@ void _processQrpoItemDtlImage(List<dynamic> dataList) async {
       print("Invalid row (not Map): $row");
     }
   }
+
+
+
+
+
 }
 
 
+
+
+Future<void> handleQRPOIntimationDetails(List<dynamic> jsonArrayQRPOIntimationDetails) async {
+  if (jsonArrayQRPOIntimationDetails.isNotEmpty) {
+    for (var item in jsonArrayQRPOIntimationDetails) {
+      if (item is Map<String, dynamic>) {
+        await updateOrInsertQRPOIntimationDetails(item);
+      } else {
+        debugPrint("QRPOIntimationDetails item is null or not a JSON object");
+      }
+    }
+  }
+}
+
+Future<int> updateOrInsertQRPOIntimationDetails(Map<String, dynamic> json) async {
+  final db = await DatabaseHelper().database;
+
+  final Map<String, dynamic> contentValues = {};
+
+  try {
+    // Process all fields synchronously first
+    for (String key in json.keys) {
+      if (key == 'pRowID') {
+        // Always generate a new pRowID for the current record
+        String newPRowID = await ItemInspectionDetailHandler().generatePK("QRPOIntimationDetails");
+        contentValues[key] = newPRowID;
+        debugPrint("Generated new pRowID: $newPRowID");
+      } else if (key == 'BE_pRowID') {
+        // Store the original pRowID as BE_pRowID for reference
+        contentValues[key] = json[key]?.toString();
+      } else {
+        contentValues[key] = json[key]?.toString();
+      }
+    }
+    
+    // Ensure pRowID is always set
+    if (!contentValues.containsKey('pRowID') || contentValues['pRowID'] == null || contentValues['pRowID'].toString().isEmpty) {
+      String newPRowID = await ItemInspectionDetailHandler().generatePK("QRPOIntimationDetails");
+      contentValues['pRowID'] = newPRowID;
+      debugPrint("Generated fallback pRowID: $newPRowID");
+    }
+    
+    // Ensure BE_pRowID is set if original pRowID exists
+    if (json['pRowID'] != null && json['pRowID'].toString().isNotEmpty) {
+      contentValues['BE_pRowID'] = json['pRowID'].toString();
+    }
+    
+    // Validate that pRowID is not null or empty
+    if (contentValues['pRowID'] == null || contentValues['pRowID'].toString().isEmpty) {
+      debugPrint("ERROR: pRowID is still null or empty after generation!");
+      return 0;
+    }
+    
+  } catch (e) {
+    debugPrint("JSON parsing error: $e");
+    return 0;
+  }
+
+  int mStatus = 0;
+  developer.log("Processing QRPOIntimationDetails - Original: $json");
+  developer.log("Processed contentValues: $contentValues");
+  developer.log("Final pRowID: ${contentValues['pRowID']}");
+  
+  try {
+    // First try to update using the original pRowID if it exists
+    int rows = 0;
+    
+    if (json['pRowID'] != null && json['pRowID'].toString().isNotEmpty) {
+      // Try to update existing record using original pRowID
+      debugPrint("Attempting to update existing record with original pRowID: ${json['pRowID']}");
+      rows = await db.update(
+        'QRPOIntimationDetails',
+        contentValues,
+        where: "pRowID = ?",
+        whereArgs: [json['pRowID']],
+      );
+      debugPrint("Update rows affected: $rows");
+    } else if (contentValues["QRHdrID"] != null && contentValues["EmailID"] != null) {
+      // Try to update using QRHdrID and EmailID combination
+      debugPrint("Attempting to update using QRHdrID: ${contentValues['QRHdrID']} and EmailID: ${contentValues['EmailID']}");
+      rows = await db.update(
+        'QRPOIntimationDetails',
+        contentValues,
+        where: "QRHdrID = ? AND EmailID = ?",
+        whereArgs: [
+          contentValues["QRHdrID"],
+          contentValues["EmailID"]
+        ],
+      );
+      debugPrint("Update rows affected: $rows");
+    }
+
+    if (rows == 0) {
+      // No existing record found, insert new one
+      debugPrint("No existing record found, inserting new record with pRowID: ${contentValues['pRowID']}");
+      int status = await db.insert('QRPOIntimationDetails', contentValues);
+      if (status > 0) {
+        mStatus = 2; // Inserted
+        debugPrint("Insert QRPOIntimationDetails successful with pRowID: ${contentValues['pRowID']}");
+      } else {
+        debugPrint("Insert QRPOIntimationDetails failed - insert returned: $status");
+      }
+    } else {
+      mStatus = 1; // Updated
+      debugPrint("Update QRPOIntimationDetails successful with pRowID: ${contentValues['pRowID']}");
+    }
+  } catch (e, stackTrace) {
+    debugPrint("Database operation failed: $e");
+    debugPrint("Stack trace: $stackTrace");
+    debugPrint("ContentValues that failed: $contentValues");
+    // Uncomment if using FirebaseCrashlytics:
+    // FirebaseCrashlytics.instance.recordError(e, stackTrace);
+  }
+
+  return mStatus;
+}

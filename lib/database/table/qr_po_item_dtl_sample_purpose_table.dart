@@ -34,8 +34,8 @@ class QRPOItemDtlSamplePurposeTable {
     $sampleNumber INTEGER DEFAULT 0,
     $recEnable INTEGER DEFAULT 1,
     $recUser TEXT DEFAULT '',
-    $recAddDt TEXT DEFAULT 'Datetime(''now'',''localtime'')',
-    $recDt TEXT DEFAULT 'Datetime(''now'',''localtime'')',
+    $recAddDt TEXT DEFAULT '',
+    $recDt TEXT DEFAULT '',
     $lastSyncDt TEXT DEFAULT '1900-01-01 00:00:00',
     PRIMARY KEY($pRowID)
   )

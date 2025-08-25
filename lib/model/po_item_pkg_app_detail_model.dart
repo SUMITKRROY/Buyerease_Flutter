@@ -1,7 +1,4 @@
-/**
- * Created by Sumit Roy 02/05/2025
- */
-
+/// Created by Sumit Roy 02/06/2025
 class POItemPkgAppDetail {
   String? pRowID;
   String? locID;
@@ -11,6 +8,13 @@ class POItemPkgAppDetail {
   String? inspectionResultID;
   String? recUser;
 
+  // Attachment lists for different packaging types
+  List<String> unitPkgAppAttachmentList;
+  List<String> shippingPkgAppAttachmentList;
+  List<String> innerPkgAppAttachmentList;
+  List<String> masterPkgAppAttachmentList;
+  List<String> palletPkgAppAttachmentList;
+
   POItemPkgAppDetail({
     this.pRowID,
     this.locID,
@@ -19,17 +23,31 @@ class POItemPkgAppDetail {
     this.sampleSizeValue,
     this.inspectionResultID,
     this.recUser,
-  });
+    List<String>? unitPkgAppAttachmentList,
+    List<String>? shippingPkgAppAttachmentList,
+    List<String>? innerPkgAppAttachmentList,
+    List<String>? masterPkgAppAttachmentList,
+    List<String>? palletPkgAppAttachmentList,
+  })  : unitPkgAppAttachmentList = unitPkgAppAttachmentList ?? [],
+        shippingPkgAppAttachmentList = shippingPkgAppAttachmentList ?? [],
+        innerPkgAppAttachmentList = innerPkgAppAttachmentList ?? [],
+        masterPkgAppAttachmentList = masterPkgAppAttachmentList ?? [],
+        palletPkgAppAttachmentList = palletPkgAppAttachmentList ?? [];
 
   factory POItemPkgAppDetail.fromJson(Map<String, dynamic> json) {
     return POItemPkgAppDetail(
-      pRowID: json['pRowID'],
-      locID: json['locID'],
-      descrID: json['descrID'],
-      sampleSizeID: json['sampleSizeID'],
-      sampleSizeValue: json['sampleSizeValue'],
-      inspectionResultID: json['inspectionResultID'],
-      recUser: json['recUser'],
+      pRowID: json['pRowID']?.toString(),
+      locID: json['locID']?.toString(),
+      descrID: json['descrID']?.toString(),
+      sampleSizeID: json['sampleSizeID']?.toString(),
+      sampleSizeValue: json['sampleSizeValue']?.toString(),
+      inspectionResultID: json['inspectionResultID']?.toString(),
+      recUser: json['recUser']?.toString(),
+      unitPkgAppAttachmentList: List<String>.from(json['unitPkgAppAttachmentList'] ?? []),
+      shippingPkgAppAttachmentList: List<String>.from(json['shippingPkgAppAttachmentList'] ?? []),
+      innerPkgAppAttachmentList: List<String>.from(json['innerPkgAppAttachmentList'] ?? []),
+      masterPkgAppAttachmentList: List<String>.from(json['masterPkgAppAttachmentList'] ?? []),
+      palletPkgAppAttachmentList: List<String>.from(json['palletPkgAppAttachmentList'] ?? []),
     );
   }
 
@@ -42,6 +60,11 @@ class POItemPkgAppDetail {
       'sampleSizeValue': sampleSizeValue,
       'inspectionResultID': inspectionResultID,
       'recUser': recUser,
+      'unitPkgAppAttachmentList': unitPkgAppAttachmentList,
+      'shippingPkgAppAttachmentList': shippingPkgAppAttachmentList,
+      'innerPkgAppAttachmentList': innerPkgAppAttachmentList,
+      'masterPkgAppAttachmentList': masterPkgAppAttachmentList,
+      'palletPkgAppAttachmentList': palletPkgAppAttachmentList,
     };
   }
-} 
+}

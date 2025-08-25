@@ -21,6 +21,7 @@ class InspectionLevelHandler {
         inspectionLevels.add(InspectionLevelModel.fromMap(row));
       }
       print('$_tag: Count of founded inspection levels: ${inspectionLevels.length}');
+      print('$_tag: Count of founded inspection levels: ${inspectionLevels}');
     } catch (e) {
       print('$_tag: Exception getting inspection levels: $e');
     }
