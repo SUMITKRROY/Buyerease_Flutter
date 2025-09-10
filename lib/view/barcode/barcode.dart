@@ -206,6 +206,7 @@ class _BarCodeState extends State<BarCode> {
   Future<void> saveChanges() async {
     setState(() {});
     widget.onChanged.call();
+    updateOverallResultFromChildren(); // <-- add this
     updateBarCodeRemark();
     updateBarcodeUI(); // Refresh count
   }
@@ -236,6 +237,16 @@ class _BarCodeState extends State<BarCode> {
           packagePoItemDetalDetail.barcodeUnitInspectionResultID =
               overAllStatusModels[index].pGenRowID;
 
+          updateOverallResultFromChildren(); // <-- Add this
+        });
+      },
+
+      /*     onResultChanged: (index) {
+        setState(() {
+          selectedUnitStatusIndex = index;
+          packagePoItemDetalDetail.barcodeUnitInspectionResultID =
+              overAllStatusModels[index].pGenRowID;
+
           if (packagePoItemDetalDetail.barcodeUnitInspectionResultID ==
               FEnumerations.overAllFailResult) {
             packagePoItemDetalDetail.barcodeInspectionResultID =
@@ -243,7 +254,7 @@ class _BarCodeState extends State<BarCode> {
             updateOverResultBarcode();
           }
         });
-      },
+      },*/
       barcodeId: widget.id,
       poItemDtl: poItemDtl,
       attachmentCount: barcodeAttachmentCount["Unit Barcode"] ?? 0,
@@ -662,4 +673,27 @@ developer.log("packagePoItemDetalDetail jsonEncode ${jsonEncode(packagePoItemDet
       },
     );
   }
+  void updateOverallResultFromChildren() {
+    // If any of the child statuses is FAIL, overall should also be FAIL
+    if (packagePoItemDetalDetail.barcodeUnitInspectionResultID == FEnumerations.overAllFailResult ||
+        packagePoItemDetalDetail.barcodeInnerInspectionResultID == FEnumerations.overAllFailResult ||
+        packagePoItemDetalDetail.barcodeMasterInspectionResultID == FEnumerations.overAllFailResult ||
+        packagePoItemDetalDetail.barcodePalletInspectionResultID == FEnumerations.overAllFailResult) {
+      packagePoItemDetalDetail.barcodeInspectionResultID = FEnumerations.overAllFailResult;
+    } else {
+      // Otherwise, take the latest "pass" or chosen result
+      packagePoItemDetalDetail.barcodeInspectionResultID =
+          packagePoItemDetalDetail.barcodeUnitInspectionResultID ??
+              packagePoItemDetalDetail.barcodeInnerInspectionResultID ??
+              packagePoItemDetalDetail.barcodeMasterInspectionResultID ??
+              packagePoItemDetalDetail.barcodePalletInspectionResultID;
+    }
+
+    // Update DB
+    ItemInspectionDetailHandler()
+        .updatePackagingFindingMeasurementList(packagePoItemDetalDetail);
+
+    setState(() {}); // Refresh UI
+  }
+
 }

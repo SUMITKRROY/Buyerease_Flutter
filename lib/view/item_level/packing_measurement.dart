@@ -26,43 +26,31 @@ class PackingMeasurement extends StatefulWidget {
   final POItemDtl poItemDtl;
   final VoidCallback onChanged; // ✅ Add this
 
-  const PackingMeasurement({super.key, required this.id, required this.onChanged, required this.pRowId, required this.poItemDtl});
+  const PackingMeasurement(
+      {super.key,
+      required this.id,
+      required this.onChanged,
+      required this.pRowId,
+      required this.poItemDtl});
 
   @override
   State<PackingMeasurement> createState() => _PackingMeasurementState();
 }
 
 class _PackingMeasurementState extends State<PackingMeasurement> {
-  final ImagePickerService _imagePickerService = ImagePickerService();
-  String imageName = '';
   TextEditingController lController = TextEditingController();
-  List<GeneralModel> appearanceDescriptions = [];
+
   List<GeneralModel> overAllResultStatusList = [];
-  String? selectedOverallInspectionResult;
-  List<String> selectedSamples = [];
-  List<String> selectedResults = [];
+
   List<SampleModel> sampleModals = [];
   String selectedResult = '';
-  String selectedResultId = '';
+
   String selectedSample = "";
-  List<String> statusList = [];
+
   List<String> statsList = [];
   int selectedResultPos = 0;
   List<String> sampleList = [];
   int selectedSamplePos = 0;
-  POItemDtl packagePoItemDetalDetail = POItemDtl();
-
-  String? selectedMasterResult;
-  String? selectedInnerResult;
-  String? selectedUnitResult;
-  String? selectedPalletResult;
-  String? selectedShippingResult;
-
-  String? selectedMasterSample;
-  String? selectedInnerSample;
-  String? selectedUnitSample;
-  String? selectedPalletSample;
-  String? selectedShippingSample;
 
   final bController = TextEditingController();
   final hController = TextEditingController();
@@ -71,12 +59,9 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
   String quantityController = "";
   final remarkController = TextEditingController();
   late POItemDtl poItemDtl;
-  String? _dropDownValue;
 
-  String? remark;
   List<POItemDtl> poItems = [];
   bool isLoading = true;
-
 
   // Attachments by title
   Map<String, List<String>> attachmentMap = {
@@ -86,6 +71,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
     "Master pack": [],
     "Pallet pack": [],
   };
+
   @override
   void initState() {
     super.initState();
@@ -99,13 +85,13 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
   Future<void> _loadData() async {
     try {
       final qrPoItemDtlTable = QRPOItemDtlTable();
-      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(widget.id,widget.pRowId);
+      final items = await qrPoItemDtlTable.getByCustomerItemRefAndEnabled(
+          widget.id, widget.pRowId);
       setState(() {
         poItems = items;
 
         isLoading = false;
       });
-
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -146,62 +132,71 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     /// Header Row
-                  Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Item Dimension",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal,
-                            fontSize: 14,
+                        Row(
+                          children: [
+                            const Text(
+                              "Item Dimension",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                                fontSize: 14,
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            const Text("In inch",
+                                style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        SizedBox(
+                          width:
+                              100, // fixed width for dropdown, adjust as needed
+                          child: DropdownButton<String>(
+                            isExpanded: false,
+                            value: selectedSample,
+                            underline:
+                                SizedBox(), // removes the default underline
+                            isDense: true, // makes it more compact vertically
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedSample = newValue;
+                                  int index = sampleList.indexOf(newValue);
+                                  poItemDtl.pkgMeInnerSampleSizeID =
+                                      sampleModals[index].sampleCode;
+                                });
+                              }
+                            },
+                            items: sampleList.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style:
+                                      TextStyle(color: ColorsData.primaryColor),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                        SizedBox(width: 10.w),
-                        const Text("In inch", style: TextStyle(fontSize: 12)),
                       ],
                     ),
 
-                    SizedBox(
-                      width: 100, // fixed width for dropdown, adjust as needed
-                      child: DropdownButton<String>(
-                        isExpanded: false,
-                        value: selectedSample,
-                        underline: SizedBox(), // removes the default underline
-                        isDense: true,         // makes it more compact vertically
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              selectedSample = newValue;
-                              int index = sampleList.indexOf(newValue);
-                              poItemDtl.pkgMeInnerSampleSizeID = sampleModals[index].sampleCode;
-                            });
-                          }
-                        },
-                        items: sampleList.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(color: ColorsData.primaryColor),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-
-
-
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
                     /// Table Header
                     Row(
                       children: [
-                        for (var col in ["L", "B", "H", "Wt.", "CBM", "Quantity"])
+                        for (var col in [
+                          "L",
+                          "B",
+                          "H",
+                          "Wt.",
+                          "CBM",
+                          "Quantity"
+                        ])
                           Expanded(
                             child: Text(
                               col,
@@ -219,12 +214,24 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                     /// Table Data Row
                     Row(
                       children: [
-                        Expanded(child: Text(item.unitL?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
-                        Expanded(child: Text(item.unitW?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
-                        Expanded(child: Text(item.unitH?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
-                        Expanded(child: Text(item.weight?.toString() ?? '0', style: const TextStyle(fontSize: 12))),
-                        Expanded(child: Text(item.cbm?.toString() ?? '0.0', style: const TextStyle(fontSize: 12))),
-                        Expanded(child: Text(item.mapCountUnit?.toString() ?? '', style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.unitL?.toString() ?? '0.0',
+                                style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.unitW?.toString() ?? '0.0',
+                                style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.unitH?.toString() ?? '0.0',
+                                style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.weight?.toString() ?? '0',
+                                style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.cbm?.toString() ?? '0.0',
+                                style: const TextStyle(fontSize: 12))),
+                        Expanded(
+                            child: Text(item.mapCountUnit?.toString() ?? '',
+                                style: const TextStyle(fontSize: 12))),
                       ],
                     ),
 
@@ -243,11 +250,19 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                         ),
                       ],
                     ),
+
                     /// Editable Measurement Inputs (below Findings)
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        for (var label in ["L", "B", "H", "Wt.", "CBM", "Quantity"])
+                        for (var label in [
+                          "L",
+                          "B",
+                          "H",
+                          "Wt.",
+                          "CBM",
+                          "Quantity"
+                        ])
                           Expanded(
                             child: Text(
                               label,
@@ -265,12 +280,32 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                     Row(
                       spacing: 05.sp,
                       children: [
-                        Expanded(child: TextField(controller: lController, decoration: _input(""), keyboardType: TextInputType.number)),
-                        Expanded(child: TextField(controller: bController, decoration: _input(""), keyboardType: TextInputType.number)),
-                        Expanded(child: TextField(controller: hController, decoration: _input(""), keyboardType: TextInputType.number)),
-                        Expanded(child: TextField(controller: wtController, decoration: _input(""), keyboardType: TextInputType.number)),
-                        Expanded(child: TextField(controller: cbmController, decoration: _input(""), keyboardType: TextInputType.number)),
-                        Expanded(child:Text("$quantityController")),
+                        Expanded(
+                            child: TextField(
+                                controller: lController,
+                                decoration: _input(""),
+                                keyboardType: TextInputType.number)),
+                        Expanded(
+                            child: TextField(
+                                controller: bController,
+                                decoration: _input(""),
+                                keyboardType: TextInputType.number)),
+                        Expanded(
+                            child: TextField(
+                                controller: hController,
+                                decoration: _input(""),
+                                keyboardType: TextInputType.number)),
+                        Expanded(
+                            child: TextField(
+                                controller: wtController,
+                                decoration: _input(""),
+                                keyboardType: TextInputType.number)),
+                        Expanded(
+                            child: TextField(
+                                controller: cbmController,
+                                decoration: _input(""),
+                                keyboardType: TextInputType.number)),
+                        Expanded(child: Text("$quantityController")),
                       ],
                     ),
 
@@ -295,11 +330,15 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                                 DropdownMenuItem(
                                     value: "PASS",
                                     child: Text("PASS",
-                                        style: TextStyle(fontSize: 12,color: ColorsData.primaryColor))),
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: ColorsData.primaryColor))),
                                 DropdownMenuItem(
                                     value: "FAIL",
                                     child: Text("FAIL",
-                                        style: TextStyle(fontSize: 12,color:ColorsData.primaryColor))),
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: ColorsData.primaryColor))),
                               ],
                               onChanged: (val) {},
                             ),
@@ -314,7 +353,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
                           poItemDtl: widget.poItemDtl,
                           onImageAdded: () {
                             saveChanges();
-                            handlePackagingAppearanceUpload(fetchAllDigitalsUploadModals());
+                            //handlePackagingAppearanceUpload(fetchAllDigitalsUploadModals());
                           },
                         )
                       ],
@@ -333,12 +372,10 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
         ),
       ),
     );
-
   }
 
   InputDecoration _input(String label) {
     return InputDecoration(
-
       hintText: label,
       hintStyle: const TextStyle(fontSize: 12),
       isDense: true,
@@ -359,28 +396,6 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
     };
   }
 
-  void handlePackagingAppearanceUpload(List<DigitalsUploadModel> digitalsUploadModals) {
-    attachmentMap.forEach((key, _) => attachmentMap[key] = []);
-
-    for (var modal in digitalsUploadModals) {
-      if (modal.title != null && modal.selectedPicPath != null) {
-        if (attachmentMap.containsKey(modal.title)) {
-          attachmentMap[modal.title]!.add(modal.selectedPicPath!);
-        }
-      }
-    }
-
-    setState(() {}); // Refresh the UI
-  }
-  /// Dummy method - replace this with your real source of image data
-  List<DigitalsUploadModel> fetchAllDigitalsUploadModals() {
-    // You should return the actual list of uploaded images
-    return [
-      DigitalsUploadModel(title: "Unit pack",),
-      DigitalsUploadModel(title: "Shipping pack",  ),
-      // Add conditionally for other types...
-    ];
-  }
   Future<void> saveChanges() async {
     final data = collectMeasurementData();
     print("Measurement Data: $data"); // for debug or actual save
@@ -390,6 +405,7 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
     widget.onChanged.call();
     setState(() {});
   }
+
   void updatePKGMeRemark() {
     poItemDtl.pkgMeRemark = remarkController.text;
 
@@ -402,22 +418,25 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
     poItemDtl.pkgMeUnitFindingQty = double.tryParse(quantityController);
 
     developer.log("Updated poItemDtl JSON: ${jsonEncode(poItemDtl)}");
-    ItemInspectionDetailHandler().updatePackagingFindingMeasurementList(poItemDtl);
+    ItemInspectionDetailHandler()
+        .updatePackagingFindingMeasurementList(poItemDtl);
   }
 
-
   Future<void> handlePackaging() async {
-    List<POItemDtl> packDetailList = await ItemInspectionDetailHandler().getPackagingMeasurementList(
+    List<POItemDtl> packDetailList =
+        await ItemInspectionDetailHandler().getPackagingMeasurementList(
       poItemDtl.qrHdrID ?? '',
       poItemDtl.qrpoItemHdrID ?? '',
     );
 
-    List<POItemDtl> packFindingList = await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
-
-      itemId:  poItemDtl.itemID ?? '', qrpoItemHdrID:  poItemDtl.qrpoItemHdrID ?? '',
+    List<POItemDtl> packFindingList =
+        await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
+      itemId: poItemDtl.itemID ?? '',
+      qrpoItemHdrID: poItemDtl.qrpoItemHdrID ?? '',
     );
 
-    List<POItemDtl> packList = ItemInspectionDetailHandler().copyFindingDataToSpecification(
+    List<POItemDtl> packList =
+        ItemInspectionDetailHandler().copyFindingDataToSpecification(
       packDetailList,
       packFindingList,
     );
@@ -432,17 +451,18 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
         wtController.text = (poItemDtl.pkgMeUnitFindingWt ?? 0).toString();
         cbmController.text = (poItemDtl.pkgMeUnitFindingCBM ?? 0).toString();
         quantityController = (poItemDtl.pkgMeUnitFindingQty ?? 0).toString();
-
       });
     }
   }
+
   Widget buildOverallResultDropdown() {
-    return     SOverAllDropdown(
+    return SOverAllDropdown(
       poItemDtl: widget.poItemDtl,
       selectInspectionResultId: poItemDtl.pkgMeInspectionResultID ?? '',
       onChange: (newId) async {
         // Handle DB update here
-        await ItemInspectionDetailHandler().updatePackagingFindingMeasurementList(
+        await ItemInspectionDetailHandler()
+            .updatePackagingFindingMeasurementList(
           poItemDtl..pkgMeInspectionResultID = newId,
         );
         print("Updated OverallInspectionResultID to $newId");
@@ -451,12 +471,14 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
   }
 
   Future<void> handleSpinner() async {
-    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(FEnumerations.overallResultStatusGenId);
+    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(
+        FEnumerations.overallResultStatusGenId);
 
     if (overAllResultStatusList.isNotEmpty) {
       for (int i = 0; i < overAllResultStatusList.length; i++) {
         statsList.add(overAllResultStatusList[i].mainDescr ?? '');
-        if (overAllResultStatusList[i].pGenRowID == poItemDtl.pkgMeInnerInspectionResultID) {
+        if (overAllResultStatusList[i].pGenRowID ==
+            poItemDtl.pkgMeInnerInspectionResultID) {
           selectedResultPos = i;
         }
       }
@@ -466,10 +488,11 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
     sampleModals = await POItemDtlHandler.getSampleSizeList();
     if (sampleModals.isNotEmpty) {
       for (int i = 0; i < sampleModals.length; i++) {
-        final sampleDescription = "${sampleModals[i].mainDescr} (${sampleModals[i].sampleVal})";
+        final sampleDescription =
+            "${sampleModals[i].mainDescr} (${sampleModals[i].sampleVal})";
         sampleList.add(sampleDescription);
 
-        if (sampleModals[i].sampleCode ==  poItemDtl.pkgMeInnerSampleSizeID) {
+        if (sampleModals[i].sampleCode == poItemDtl.pkgMeInnerSampleSizeID) {
           selectedSamplePos = i;
         }
       }
@@ -478,41 +501,5 @@ class _PackingMeasurementState extends State<PackingMeasurement> {
         poItemDtl.pkgMeInnerSampleSizeID = sampleModals[0].sampleCode;
       }
     }
-  }
-
-
-  Future<void> handlePackagingAppearanceOverAllResult() async {
-    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(
-        FEnumerations.overallResultStatusGenId);
-    sampleModals = await POItemDtlHandler.getSampleSizeList();
-
-    statusList = overAllResultStatusList
-        .map((e) => e.mainDescr)
-        .whereType<String>()
-        .toList();
-
-    selectedMasterResult =
-        packagePoItemDetalDetail.pkgMeMasterInspectionResultID;
-    selectedInnerResult = packagePoItemDetalDetail.pkgMeInnerInspectionResultID;
-    selectedUnitResult = packagePoItemDetalDetail.pkgMeUnitInspectionResultID;
-    selectedPalletResult =
-        packagePoItemDetalDetail.pkgMePalletInspectionResultID;
-    selectedShippingResult =
-        packagePoItemDetalDetail.pkgMeShippingInspectionResultID;
-
-    sampleList =
-        sampleModals.map((e) => "${e.mainDescr} (${e.sampleVal})").toList();
-
-    selectedMasterSample = packagePoItemDetalDetail.pkgAppMasterSampleSizeID;
-    selectedInnerSample = packagePoItemDetalDetail.pkgAppInnerSampleSizeID;
-    selectedUnitSample = packagePoItemDetalDetail.pkgAppUnitSampleSizeID;
-    selectedPalletSample = packagePoItemDetalDetail.pkgAppPalletSampleSizeID;
-    selectedShippingSample =
-        packagePoItemDetalDetail.pkgAppShippingMarkSampleSizeId;
-
-    setState(() {});
-
-    // Initialize selections after data is loaded
-    //_initializeSelections();
   }
 }

@@ -200,7 +200,7 @@ class MasterRepo {
 
       FslLog.d("API_InspectionSend", "Sending image data...");
       FslLog.vc("API_InspectionSend", jsonEncode(inspectionData));
-      developer.log("API_InspectionSend ${json.encode(inspectionData)}");
+      //developer.log("API_InspectionSend ${json.encode(inspectionData)}");
 
       final response = await dio.post(
         ApiRoute.uploadFile,

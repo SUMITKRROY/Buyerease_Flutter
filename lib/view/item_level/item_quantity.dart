@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:buyerease/database/table/qr_po_item_hdr_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../components/ResponsiveCustomTable.dart';
 import '../../components/remarks.dart';
-import '../../config/theame_data.dart';
 import '../../database/table/qr_po_item_dtl_table.dart';
 import '../../model/inspection_model.dart';
 import '../../model/po_item_dtl_model.dart';
@@ -16,6 +14,7 @@ import '../../services/poitemlist/po_item_dtl_handler.dart';
 
 class ItemQuantity extends StatefulWidget {
   final String pRowId;
+  final String itemId;
   final POItemDtl poItemDtl;
   final InspectionModal inspectionModal;
   final VoidCallback onChanged;
@@ -23,29 +22,36 @@ class ItemQuantity extends StatefulWidget {
   const ItemQuantity({
     super.key,
     required this.pRowId,
-    required this.onChanged,
+    required this.itemId,
     required this.poItemDtl,
     required this.inspectionModal,
+    required this.onChanged,
   });
 
   @override
   State<ItemQuantity> createState() => _ItemQuantityState();
 }
 
-class _ItemQuantityState extends State<ItemQuantity> with AutomaticKeepAliveClientMixin{
+class _ItemQuantityState extends State<ItemQuantity>
+    with AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true; // Keep the widget state alive
+  bool get wantKeepAlive => true;
+
   late POItemDtl poItemDtl;
   List<POItemDtl> pOItemDtlList = [];
   bool isLoading = true;
-  TextEditingController _qtyRemarkController = TextEditingController();
+  final TextEditingController _qtyRemarkController = TextEditingController();
   String latestDate = "";
+  String orderQty = "";
+  String availableQty = "";
+  String acceptedQty = "";
   bool _hasUnsavedChanges = false;
-  POItemDtl packagePoItemDetalDetail = POItemDtl();
 
   @override
   void initState() {
     super.initState();
+    poItemDtl = widget.poItemDtl;
+    developer.log("PO Detail OrderQty: ${jsonEncode(poItemDtl)}");
     _loadData();
   }
 
@@ -57,24 +63,21 @@ class _ItemQuantityState extends State<ItemQuantity> with AutomaticKeepAliveClie
 
   Future<void> _loadData() async {
     try {
-      // Get latest delivery date
       latestDate = await POItemDtlHandler.getPOListItemLatestDelDate(
         widget.pRowId,
-        widget.poItemDtl,
+        poItemDtl,
       );
+pOItemDtlList.add(widget.poItemDtl);
+    //  pOItemDtlList = await POItemDtlHandler.getItemList(widget.pRowId);
+      orderQty = poItemDtl.orderQty ?? "";
+      availableQty = (poItemDtl.availableQty ?? 0).toString();
+      acceptedQty = (poItemDtl.acceptedQty ?? 0).toString();
 
-      // Load PO item detail
-      pOItemDtlList = await POItemDtlHandler.getItemList(widget.pRowId);
-
-      // Initialize poItemDtl with widget value (or from loaded list)
-      poItemDtl = widget.poItemDtl;
+      // Attach latest delivery date
       poItemDtl.latestDelDt = latestDate;
-      developer.log(
-          "developer ler with saved remark ${jsonEncode(widget.poItemDtl)}");
-      developer.log(
-          "developer ler with saved latestDelDt ${(widget.poItemDtl.latestDelDt)}");
 
-      await handlePackaging();
+      // Handle packaging remarks
+      await _handlePackaging();
 
       setState(() {
         isLoading = false;
@@ -83,7 +86,7 @@ class _ItemQuantityState extends State<ItemQuantity> with AutomaticKeepAliveClie
       setState(() {
         isLoading = false;
       });
-      print('Error loading data: $e');
+      developer.log('Error loading data: $e');
     }
   }
 
@@ -91,79 +94,74 @@ class _ItemQuantityState extends State<ItemQuantity> with AutomaticKeepAliveClie
     setState(() {
       _hasUnsavedChanges = true;
     });
-    widget.onChanged(); // Notify parent (OverAllResult)
+    widget.onChanged();
   }
 
   String formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final DateTime date = DateTime.parse(dateStr);
-      return DateFormat('dd-MM-yyyy').format(date); // ✅ Now DD-MM-YYYY
+      return DateFormat('dd-MM-yyyy').format(date);
     } catch (e) {
-      print('Error formatting date: $e');
+      developer.log('Error formatting date: $e');
       return dateStr;
     }
   }
 
-
-  // 🔁 Equivalent to Java handleItemQtyRemark()
   Future<void> saveChanges() async {
-    final pkgAppRemark = _qtyRemarkController.text ?? '';
-
-    // Update local model
-    poItemDtl.qtyRemark = pkgAppRemark;
-
-    updateQtyRemark();
-
-    // Save to server (optional, but mimics Java method)
-    // await ItemInspectionDetailHandler.updatePackagingFindingMeasurementList(poItemDtl);
+    poItemDtl.qtyRemark = _qtyRemarkController.text;
+    _updateQtyRemark();
 
     setState(() {
       _hasUnsavedChanges = false;
     });
 
-    developer.log('Qty Remark saved: $pkgAppRemark');
+    developer.log('Qty Remark saved: ${poItemDtl.qtyRemark}');
   }
 
-  void updateQtyRemark() {
+  void _updateQtyRemark() {
     poItemDtl.qtyRemark = _qtyRemarkController.text;
+    developer.log("Updated POItemDtl: ${jsonEncode(poItemDtl)}");
 
-    developer
-        .log("packagePoItemDetalDetail jsonEncode ${jsonEncode(poItemDtl)}");
     ItemInspectionDetailHandler()
         .updatePackagingFindingMeasurementList(poItemDtl);
   }
 
   List<String> get _headers => [
-        'Latest Delivery Date',
-        'Ship Via',
-        'Order Quantity',
-        'Available Quantity',
-        'Accepted Quantity',
-      ];
+    'Latest Delivery Date',
+    'Ship Via',
+    'Order Quantity',
+    'Available Quantity',
+    'Accepted Quantity',
+  ];
 
   List<List<dynamic>> get _rows => [
-        [
-          formatDate(poItemDtl.latestDelDt),
-          // pOItemDtlList.first.latestDelDt ?? '',
-          pOItemDtlList.first.shipToBreakUP ?? '',
-          pOItemDtlList.first.orderQty?.toString() ?? '0',
-          pOItemDtlList.first.availableQty?.toString() ?? '0',
-          pOItemDtlList.first.acceptedQty?.toString() ?? '0',
-        ],
-      ];
+    [
+      formatDate(latestDate),
+      '', // Ship Via (not available yet in model)
+      orderQty,
+      availableQty,
+      acceptedQty,
+
+    ],
+  ];
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Important to call super.build when using mixin
+    super.build(context);
+
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (pOItemDtlList.isEmpty) {
+      return const Text("No data found");
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Table showing delivery & quantity details
+        // Table
         SizedBox(
           height: 120.h,
           child: ResponsiveCustomTable(
@@ -177,40 +175,37 @@ class _ItemQuantityState extends State<ItemQuantity> with AutomaticKeepAliveClie
         Remarks(
           controller: _qtyRemarkController,
           onChanged: (val) {
-            _markAsChanged(); // Your internal state update
-            widget.onChanged(); // Notify the parent (already non-nullable)
+            _markAsChanged();
           },
         ),
       ],
     );
   }
 
-  Future<void> handlePackaging() async {
+  Future<void> _handlePackaging() async {
     List<POItemDtl> packDetailList =
-        await ItemInspectionDetailHandler().getPackagingMeasurementList(
+    await ItemInspectionDetailHandler().getPackagingMeasurementList(
       poItemDtl.qrHdrID ?? '',
       poItemDtl.qrpoItemHdrID ?? '',
     );
 
     List<POItemDtl> packFindingList =
-        await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
+    await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
       itemId: poItemDtl.itemID ?? '',
       qrpoItemHdrID: poItemDtl.qrpoItemHdrID ?? '',
     );
 
     List<POItemDtl> packList =
-        ItemInspectionDetailHandler().copyFindingDataToSpecification(
+    ItemInspectionDetailHandler().copyFindingDataToSpecification(
       packDetailList,
       packFindingList,
     );
 
     if (packList.isNotEmpty) {
       setState(() {
-        packagePoItemDetalDetail = packList[0];
-        _qtyRemarkController.text = packagePoItemDetalDetail.qtyRemark!;
+        poItemDtl = packList[0];
+        _qtyRemarkController.text = poItemDtl.qtyRemark ?? '';
       });
     }
   }
-
-
 }

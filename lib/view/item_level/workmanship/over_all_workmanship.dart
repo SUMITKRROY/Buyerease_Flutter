@@ -4,10 +4,7 @@ import 'dart:developer' as developer;
 import 'package:buyerease/model/workmanship_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../components/ResponsiveCustomTable.dart';
-import '../../../components/custom_table.dart';
-import '../../../components/over_all_dropdown.dart';
 import '../../../components/over_all_dropdown_section_wise.dart';
 import '../../../components/remarks.dart';
 import '../../../config/theame_data.dart';
@@ -15,7 +12,6 @@ import '../../../database/table/qr_po_item_dtl_table.dart';
 import '../../../model/POItemDtl1.dart';
 import '../../../model/inspection_model.dart';
 import '../../../model/po_item_dtl_model.dart';
-
 import '../../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../../../services/poitemlist/po_item_dtl_handler.dart';
 import 'add_workmanship.dart';
@@ -117,11 +113,12 @@ class _WorkManShipState extends State<WorkManShip> {
                     IconButton(
                       onPressed: () async {
                         final result = await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => AddWorkManShip(poItemDtl: poItemDtl)),
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  AddWorkManShip(poItemDtl: poItemDtl)),
                         );
                         workManShipModels.add(result);
                         await setAdaptor(); // 🔄 Refresh after returning
-
                       },
                       icon: Icon(
                         Icons.add_circle_outline,
@@ -137,7 +134,6 @@ class _WorkManShipState extends State<WorkManShip> {
                 )
               ],
             ),
-
 
             ResponsiveCustomTable(
               headers: [
@@ -224,9 +220,19 @@ class _WorkManShipState extends State<WorkManShip> {
                 'Minor',
               ],
               rows: [
-                ['Total', totalCritical.toString(), totalMajor.toString(), totalMinor.toString()],
-                ['Permissible\nDefect', "${pOItemDtlList.first.criticalDefectsAllowed ?? 0}", "${pOItemDtlList.first.majorDefectsAllowed ?? 0}", "${pOItemDtlList.first.minorDefectsAllowed  ?? 0}"], // index 0
-                 // index 1
+                [
+                  'Total',
+                  totalCritical.toString(),
+                  totalMajor.toString(),
+                  totalMinor.toString()
+                ],
+                [
+                  'Permissible\nDefect',
+                  "${pOItemDtlList.first.criticalDefectsAllowed ?? 0}",
+                  "${pOItemDtlList.first.majorDefectsAllowed ?? 0}",
+                  "${pOItemDtlList.first.minorDefectsAllowed ?? 0}"
+                ], // index 0
+                // index 1
               ],
               specialRowIndexes: [0, 1], // mark both rows as "special"
             ),
@@ -269,7 +275,11 @@ class _WorkManShipState extends State<WorkManShip> {
         0,
         (sum, item) => sum + (item.minor ?? 0),
       );
-
+      if (pOItemDtlList.isNotEmpty) {
+        pOItemDtlList.first.criticalDefect = totalCritical;
+        pOItemDtlList.first.majorDefect = totalMajor;
+        pOItemDtlList.first.minorDefect = totalMinor;
+      }
       isLoading = false;
     });
 
@@ -337,20 +347,72 @@ class _WorkManShipState extends State<WorkManShip> {
     }
   }
 
+
+
+
+  Future<void> updateTotalWorkmanship() async {
+    // Fetch the work defects
+    List<WorkManShipModel> lWorkDefect = await ItemInspectionDetailHandler().getWorkmanShip(
+      poItemDtl.qrHdrID ?? "",
+      poItemDtl.qrpoItemHdrID ?? '',
+      poItemDtl.qrItemID ?? "",
+    );
+
+    poItemDtl.criticalDefect = totalCritical;
+    poItemDtl.majorDefect = totalMajor;
+    poItemDtl.minorDefect = totalMinor;
+
+    await ItemInspectionDetailHandler().updateDefect( poItemDtl);
+
+    // // Update UI
+    // int totalCritical = poItemDtl.criticalDefect;
+    // int totalMajor = poItemDtl.majorDefect;
+    // int totalMinor = poItemDtl.minorDefect;
+    //
+    // txtTotalCritical.text = totalCritical.toString();
+    // txtTotalMajor.text = totalMajor.toString();
+    // txtTotalMinor.text = totalMinor.toString();
+    //
+    // txtTotalCritical.style = TextStyle(
+    //   color: totalCritical > poItemDtl.criticalDefectsAllowed
+    //       ? Colors.red
+    //       : Colors.black,
+    // );
+    //
+    // txtTotalMajor.style = TextStyle(
+    //   color: totalMajor > poItemDtl.majorDefectsAllowed
+    //       ? Colors.red
+    //       : Colors.black,
+    // );
+    //
+    // txtTotalMinor.style = TextStyle(
+    //   color: totalMinor > poItemDtl.minorDefectsAllowed
+    //       ? Colors.red
+    //       : Colors.black,
+    // );
+    //
+    // txtPermissibleMinor.text = poItemDtl.minorDefectsAllowed.toString();
+    // txtPermissibleMajor.text = poItemDtl.majorDefectsAllowed.toString();
+    // txtPermissibleCritical.text = poItemDtl.criticalDefectsAllowed.toString();
+  }
+
+
   Future<void> saveChanges() async {
     setState(() {});
     setAdaptor();
     handleWorkmanshipRemark();
-
+    updateTotalWorkmanship();
     widget.onChanged.call();
   }
+
   Widget buildOverallResultDropdown() {
-    return     SOverAllDropdown(
+    return SOverAllDropdown(
       poItemDtl: widget.poItemDtl,
       selectInspectionResultId: poItemDtl.workmanshipInspectionResultID ?? '',
       onChange: (newId) async {
         // Handle DB update here
-        await ItemInspectionDetailHandler().updatePackagingFindingMeasurementList(
+        await ItemInspectionDetailHandler()
+            .updatePackagingFindingMeasurementList(
           poItemDtl..workmanshipInspectionResultID = newId,
         );
         print("Updated workmanshipInspectionResultID to $newId");
@@ -414,8 +476,8 @@ class _WorkManShipState extends State<WorkManShip> {
 
         developer.log(
           'UniqueList[$j] - orderQty: ${uniqueList[j].orderQty}, '
-              'availableQty: ${uniqueList[j].availableQty}, '
-              'acceptedQty: ${uniqueList[j].acceptedQty}',
+          'availableQty: ${uniqueList[j].availableQty}, '
+          'acceptedQty: ${uniqueList[j].acceptedQty}',
           name: 'changeOnAvailable',
         );
 
@@ -447,7 +509,7 @@ class _WorkManShipState extends State<WorkManShip> {
             pOItemDtl1.allowedinspectionQty = int.tryParse(toInspDtl[2]) ?? 0;
 
             List<String>? minorDefect =
-            await POItemDtlHandler.getDefectAccepted(
+                await POItemDtlHandler.getDefectAccepted(
               inspectionModal.qlMinor!,
               sampleCode,
             );
@@ -455,10 +517,10 @@ class _WorkManShipState extends State<WorkManShip> {
                 'UniqueList[$j] - MinorDefect($sampleCode): $minorDefect',
                 name: 'changeOnAvailable');
             pOItemDtl1.minorDefectsAllowed =
-            minorDefect != null ? int.tryParse(minorDefect[1]) ?? 0 : 0;
+                minorDefect != null ? int.tryParse(minorDefect[1]) ?? 0 : 0;
 
             List<String>? majorDefect =
-            await POItemDtlHandler.getDefectAccepted(
+                await POItemDtlHandler.getDefectAccepted(
               inspectionModal.qlMajor!,
               sampleCode,
             );
@@ -466,7 +528,7 @@ class _WorkManShipState extends State<WorkManShip> {
                 'UniqueList[$j] - MajorDefect($sampleCode): $majorDefect',
                 name: 'changeOnAvailable');
             pOItemDtl1.majorDefectsAllowed =
-            majorDefect != null ? int.tryParse(majorDefect[1]) ?? 0 : 0;
+                majorDefect != null ? int.tryParse(majorDefect[1]) ?? 0 : 0;
 
             if ((pOItemDtl1.poMasterPackQty ?? 0) > 0) {
               double or = (pOItemDtl1.acceptedQty ?? 0).toDouble();
@@ -507,7 +569,7 @@ class _WorkManShipState extends State<WorkManShip> {
             pOItemDtl.allowedinspectionQty = int.tryParse(toInspDtl[2]) ?? 0;
 
             List<String>? minorDefect =
-            await POItemDtlHandler.getDefectAccepted(
+                await POItemDtlHandler.getDefectAccepted(
               widget.inspectionModal.qlMinor!,
               sampleCode,
             );
@@ -515,10 +577,10 @@ class _WorkManShipState extends State<WorkManShip> {
                 'POItemDtl[$i] - MinorDefect($sampleCode): $minorDefect',
                 name: 'changeOnAvailable');
             pOItemDtl.minorDefectsAllowed =
-            minorDefect != null ? int.tryParse(minorDefect[1]) ?? 0 : 0;
+                minorDefect != null ? int.tryParse(minorDefect[1]) ?? 0 : 0;
 
             List<String>? majorDefect =
-            await POItemDtlHandler.getDefectAccepted(
+                await POItemDtlHandler.getDefectAccepted(
               widget.inspectionModal.qlMajor!,
               sampleCode,
             );
@@ -526,7 +588,7 @@ class _WorkManShipState extends State<WorkManShip> {
                 'POItemDtl[$i] - MajorDefect($sampleCode): $majorDefect',
                 name: 'changeOnAvailable');
             pOItemDtl.majorDefectsAllowed =
-            majorDefect != null ? int.tryParse(majorDefect[1]) ?? 0 : 0;
+                majorDefect != null ? int.tryParse(majorDefect[1]) ?? 0 : 0;
 
             if ((pOItemDtl.poMasterPackQty ?? 0) > 0) {
               double or = (pOItemDtl.acceptedQty ?? 0).toDouble();

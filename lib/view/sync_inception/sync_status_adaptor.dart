@@ -324,7 +324,7 @@ developer.log("inspectionData data detail: $inspectionData");
           FEnumerations.syncImagesTable,
           "${syncedList.length + 1}/${imagesList.length} Syncing..."
       );
-      developer.log("json object $data");
+      //developer.log("json object $data");
       String success = await context.read<SyncToServerCubit>().sendSingleImageData(data);
 
       if (success.isNotEmpty) {
@@ -610,6 +610,8 @@ developer.log("inspectionData data detail: $inspectionData");
             "DIGITAL sync .........................................$success\n\n");
         if(success){
           for (String id in idsListForSync) {
+            handleToFinalizeSync(idsListForSync: idsListForSync);
+            // updateSyncList(tableName, FEnumerations.syncFailedStatus);
             await ItemInspectionDetailHandler().updateFinalSync(id);
           }}
 
@@ -622,7 +624,7 @@ developer.log("inspectionData data detail: $inspectionData");
     if (idsListForSync.isNotEmpty) {
       final fiTables = await SendDataHandler()
           .getSelectedInspectionIdsData(context, idsListForSync);
-
+developer.log("fiTables  ${fiTables}");
       if (fiTables != null && fiTables.isNotEmpty) {
         final userId = await UserMasterTable().getFirstUserID();
 

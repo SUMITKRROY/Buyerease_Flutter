@@ -211,20 +211,28 @@ class _PoItemState extends State<PoItem> {
               ),
             ];
           }).toList(),
-          onRowTap: (index) {
-            final selectedItem = poItems[index];
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ItemLevelTab(
-                  id: selectedItem.customerItemRef ?? '',
-                  pRowId: widget.pRowId, // or dynamic value
-                  poItemDtl: selectedItem, inspectionModal:widget.inspectionModal!,
+            onRowTap: (index) {
+              final selectedItem = poItems[index];
+              final id = selectedItem.pRowID ?? '';
+
+              // 🔑 Sync latest values from controllers
+              selectedItem.availableQty = int.tryParse(availableControllers[id]?.text ?? '0') ?? 0;
+              selectedItem.acceptedQty = int.tryParse(acceptControllers[id]?.text ?? '0') ?? 0;
+              selectedItem.shortStockQty = int.tryParse(shortControllers[id]?.text ?? '0') ?? 0;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ItemLevelTab(
+                    id: selectedItem.customerItemRef ?? '',
+                    pRowId: widget.pRowId,
+                    poItemDtl: selectedItem,
+                    inspectionModal: widget.inspectionModal,
+                  ),
                 ),
-              ),
-            );
-          },
-          descriptions: poItems.map((item) =>
+              );
+            },
+            descriptions: poItems.map((item) =>
           '${item.itemDescr} - ${item.customerItemRef ?? ''}').toList(),
           onDelete: (index) async {
             final item = poItems[index];
@@ -556,14 +564,6 @@ class _PoItemState extends State<PoItem> {
           pOItemDtlList[i].acceptedQty =
               f.toInt() - (pOItemDtlList[i].earlierInspected ?? 0);
 
-          // If you want to re-enable the commented-out part:
-          /*
-        if ((pOItemDtlList[i].poMasterPackQty ?? 0) > 0) {
-          final or = double.tryParse(orderQtyStr) ?? 0;
-          pOItemDtlList[i].cartonsPacked =
-              (or / pOItemDtlList[i].poMasterPackQty!).toInt();
-        }
-        */
         }
       }
       changeOnAvailable();

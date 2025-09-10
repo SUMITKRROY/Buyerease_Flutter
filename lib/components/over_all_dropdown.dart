@@ -12,15 +12,15 @@ import '../utils/app_constants.dart';
 
 class OverAllDropdown extends StatefulWidget {
   final POItemDtl poItemDtl;
-    OverAllDropdown({super.key, required this.poItemDtl});
+  OverAllDropdown({super.key, required this.poItemDtl});
 
   @override
   State<OverAllDropdown> createState() => _OverAllDropdownState();
 }
 
 class _OverAllDropdownState extends State<OverAllDropdown> {
-  late   POItemDtl poItemDtl;
-  POItemDtl packagePoItemDetalDetail =   POItemDtl();
+  late POItemDtl poItemDtl;
+  POItemDtl packagePoItemDetalDetail = POItemDtl();
   String selectedResult = '';
   String selectedResultId = '';
   int selectedResultPos = 0;
@@ -49,7 +49,7 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
     if (selectedResultId.isNotEmpty) {
       // Match DB value to description
       int index = overAllResultStatusList.indexWhere(
-            (element) => element.pGenRowID.toString() == selectedResultId,
+        (element) => element.pGenRowID.toString() == selectedResultId,
       );
       if (index != -1) {
         selectedResult = statsList[index];
@@ -65,13 +65,13 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
 
   Future<void> handlePackaging() async {
     List<POItemDtl> packDetailList =
-    await ItemInspectionDetailHandler().getPackagingMeasurementList(
+        await ItemInspectionDetailHandler().getPackagingMeasurementList(
       poItemDtl.qrHdrID ?? '',
       poItemDtl.qrpoItemHdrID ?? '',
     );
 
     List<POItemDtl> packFindingList =
-    await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
+        await ItemInspectionDetailHandler().getPackagingFindingMeasurementList(
       itemId: poItemDtl.itemID ?? '',
       qrpoItemHdrID: poItemDtl.qrpoItemHdrID ?? '',
     );
@@ -81,7 +81,8 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
 
     if (packList.isNotEmpty) {
       packagePoItemDetalDetail = packList.first;
-      selectedResultId = packagePoItemDetalDetail.overallInspectionResultID ?? '';
+      selectedResultId =
+          packagePoItemDetalDetail.overallInspectionResultID ?? '';
     }
   }
 
@@ -94,12 +95,19 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
         Text('Over All Result', style: TextStyle(fontSize: 14.sp)),
         Container(
           height: 45.h,
-          width: MediaQuery.of(context).size.width * 0.3.w,
-          child: DropdownButtonFormField<String>(
-            value: selectedResult.isNotEmpty && statsList.contains(selectedResult)
-                ? selectedResult
-                : null,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
+          width: MediaQuery.of(context).size.width * 0.3,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: DropdownButton<String>(
+            value:
+                selectedResult.isNotEmpty && statsList.contains(selectedResult)
+                    ? selectedResult
+                    : null,
+            isExpanded: true, // makes the dropdown use full width
+            underline: const SizedBox(), // removes the default underline
             items: statsList.map((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -112,7 +120,7 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
                   selectedResult = newValue;
                   int index = statsList.indexOf(newValue);
                   String newId =
-                  overAllResultStatusList[index].pGenRowID.toString();
+                      overAllResultStatusList[index].pGenRowID.toString();
 
                   poItemDtl.overallInspectionResultID = newId;
                   itemMeasurementModal.inspectionResultID =
@@ -121,7 +129,7 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
 
                 // Update DB and fetch updated record
                 final updatedRow =
-                await ItemInspectionDetailHandler().updateOverAllResult(
+                    await ItemInspectionDetailHandler().updateOverAllResult(
                   poItemDtl,
                 );
 
@@ -129,11 +137,10 @@ class _OverAllDropdownState extends State<OverAllDropdown> {
               }
             },
           ),
-        ),
+        )
       ],
     );
   }
-
 
   // Future<void> handleSpinner() async {
   //   overAllResultStatusList = await GeneralMasterHandler.getGeneralList(FEnumerations.overallResultStatusGenId);

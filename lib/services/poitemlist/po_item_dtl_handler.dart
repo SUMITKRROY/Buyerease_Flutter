@@ -413,7 +413,8 @@ developer.log("result of data ${result}");
         'recDt': ApiRoute.getCurrentDate(),
         'recEnable': 1,
       };
-
+      developer.log("Qrpoitemhrd data is QRPOItemdtl >> ${poItemDtl.qrItemID}");
+      developer.log("Qrpoitemhrd data QRPOItemdtl is  >> ${contentValues}");
       final rows = await db.update(
         'QRPOItemdtl',
         contentValues,
@@ -453,15 +454,15 @@ developer.log("result of data ${result}");
         'recDt': ApiRoute.getCurrentDate(),
         'recEnable': 1,
       };
+      developer.log("  qrpoItemHdrID is QRhdr  >> ${poItemDtl.qrpoItemHdrID}");
+      developer.log("Qrpoitemhrd data QRPOItemdtl is QRhdr >> ${contentValues}");
 
       final rows = await db.update(
         'QRPOItemHdr',
         contentValues,
         where: 'pRowID = ?',
-        whereArgs: [poItemDtl.pRowID],
+        whereArgs: [poItemDtl.qrpoItemHdrID],
       );
-      developer.log("Qrpoitemhrd data is  >> ${poItemDtl.pRowID}");
-      developer.log("Qrpoitemhrd data is  >> ${contentValues}");
       if (rows == 0) {
         print('$_tag: QRPOItemHdr table NOT UPDATED...');
         return false;

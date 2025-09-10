@@ -89,6 +89,7 @@ class MyApp extends StatelessWidget {
                   theme: lightMode,
                   initialRoute: RoutePath.splash,
                   onGenerateRoute: MyRoutes.generateRoute,
+                  // home: LoanHomePage(),
                 ),
               ),
             );

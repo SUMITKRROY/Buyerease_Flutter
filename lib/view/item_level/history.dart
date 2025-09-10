@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as dio;
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../config/api_route.dart';
 import '../../model/inspection_model.dart';
 import '../../model/po_item_dtl_model.dart';
 import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
@@ -80,6 +84,11 @@ developer.log("this is the data ${jsonEncode(_inspectionLevels)}");
                   : ResponsiveCustomTable(
                 headers: _headers,
                 rows: _rows,
+                onRowTap: (index) {
+                  final selectedItem = _inspectionLevels[index];
+
+                  _redirectWebView(context, selectedItem);
+                },
                 showTotalRow: false,
               ),
             ),
@@ -95,7 +104,74 @@ developer.log("this is the data ${jsonEncode(_inspectionLevels)}");
     String formattedDate = DateFormat('dd MMMM yyyy').format(parsedDate);
     return formattedDate;
   }
+  Future<void> _downloadFile(String url) async {
+    try {
+      String encodedUrl = Uri.encodeFull(url);
+      await launch(encodedUrl);
+    } catch (e) {
+      print('Error launching URL: $e');
+      // Handle the error, for example, show a snackbar or log the error
+    }
+  }
+
+}
 
 
+
+Future<void> _redirectWebView(BuildContext context, InspectionModal inspectionModal) async {
+  // Show loading dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final dio = Dio();
+
+    // Prepare request
+    final Map<String, dynamic> params = {
+      "InspectionpRowID": inspectionModal.qrHdrID ?? '',
+    };
+
+    final response = await dio.post(
+      ApiRoute.encryptHistory,
+      data: params,
+      options: Options(
+        headers: {"Content-Type": "application/json"},
+      ),
+    );
+
+    Navigator.of(context).pop(); // hide loading
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      final String? token = data["EncryptValue"];
+
+      if (token != null && token.isNotEmpty) {
+        final String rdUrl = "${ApiRoute.historyDetails}$token";
+        debugPrint("Redirecting to: $rdUrl");
+
+        final Uri uri = Uri.parse(rdUrl);
+
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not open link")),
+          );
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${response.statusCode}")),
+      );
+    }
+  } catch (e) {
+    Navigator.of(context).pop(); // hide loading if error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error loading: $e")),
+    );
+  }
 }
 

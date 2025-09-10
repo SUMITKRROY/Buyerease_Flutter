@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../model/sync/ImageModal.dart';
@@ -235,7 +236,44 @@ class SendDataHandler {
     }
     return params;
   }
+  Future<Map<String, dynamic>?> getSelectedInspectionIdsData(
+      dynamic context, List<String> hdrIdList) async {
+    Map<String, dynamic>? params;
 
+    if (hdrIdList.isNotEmpty) {
+      Map<String, dynamic> paramsIDs = {};
+      DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      String deviceId = "";
+      String? deviceIp = "";
+      // Join IDs with single quotes and commas
+      String ids = hdrIdList.map((id) => "'$id'").join(", ");
+
+
+      paramsIDs["pRowIDs"] = ids;
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo info = await deviceInfoPlugin.androidInfo;
+        deviceId = info.id;
+
+      } else if (Platform.isIOS) {
+        IosDeviceInfo info = await deviceInfoPlugin.iosInfo;
+        deviceId = info.identifierForVendor ?? "";
+      }
+      // Assuming you have a DeviceInfo class similar to your Java code
+      DeviceInfo deviceInfo = DeviceInfo(context);
+      deviceIp = await deviceInfo.getDeviceIp();
+      paramsIDs["KEY_DEVICE_ID"] = deviceId;
+      paramsIDs["KEY_DEVICE_IP"] = deviceIp ?? "0.0.0.0";
+      paramsIDs["KEY_DEVICE_LOCATION"] = "";
+      paramsIDs["KEY_DEVICE_TYPE"] = "A";
+
+
+      params = {};
+      params["Finalize"] = [paramsIDs]; // JSONArray → Dart List
+    }
+
+    return params;
+  }
+/*
   Future<Map<String, dynamic>?> getSelectedInspectionIdsData(
       BuildContext context, List<String>? hdrIdList) async {
     if (hdrIdList != null && hdrIdList.isNotEmpty) {
@@ -246,7 +284,7 @@ class SendDataHandler {
 
       // Assuming DeviceInfo class with these async methods
       final deviceInfo = DeviceInfo(context);
-      final String deviceId = await deviceInfo.devicesUniqueId!;
+        String? deviceId = deviceInfo.devicesUniqueId;
       final String? deviceIp = await deviceInfo.getDeviceIp();
 
       paramsIDs["pRowIDs"] = ids;
@@ -263,7 +301,7 @@ class SendDataHandler {
     }
 
     return null;
-  }
+  }*/
 
   Future<List<Map<String, dynamic>>> getQRFeedbackhdrJson(String hdrID) async {
     List<Map<String, dynamic>> jsonArrayList = [];

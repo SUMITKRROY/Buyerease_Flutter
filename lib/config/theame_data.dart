@@ -222,17 +222,7 @@ ThemeData darkMode = ThemeData(
     ),
   ),
 
-  // Card Theme
-  // cardTheme: CardTheme(
-  //   color: ColorsData.darkGrayColor,
-  //   elevation: 2,
-  //   shape: RoundedRectangleBorder(
-  //     borderRadius: BorderRadius.circular(10.r),
-  //   ),
-  //   shadowColor: ColorsData.shadowColor,
-  // ),
 
-  // Container Theme
   extensions: <ThemeExtension<dynamic>>[
     ContainerTheme(
       defaultPadding: EdgeInsets.all(16.r),

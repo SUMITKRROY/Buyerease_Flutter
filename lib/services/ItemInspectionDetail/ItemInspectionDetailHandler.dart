@@ -1721,6 +1721,39 @@ developer.log("contentValues $contentValues");
 
 
 
+  Future<int> updateDefect( POItemDtl poItemDtl) async {
+    int status = 0;
+    final db = await DatabaseHelper().database;
+    try {
+
+      Map<String, dynamic> contentValues = {
+        'CriticalDefect': poItemDtl.criticalDefect,
+        'MajorDefect': poItemDtl.majorDefect,
+        'MinorDefect': poItemDtl.minorDefect,
+        'recDt': AppConfig.getCurrentDate(), // Make sure this returns a string
+      };
+
+      int rows = await db.update(
+        'QRPOItemHdr',
+        contentValues,
+        where: 'pRowID = ?',
+        whereArgs: [poItemDtl.qrpoItemHdrID],
+      );
+developer.log("developer log >>>>>>>>>>. ${poItemDtl.qrpoItemHdrID}");
+developer.log("developer log >>>>>>>>>>. ${contentValues}");
+
+      if (rows == 0) {
+        print('NOT UPDATED QRPOItemHdr');
+      } else {
+        status = 1;
+        print('Updated QRPOItemHdr successfully');
+      }
+    } catch (e) {
+      print('Error updating defect: $e');
+    }
+    return status;
+  }
+
   List<POItemDtl> copyFindingDataToSpecification(
       List<POItemDtl> packDetailList, List<POItemDtl> packFindingList) {
     print('capyFindingDataToSpecification packDetail size: ${packDetailList.length}');
@@ -1865,7 +1898,6 @@ developer.log("contentValues $contentValues");
           itemMeasurementModal.pRowID!.isEmpty ||
           itemMeasurementModal.pRowID!.toLowerCase() == 'null') {
         itemMeasurementModal.pRowID = await generatePK(
-
           FEnumerations.tableItemMeasurement,
         );
       }

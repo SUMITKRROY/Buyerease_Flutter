@@ -354,37 +354,6 @@ developer.log("ItemMeasurementModal measurements ${jsonEncode(measurements)}");
   }
 
 
-  // Future<void> setAdaptor() async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-  //
-  //   List<WorkManShipModel> list = await ItemInspectionDetailHandler().getWorkmanShip(
-  //     poItemDtl.qrHdrID ?? '',
-  //     poItemDtl.qrpoItemHdrID ?? '',
-  //     poItemDtl.qrItemID ?? '',
-  //   );
-  //
-  //   setState(() {
-  //     workManShipModels.clear();
-  //     workManShipModels.addAll(list);
-  //     totalCritical = workManShipModels.fold<int>(
-  //       0, (sum, item) => sum + (item.critical ?? 0),
-  //     );
-  //
-  //     totalMajor = workManShipModels.fold<int>(
-  //       0, (sum, item) => sum + (item.major ?? 0),
-  //     );
-  //
-  //     totalMinor = workManShipModels.fold<int>(
-  //       0, (sum, item) => sum + (item.minor ?? 0),
-  //     );
-  //
-  //     isLoading = false;
-  //   });
-  //
-  //   developer.log("workmanship modal list ${jsonEncode(workManShipModels)}");
-  // }
 
 
   Future<void> handlePackaging() async {

@@ -27,7 +27,7 @@ class _CartonState extends State<Carton> {
 
   final Map<String, TextEditingController> packedControllers = {};
   final Map<String, TextEditingController> availableControllers = {};
-  final Map<String, TextEditingController> toInspectControllers = {};
+  final Map<String, TextEditingController> cartonsInspectedControllers = {};
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _CartonState extends State<Carton> {
   void dispose() {
     packedControllers.values.forEach((c) => c.dispose());
     availableControllers.values.forEach((c) => c.dispose());
-    toInspectControllers.values.forEach((c) => c.dispose());
+    cartonsInspectedControllers.values.forEach((c) => c.dispose());
     super.dispose();
   }
 
@@ -52,7 +52,7 @@ class _CartonState extends State<Carton> {
         String id = item.pRowID ?? '';
         packedControllers[id] = TextEditingController(text: (item.cartonsPacked ?? 0).toString());
         availableControllers[id] = TextEditingController(text: item.cartonAvailable ?? '0');
-        toInspectControllers[id] = TextEditingController(text: item.cartonToInspectedhdr ?? '0');
+        cartonsInspectedControllers[id] = TextEditingController(text: (item.cartonsInspected ?? '0').toString());
       }
     } catch (e) {
       showToast('Error loading items', true);
@@ -92,8 +92,8 @@ class _CartonState extends State<Carton> {
       controller = availableControllers[id]!;
       setValue = (v) => item.cartonAvailable = v?.toString() ?? '0';
     } else {
-      controller = toInspectControllers[id]!;
-      setValue = (v) => item.cartonToInspectedhdr = v?.toString() ?? '0';
+      controller = cartonsInspectedControllers[id]!;
+      setValue = (v) => item.cartonsInspected = v;
     }
 
     return TextFormField(
@@ -123,8 +123,9 @@ class _CartonState extends State<Carton> {
       bool allUpdated = true;
       for (var item in poItems) {
         bool updatedDtl = await POItemDtlHandler.updatePOItemDtlOfWorkmanshipAndCarton(item);
+        bool updatedHDR = await POItemDtlHandler.updatePOItemHdrOfWorkmanshipAndCarton(item);
         bool updatedHdr = await POItemDtlHandler.updatePOItemHdrOnInspection(item);
-        if (!updatedDtl || !updatedHdr) allUpdated = false;
+        if (!updatedDtl || !updatedHdr || updatedHDR) allUpdated = false;
       }
       setState(() {});
       widget.onChanged?.call();
@@ -151,7 +152,7 @@ class _CartonState extends State<Carton> {
               item.poNo ?? '',
               item.itemCode ?? '',
               _buildEditableField(id, 'packed', item),
-              _buildEditableField(id, 'available', item),
+              item.cartonsPacked ?? "",
               _buildEditableField(id, 'toInspect', item),
             ];
           }).toList(),
@@ -173,8 +174,10 @@ class _CartonState extends State<Carton> {
             'Total',
             '',
             poItems.fold(0, (sum, item) => sum + (item.cartonsPacked ?? 0)).toString(),
-            poItems.fold(0, (sum, item) => sum + (int.tryParse(item.cartonAvailable ?? '0') ?? 0)).toString(),
-            poItems.fold(0, (sum, item) => sum + (int.tryParse(item.cartonToInspectedhdr ?? '0') ?? 0)).toString(),
+            poItems.fold(0, (sum, item) => sum + (item.cartonsPacked ?? 0)).toString(),
+            poItems.fold(0, (sum, item) => sum + (item.cartonsInspected ?? 0)).toString(),
+            // poItems.fold(0, (sum, item) => sum + (int.tryParse(item.cartonAvailable ?? '0') ?? 0)).toString(),
+            // poItems.fold(0, (sum, item) => sum + (int.tryParse(item.cartonsInspected ?? '0') ?? 0)).toString(),
           ],
         ),
       ),

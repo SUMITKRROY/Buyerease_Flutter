@@ -81,7 +81,6 @@ class _OnSiteState extends State<OnSite> {
     _loadItems();
     loadSampleData();
     handleOnSiteTab();
-
   }
 
   Future<void> loadSampleData() async {
@@ -161,7 +160,7 @@ class _OnSiteState extends State<OnSite> {
 
       // Get the selected result object from overAllResultStatusList
       final selectedResultModel = doverAllResultStatusList[selectedIndex];
-developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
+      developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
       setState(() {
         // Track which dropdown index was selected for this row
         selectedResultIndices[rowIndex] = selectedIndex;
@@ -172,15 +171,13 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
 
       developer.log(
         "Row $rowIndex → ${selectedResultModel.mainDescr} "
-            "(pGenRowID: ${selectedResultModel.pGenRowID})",
+        "(pGenRowID: ${selectedResultModel.pGenRowID})",
       );
 
       // Save this updated detail to the database
       updateOnSite(detail);
     }
   }
-
-
 
   void _initializeSelections() {
     for (int i = 0; i < onSiteList.length && i < 10; i++) {
@@ -209,7 +206,7 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
       // Initialize result selections
       if (detail.inspectionResultID != null) {
         final resultIndex = doverAllResultStatusList.indexWhere(
-              (result) => result.pGenRowID == detail.inspectionResultID,
+          (result) => result.pGenRowID == detail.inspectionResultID,
         );
         if (resultIndex != -1) {
           selectedResultIndices[i] = resultIndex;
@@ -228,7 +225,6 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
         }
       }*/
     }
-
   }
 
   @override
@@ -253,27 +249,7 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
             )
           ],
         ),
-        // DropdownButton<String>(
-        //   value: selectedOnSiteOverallResult,
-        //   items: dropdownOnSiteOverallResultItems,
-        //   hint: Text('Select Overall Result'),
-        //   onChanged: (String? newValue) {
-        //     if (newValue == null) return;
-        //
-        //     selectedOnSiteOverallResult = newValue;
-        //
-        //     final selectedModel = overAllResultStatusList.firstWhere(
-        //           (element) => element.mainDescr == newValue,
-        //       orElse: () => GeneralModel(),
-        //     );
-        //
-        //     packagePoItemDetalDetail.onSiteTestInspectionResultID = selectedModel.pGenRowID;
-        //     handleOverAllResult(); // Equivalent to Java method call
-        //   },
-        // ),
-
         SizedBox(height: 20),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: const [
@@ -346,7 +322,6 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
                                     },
                             ),
                           ),
-
                           // Sample Size Dropdown
                           Expanded(
                             child: DropdownButtonFormField<int>(
@@ -378,28 +353,31 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
                                     },
                             ),
                           ),
-
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               value: (selectedResultIndices[index] != null &&
-                                  selectedResultIndices[index]! >= 0 &&
-                                  selectedResultIndices[index]! < statsList.length)
+                                      selectedResultIndices[index]! >= 0 &&
+                                      selectedResultIndices[index]! <
+                                          statsList.length)
                                   ? statsList[selectedResultIndices[index]!]
                                   : null,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                               ),
-                              items: statsList.toSet().map((String value) { // remove duplicates
+                              items: statsList.toSet().map((String value) {
+                                // remove duplicates
                                 return DropdownMenuItem<String>(
                                   value: value,
-                                  child: Text(value, style: const TextStyle(fontSize: 12)),
+                                  child: Text(value,
+                                      style: const TextStyle(fontSize: 12)),
                                 );
                               }).toList(),
                               onChanged: (val) {
                                 if (val != null) {
                                   final selectedIndex = statsList.indexOf(val);
                                   if (selectedIndex != -1) {
-                                    _onResultDropdownChanged(index, selectedIndex);
+                                    _onResultDropdownChanged(
+                                        index, selectedIndex);
                                   }
                                 }
                               },
@@ -420,71 +398,11 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
     );
   }
 
-  void _showInspectionDialog() async {
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'Select Inspection Level',
-            style: TextStyle(fontSize: 14),
-          ),
-          content: Container(
-            width: double.maxFinite,
-            child: _loading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _items.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(
-                          _items[index],
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        onTap: () => Navigator.of(context).pop(_items[index]),
-                      );
-                    },
-                  ),
-          ),
-        );
-      },
-    );
-
-    if (result != null) {
-      setState(() {
-        rows.add({'purpose': result, 'samples': 0});
-      });
-    }
-  }
-
-  Widget _buildDialogOption(String title) {
-    return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 12),
-      ),
-      onTap: () => Navigator.of(context).pop(title),
-    );
-  }
-
-  void initializeSelections(List<OnSiteModal> onSiteList) {
-    // This method is now replaced by _initializeSelections()
-    // Keeping for backward compatibility but not used
-  }
-
   List<OnSiteModal> onSiteList = [];
   OnSiteModal onSiteListModal = OnSiteModal();
 
   List<bool> onSiteVisibilityFlags = List.filled(10, false);
   List<String?> onSiteDescriptions = List.filled(10, null);
-  List<String?> statusList = [];
-  String? selectedOverAllResultId;
-
-  List<InsLvHdrModal> insLvHdrModals = [];
-  List<String> insAbbrvList = [];
-
-  // Old method removed - not used in new implementation
 
   // Old methods removed - replaced by new dropdown implementation
   Future<void> updateOnSite(OnSiteModal onSiteModalItem) async {
@@ -549,43 +467,11 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
     }
   }
 
-/*  Future<void> updateOverAllResultOnsite() async {
-    // Simulate fetch from backend or local service
-    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(
-      FEnumerations.overallResultStatusGenId,
-    );
-
-    if (overAllResultStatusList.isNotEmpty) {
-      int selectedIndex = 0;
-
-      statusList = overAllResultStatusList.map((e) => e.mainDescr).toList();
-
-      for (int i = 0; i < overAllResultStatusList.length; i++) {
-        if (packagePoItemDetalDetail.onSiteTestInspectionResultID ==
-            overAllResultStatusList[i].pGenRowID) {
-          selectedIndex = i;
-          break;
-        }
-      }
-
-      setState(() {
-        selectedOverAllResultId = overAllResultStatusList[selectedIndex].pGenRowID;
-      });
-    }
-  }*/
-
   Future<void> handleOnSiteTab() async {
     setState(() {
       spinnerTouched = false;
       _loading = true; // Set loading to true at the start
     });
-
-/*
-    // Assign onPressed callback
-    addOnSiteDescIvOnPressed = () {
-      handleOnSiteDesc();
-    };
-*/
 
     // Call other handlers
     handlePackaging();
@@ -631,7 +517,7 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
         }
       }
     }
-    await    handleSpinner();
+    await handleSpinner();
     // Initialize selections after data is loaded
     _initializeSelections();
   }
@@ -653,7 +539,6 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
       packDetailList,
       packFindingList,
     );
-
     if (packList.isNotEmpty) {
       setState(() {
         packagePoItemDetalDetail = packList[0];
@@ -728,11 +613,13 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
                 pRowID: await ItemInspectionDetailHandler().generatePK(
                   FEnumerations.tableNameOnSiteTest,
                 ),
-                inspectionLevelID: null,
-                inspectionResultID: null,
-                onSiteTestID: status.pGenRowID,
-                sampleSizeID: null,
-                sampleSizeValue: null,
+                onSiteTestID: overAllResultStatusList[selectedItem].pGenRowID,
+
+                // 👇 default selections
+                inspectionLevelID: _inspectionLevels.first.pRowID,
+                sampleSizeID: sampleModals.first.sampleCode,
+                sampleSizeValue: sampleModals.first.sampleVal?.toString(),
+                inspectionResultID: doverAllResultStatusList.first.pGenRowID,
               );
 
               await POItemDtlHandler.insertOnSite(
@@ -749,11 +636,19 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
             FEnumerations.tableNameOnSiteTest,
           ),
           onSiteTestID: overAllResultStatusList[selectedItem].pGenRowID,
+          // 👇 default selections
+          inspectionLevelID: _inspectionLevels.first.pRowID,
+          sampleSizeID: sampleModals.first.sampleCode,
+          sampleSizeValue: sampleModals.first.sampleVal?.toString(),
+          inspectionResultID: doverAllResultStatusList.first.pGenRowID,
         );
 
         bool success =
             await POItemDtlHandler.insertOnSite(onSiteModal, widget.poItemDtl);
         // Show a SnackBar based on success/failure
+        setState(() {
+          handleOnSiteTab();
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -770,85 +665,6 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
     }
   }
 
-  // void handleOverAllResult() {
-  //   final checks = [
-  //     packagePoItemDetalDetail.itemMeasurementInspectionResultID,
-  //     packagePoItemDetalDetail.workmanshipInspectionResultID,
-  //     packagePoItemDetalDetail.pkgMeInspectionResultID,
-  //     packagePoItemDetalDetail.itemMeasurementInspectionResultID,
-  //     packagePoItemDetalDetail.workmanshipInspectionResultID,
-  //     packagePoItemDetalDetail.pkgMeInspectionResultID,
-  //     packagePoItemDetalDetail.pkgMeInspectionResultID,
-  //     packagePoItemDetalDetail.onSiteTestInspectionResultID,
-  //     packagePoItemDetalDetail.barcodeInspectionResultID,
-  //     packagePoItemDetalDetail.pkgAppInspectionResultID,
-  //   ];
-  //
-  //   final resultOrder = [
-  //     FEnumerations.overAllFailResult,
-  //     FEnumerations.overAllFailResult,
-  //     FEnumerations.overAllFailResult,
-  //     FEnumerations.overAllHoldResult,
-  //     FEnumerations.overAllHoldResult,
-  //     FEnumerations.overAllHoldResult,
-  //     FEnumerations.overAllDescResult,
-  //     FEnumerations.overAllDescResult,
-  //     FEnumerations.overAllDescResult,
-  //     FEnumerations.overAllDescResult,
-  //   ];
-  //
-  //   for (int i = 0; i < checks.length; i++) {
-  //     if (checks[i] != null && checks[i] == resultOrder[i]) {
-  //       packagePoItemDetalDetail.overallInspectionResultID = checks[i];
-  //       break;
-  //     }
-  //   }
-  //
-  //   // handleHoleOverAllResult();
-  // }
-
-  // Future<void> handleHoleOverAllResult() async {
-  //   // Fetch data from handler
-  //   final overAllResultStatusList = await GeneralMasterHandler.getGeneralList(
-  //     FEnumerations.overallResultStatusGenId,
-  //   );
-  //
-  //   if (overAllResultStatusList == null || overAllResultStatusList.isEmpty)
-  //     return;
-  //
-  //   // Prepare dropdown values
-  //   List<String> statusList = [];
-  //   int selectedMPos = 0;
-  //
-  //   for (int i = 0; i < overAllResultStatusList.length; i++) {
-  //     final model = overAllResultStatusList[i];
-  //     statusList.add(model.mainDescr ?? '');
-  //
-  //     if (model.pGenRowID ==
-  //         packagePoItemDetalDetail.overallInspectionResultID) {
-  //       selectedMPos = i;
-  //     }
-  //   }
-  //
-  //   // Update state
-  //   dropdownHoleOverAllResultItems = statusList
-  //       .map((status) => DropdownMenuItem<String>(
-  //             value: status,
-  //             child: Text(status),
-  //           ))
-  //       .toList();
-  //
-  //   selectedHoleOverAllResult = statusList[selectedMPos];
-  //
-  //   // Optional: call setState here if inside a StatefulWidget
-  //   if (mounted) {
-  //     setState(() {});
-  //   }
-  //
-  //   // Save list and selection if needed later
-  //   this.overAllResultStatusList = overAllResultStatusList;
-  // }
-
   String getPurposeFromGenId(String? genId) {
     final match = overAllResultStatusList.firstWhere(
       (e) => e.pGenRowID == genId,
@@ -857,7 +673,7 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
     return match.mainDescr ?? '';
   }
 
-  bool _hasUnsavedChanges = false;
+
 
   Future<void> saveChanges() async {
     handleOnSiteRemark();
@@ -865,9 +681,6 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
     // Save to server (optional, but mimics Java method)
     // await ItemInspectionDetailHandler.updatePackagingFindingMeasurementList(poItemDtl);
 
-    setState(() {
-      _hasUnsavedChanges = false;
-    });
 
     developer.log('onsite Remark saved: $_onSiteRemark');
   }
@@ -890,7 +703,7 @@ developer.log("selectmodal ${jsonEncode(selectedResultModel)}");
   Future<void> handleSpinner() async {
     doverAllResultStatusList = await GeneralMasterHandler.getGeneralList(
         FEnumerations.overallResultStatusGenId);
-developer.log("overall result ID ${jsonEncode(doverAllResultStatusList)}");
+    developer.log("overall result ID ${jsonEncode(doverAllResultStatusList)}");
     if (doverAllResultStatusList.isNotEmpty) {
       for (int i = 0; i < doverAllResultStatusList.length; i++) {
         statsList.add(doverAllResultStatusList[i].mainDescr ?? '');

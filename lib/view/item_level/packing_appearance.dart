@@ -40,32 +40,32 @@ class PackingAppearance extends StatefulWidget {
 }
 
 class _PackingAppearanceState extends State<PackingAppearance> {
-  final List<String> results = ['PASS', 'FAIL'];
   List<GeneralModel> appearanceDescriptions = [];
   List<GeneralModel> overAllResultStatusList = [];
   String? selectedOverallInspectionResult;
   List<String> selectedSamples = [];
   List<String> selectedResults = [];
+  List<POItemDtl> pOItemDtlList = [];
+// Inside your StatefulWidget class
+
+  String? selectedSampleValue; // optional, to show selected value in dropdown
 
   late POItemDtl poItemDtl;
-  TextEditingController editPackingAppearRemarkController = TextEditingController();
+  TextEditingController editPackingAppearRemarkController =
+      TextEditingController();
 
   List<SampleModel> sampleModals = [];
-  String selectedResult = '';
+
   String selectedResultId = '';
-  String selectedSample = "";
+
   List<String> statusList = [];
-  List<String> statsList = [];
-  int selectedResultPos = 0;
+
   List<String> sampleList = [];
-  int selectedSamplePos = 0;
 
-
-    List<POItemPkgAppDetail> pkgAppList = [];
+  List<POItemPkgAppDetail> pkgAppList = [];
 
   List<int?> selectedIndices = List.generate(9, (_) => null);
   List<int?> selectedSampleIndices = List.generate(9, (_) => null);
-  bool spinnerTouched = false;
 
   String? selectedMasterResult;
   String? selectedInnerResult;
@@ -79,10 +79,7 @@ class _PackingAppearanceState extends State<PackingAppearance> {
   String? selectedPalletSample;
   String? selectedShippingSample;
 
-  late InspectionModal inspectionModal;
   POItemDtl packagePoItemDetalDetail = POItemDtl();
-  OnSiteModal onSIteModal = new OnSiteModal();
-  SampleCollectedModal sampleCollectedModal = new SampleCollectedModal();
   POItemPkgAppDetail pOItemPkgAppDetail = new POItemPkgAppDetail();
 
   bool isLoading = false;
@@ -112,21 +109,22 @@ class _PackingAppearanceState extends State<PackingAppearance> {
     handleToInitiatePackagingAppearance();
     handlePackaging();
   }
+
   void _initializeSelections() {
-    for (int i = 0; i <  pkgAppList.length && i < 9; i++) {
-      final detail =  pkgAppList[i];
-      
+    for (int i = 0; i < pkgAppList.length && i < 9; i++) {
+      final detail = pkgAppList[i];
+
       // Initialize appearance result selections
-      final resultIndex =  overAllResultStatusList.indexWhere(
-            (item) => item.pGenRowID == detail.inspectionResultID,
+      final resultIndex = overAllResultStatusList.indexWhere(
+        (item) => item.pGenRowID == detail.inspectionResultID,
       );
       if (resultIndex != -1) {
         selectedIndices[i] = resultIndex;
       }
-      
+
       // Initialize sample size selections
       final sampleIndex = sampleModals.indexWhere(
-            (sample) => sample.sampleCode == detail.sampleSizeID,
+        (sample) => sample.sampleCode == detail.sampleSizeID,
       );
       if (sampleIndex != -1) {
         selectedSampleIndices[i] = sampleIndex;
@@ -135,13 +133,13 @@ class _PackingAppearanceState extends State<PackingAppearance> {
   }
 
   void _onDropdownChanged(int dropdownIndex, int selectedIndex) {
-    final detail =  pkgAppList[dropdownIndex];
-    final selectedModel =  overAllResultStatusList[selectedIndex];
+    final detail = pkgAppList[dropdownIndex];
+    final selectedModel = overAllResultStatusList[selectedIndex];
 
     setState(() {
       selectedIndices[dropdownIndex] = selectedIndex;
     });
-
+    developer.log("developer log of Status List ${selectedModel.pGenRowID}");
     detail.pRowID = detail.pRowID; // Already set
     detail.inspectionResultID = selectedModel.pGenRowID;
 
@@ -162,33 +160,107 @@ class _PackingAppearanceState extends State<PackingAppearance> {
 
     updatePkgAppearance(detail);
   }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          buildOverallResultDropdown(),
-      
-          _buildCardSection("Unit Packing"),
-          _buildCardSection("Shipping Mark"),
-          if (innerPackQty > 0) _buildCardSection("Inner Packing"),
-          if (masterPackQty > 0) _buildCardSection("Master Packing"),
-          if (palletPackQty > 0) _buildCardSection("Pallet Packing"),
-          _buildTableHeader(),
-          _buildDataList(),
-          Remarks(
-            controller: editPackingAppearRemarkController,
-            onChanged: (_) {
-              widget.onChanged();
-            },
-          ),
-        ],
-      ),
+    return ListView(
+      children: [
+        buildOverallResultDropdown(),
+        _buildCardSection("Unit Packing"),
+        _buildCardSection("Shipping Mark"),
+        if (innerPackQty > 0) _buildCardSection("Inner Packing"),
+        if (masterPackQty > 0) _buildCardSection("Master Packing"),
+        if (palletPackQty > 0) _buildCardSection("Pallet Packing"),
+        _buildTableHeader(),
+        _buildDataList(),
+        Remarks(
+          controller: editPackingAppearRemarkController,
+          onChanged: (_) {
+            widget.onChanged();
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildCardSection(String title) {
-    String selectedResult = 'PASS';
+    // Map title → DB field
+    String? getStoredResultId() {
+      switch (title) {
+        case "Unit Packing":
+          return poItemDtl.pkgAppUnitInspectionResultID;
+        case "Shipping Mark":
+          return poItemDtl.pkgAppShippingMarkInspectionResultID;
+        case "Inner Packing":
+          return poItemDtl.pkgAppInnerSampleSizeID;
+        case "Master Packing":
+          return poItemDtl.pkgAppMasterInspectionResultID;
+        case "Pallet Packing":
+          return poItemDtl.pkgAppPalletInspectionResultID;
+        default:
+          return null;
+      }
+    }
+
+    void setStoredResultId(String? id) {
+      switch (title) {
+        case "Unit Packing":
+          poItemDtl.pkgAppUnitInspectionResultID = id;
+          break;
+        case "Shipping Mark":
+          poItemDtl.pkgAppShippingMarkInspectionResultID = id;
+          break;
+        case "Inner Packing":
+          poItemDtl.pkgAppInnerSampleSizeID = id;
+          break;
+        case "Master Packing":
+          poItemDtl.pkgAppMasterInspectionResultID = id;
+          break;
+        case "Pallet Packing":
+          poItemDtl.pkgAppPalletInspectionResultID = id;
+          break;
+      }
+    }
+
+    String? getStoredSampleId() {
+      switch (title) {
+        case "Unit Packing":
+          return poItemDtl.pkgAppUnitSampleSizeID;
+        case "Shipping Mark":
+          return poItemDtl.pkgAppShippingMarkSampleSizeId;
+        case "Inner Packing":
+          return poItemDtl.pkgAppInnerSampleSizeID;
+        case "Master Packing":
+          return poItemDtl.pkgAppMasterSampleSizeID;
+        case "Pallet Packing":
+          return poItemDtl.pkgAppPalletSampleSizeID;
+        default:
+          return null;
+      }
+    }
+
+    void setStoredSampleId(String? id) {
+      switch (title) {
+        case "Unit Packing":
+          poItemDtl.pkgAppUnitSampleSizeID = id;
+          break;
+        case "Shipping Mark":
+          poItemDtl.pkgAppShippingMarkSampleSizeId = id;
+          break;
+        case "Inner Packing":
+          poItemDtl.pkgAppInnerSampleSizeID = id;
+          break;
+        case "Master Packing":
+          poItemDtl.pkgAppMasterSampleSizeID = id;
+          break;
+        case "Pallet Packing":
+          poItemDtl.pkgAppPalletSampleSizeID = id;
+          break;
+      }
+    }
+
+    // current stored ID
+    final currentResultId = getStoredResultId();
 
     String getAppearanceTitle() {
       switch (title) {
@@ -231,24 +303,71 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                     ),
                   ),
                 ),
-                const Expanded(flex: 2, child: SampleSizeDropdown()),
+                // const Expanded(flex: 2, child: SampleSizeDropdown()),
                 Expanded(
                   flex: 2,
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    value: selectedResult,
-                    underline: const SizedBox(),
-                    onChanged: (value) {},
-                    items: results.map((result) {
-                      return DropdownMenuItem(
-                        value: result,
-                        child:
-                            Text(result, style: const TextStyle(fontSize: 12)),
+                    value: sampleModals.isNotEmpty
+                        ? (getStoredSampleId()?.isNotEmpty == true
+                            ? getStoredSampleId()
+                            : sampleModals.first.sampleCode)
+                        : null,
+                    items: sampleModals.map((e) {
+                      return DropdownMenuItem<String>(
+                        value: e.sampleCode,
+                        child: Text("${e.mainDescr} (${e.sampleVal})"),
                       );
                     }).toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
 
+                      setState(() {
+                        setStoredSampleId(value);
+
+                        final matchedSample = sampleModals.firstWhere(
+                          (element) => element.sampleCode == value,
+                          orElse: () => sampleModals.first,
+                        );
+
+                        selectedSampleValue = matchedSample.mainDescr;
+                      });
+
+                      handleUpdateData();
+                    },
                   ),
+                ),
 
+                // ✅ Dropdown stores ID but shows description
+                Expanded(
+                  flex: 2,
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: currentResultId?.isNotEmpty == true
+                        ? currentResultId
+                        : overAllResultStatusList.isNotEmpty
+                            ? overAllResultStatusList.first.pGenRowID
+                            : null,
+                    underline: const SizedBox(),
+                    onChanged: (newId) async {
+                      if (newId == null) return;
+
+                      setState(() {
+                        setStoredResultId(newId);
+                      });
+
+                      // update DB
+                      updateOverResultPackagingAppearance();
+                      handleUpdateData();
+                    },
+                    items: overAllResultStatusList.map((model) {
+                      return DropdownMenuItem<String>(
+                        value: model.pGenRowID,
+                        child: Text(model.mainDescr ?? '',
+                            style: const TextStyle(fontSize: 12)),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
@@ -259,7 +378,6 @@ class _PackingAppearanceState extends State<PackingAppearance> {
               poItemDtl: poItemDtl,
               onImageAdded: () {
                 saveChanges();
-
               },
             )
           ],
@@ -289,9 +407,9 @@ class _PackingAppearanceState extends State<PackingAppearance> {
       ),
     );
   }
+
   Widget _buildDataList() {
     return Column(
-
       children: appearanceDescriptions.map((currentDescription) {
         final index = appearanceDescriptions.indexOf(currentDescription);
 
@@ -308,15 +426,20 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                 ),
               ),
 
+              // ✅ Sample Size Dropdown
               Expanded(
                 flex: 2,
                 child: DropdownButton<int>(
-                  value: selectedSampleIndices[index],
+                  value: selectedSampleIndices[index] ??
+                      0, // <-- default first item
                   items: List.generate(sampleModals.length, (i) {
                     final sample = sampleModals[i];
                     return DropdownMenuItem<int>(
                       value: i,
-                      child: Text("${sample.mainDescr} (${sample.sampleVal})",style: TextStyle(fontSize: 12.sp),),
+                      child: Text(
+                        "${sample.mainDescr} (${sample.sampleVal})",
+                        style: TextStyle(fontSize: 12.sp),
+                      ),
                     );
                   }),
                   onChanged: (val) {
@@ -326,12 +449,17 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                   },
                 ),
               ),
+
+              // ✅ Result Dropdown
               DropdownButton<int>(
-                value: selectedIndices[index],
+                value: selectedIndices[index] ?? 0, // <-- default first item
                 items: List.generate(statusList.length, (i) {
                   return DropdownMenuItem<int>(
                     value: i,
-                    child: Text(statusList[i],style: TextStyle(fontSize: 12.sp),),
+                    child: Text(
+                      statusList[i],
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
                   );
                 }),
                 onChanged: (val) {
@@ -340,203 +468,24 @@ class _PackingAppearanceState extends State<PackingAppearance> {
                   }
                 },
               ),
-
             ],
           ),
         );
       }).toList(),
     );
-  }
-/*  Widget _buildDataList() {
-    return ListView.builder(
-      itemCount: appearanceDescriptions.length,
-      itemBuilder: (context, index) {
-        final currentDescription = appearanceDescriptions[index];
-        final sampleSize = selectedSamples[index];
-        final result = selectedResults[index];
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Text(
-                  currentDescription.mainDescr ?? '',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: DropdownButtonFormField<int>(
-                 // decoration: InputDecoration(labelText: 'Sample Size $index'),
-                  value: selectedSampleIndices[index],
-                  items: List.generate(sampleModals.length, (i) {
-                    final sample = sampleModals[i];
-                    return DropdownMenuItem<int>(
-                      value: i,
-                      child: Text("${sample.mainDescr} (${sample.sampleVal})"),
-                    );
-                  }),
-                  onChanged: (val) {
-                    if (val != null) {
-                      _onSampleDropdownChanged(index, val);
-                    }
-                  },
-                ),
-              ),
-
-              Expanded(
-                flex: 2,
-                child:DropdownButtonFormField<int>(
-                  //decoration: InputDecoration(labelText: 'Appearance $index'),
-                  value: selectedIndices[index],
-                  items: List.generate(statusList.length, (i) {
-                    return DropdownMenuItem<int>(
-                      value: i,
-                      child: Text(statusList[i]),
-                    );
-                  }),
-                  onChanged: (val) {
-                    if (val != null) {
-                      _onDropdownChanged(index, val);
-                    }
-                  },)
-  _dropdown(
-                  results,
-                  selectedResults[index],
-                      (val) async {
-                    selectedResults[index] = val!;
-
-                    // Map "PASS"/"FAIL" to their corresponding GenID
-                    final resultGenModel = overAllResultStatusList.firstWhere(
-                          (element) => element.mainDescr == val,
-                      orElse: () => GeneralModel(),
-                    );
-
-                    final detail = POItemPkgAppDetail()
-                      ..inspectionResultID = resultGenModel.pGenRowID
-                      ..descrID = appearanceDescriptions[index].pGenRowID;
-
-                    await POItemDtlHandler.updatePOItemDtlPKGAppDetails(detail);
-                    widget.onChanged();
-                    setState(() {});
-                  },
-                ),
-              ),
-
-
-            ],
-          ),
-        );
-      },
-    );
-  }*/
-
-
-  Widget _dropdown(List<String> items, String selectedValue,
-      void Function(String?)? onChanged) {
-    return DropdownButton<String>(
-      isExpanded: true,
-      value: selectedValue,
-      icon: const Icon(Icons.arrow_drop_down),
-      underline: Container(height: 1, color: Colors.grey),
-      onChanged: (val) {
-        onChanged?.call(val);
-        updatePkgAppearance(pOItemPkgAppDetail);
-        widget.onChanged(); // <-- THIS WILL TRIGGER SAVE BUTTON
-      },
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value,
-              style: const TextStyle(fontSize: 12),
-              overflow: TextOverflow.ellipsis),
-        );
-      }).toList(),
-    );
-  }
-/*  Widget _dropdown(List<String> items, String selectedValue,
-
-      void Function(String?)? onChanged) {
-    return DropdownButton<String>(
-      isExpanded: true,
-      value: selectedValue,
-      icon: const Icon(Icons.arrow_drop_down),
-      underline: Container(height: 1, color: Colors.grey),
-      onChanged: (val) {
-        onChanged?.call(val);
-        updatePkgAppearance(pOItemPkgAppDetail);
-        widget.onChanged(); // <-- THIS WILL TRIGGER SAVE BUTTON
-      },
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value,
-              style: const TextStyle(fontSize: 12),
-              overflow: TextOverflow.ellipsis),
-        );
-      }).toList(),
-    );
-  }*/
-
-  void handlePackagingAppearanceUpload(
-      List<DigitalsUploadModel> digitalsUploadModals) {
-    attachmentMap.forEach((key, _) => attachmentMap[key] = []);
-
-    for (var modal in digitalsUploadModals) {
-      if (modal.title != null && modal.selectedPicPath != null) {
-        if (attachmentMap.containsKey(modal.title)) {
-          attachmentMap[modal.title]!.add(modal.selectedPicPath!);
-        }
-      }
-    }
-
-    setState(() {}); // Refresh the UI
-  }
-
-  Future<void> handleSpinner() async {
-    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(FEnumerations.overallResultStatusGenId);
-
-    if (overAllResultStatusList.isNotEmpty) {
-      for (int i = 0; i < overAllResultStatusList.length; i++) {
-        statsList.add(overAllResultStatusList[i].mainDescr ?? '');
-        if (overAllResultStatusList[i].pGenRowID == pOItemPkgAppDetail.inspectionResultID) {
-          selectedResultPos = i;
-        }
-      }
-      selectedResult = statsList[selectedResultPos];
-    }
-
-    sampleModals = await POItemDtlHandler.getSampleSizeList();
-    if (sampleModals.isNotEmpty) {
-      for (int i = 0; i < sampleModals.length; i++) {
-        final sampleDescription = "${sampleModals[i].mainDescr} (${sampleModals[i].sampleVal})";
-        sampleList.add(sampleDescription);
-
-        if (sampleModals[i].sampleCode == pOItemPkgAppDetail.sampleSizeID) {
-          selectedSamplePos = i;
-        }
-      }
-      selectedSample = sampleList[selectedSamplePos];
-      if (selectedSamplePos == 0) {
-        pOItemPkgAppDetail.sampleSizeID = sampleModals[0].sampleCode;
-        pOItemPkgAppDetail.sampleSizeValue = sampleModals[0].sampleVal?.toString();
-      }
-    }
   }
 
   Future<void> handlePackagingAppearanceSimpleOverAllResultDescSpinner() async {
     // Fetch all required lists
-   pkgAppList = await POItemDtlHandler.getPKGAPPList();
+    pkgAppList = await POItemDtlHandler.getPKGAPPList();
 
     final List<GeneralModel> overAllResultStatusLists =
-    await GeneralMasterHandler.getGeneralList(
+        await GeneralMasterHandler.getGeneralList(
       FEnumerations.packageAppearanceOverallResultStatusGenId,
     );
 
     final List<GeneralModel> overAllResultStatusListPkgAppGenMstList =
-    await GeneralMasterHandler.getGeneralList(
+        await GeneralMasterHandler.getGeneralList(
       FEnumerations.overallResultStatusGenId,
     );
 
@@ -549,15 +498,17 @@ class _PackingAppearanceState extends State<PackingAppearance> {
     // Update UI state
     setState(() {
       appearanceDescriptions = overAllResultStatusLists;
-        developer.log("List data appearanceDescriptions ${jsonEncode(appearanceDescriptions)}");
+      developer.log(
+          "List data appearanceDescriptions ${jsonEncode(appearanceDescriptions)}");
       selectedSamples = List.generate(
         overAllResultStatusLists.length,
-            (_) => sampleModals.isNotEmpty ? (sampleModals[0].sampleCode ?? '') : '',
+        (_) =>
+            sampleModals.isNotEmpty ? (sampleModals[0].sampleCode ?? '') : '',
       );
 
       selectedResults = List.generate(
         overAllResultStatusLists.length,
-            (_) => overAllResultStatusListPkgAppGenMstList.isNotEmpty ? 'PASS' : '',
+        (_) => overAllResultStatusListPkgAppGenMstList.isNotEmpty ? 'PASS' : '',
       );
     });
 
@@ -567,7 +518,7 @@ class _PackingAppearanceState extends State<PackingAppearance> {
 
       // ✅ Correct comparison: prevent duplicate insertion
       final bool alreadyExists = pkgAppList.any(
-            (pkg) => pkg.inspectionResultID == currentStatus.pGenRowID,
+        (pkg) => pkg.inspectionResultID == currentStatus.pGenRowID,
       );
 
       if (!alreadyExists) {
@@ -595,32 +546,6 @@ class _PackingAppearanceState extends State<PackingAppearance> {
     _initializeSelections();
   }
 
-/*
-  Future<void> handlePackagingAppearanceSimpleOverAllResultDescSpinner() async {
-    // Mocked data loading functions
-    overAllResultStatusList = await GeneralMasterHandler.getGeneralList(
-        FEnumerations.overallResultStatusGenId);
-    sampleModals = await POItemDtlHandler.getSampleSizeList();
-
-    if (overAllResultStatusList.isNotEmpty) {
-      setState(() {
-        // Default selected values (replace with values from packagePoItemDetalDetail)
-        selectedMasterResult = overAllResultStatusList.first.pGenRowID;
-        selectedInnerResult = overAllResultStatusList.first.pGenRowID;
-        selectedUnitResult = overAllResultStatusList.first.pGenRowID;
-        selectedPalletResult = overAllResultStatusList.first.pGenRowID;
-        selectedShippingResult = overAllResultStatusList.first.pGenRowID;
-
-        selectedMasterSample = sampleModals.first.sampleCode;
-        selectedInnerSample = sampleModals.first.sampleCode;
-        selectedUnitSample = sampleModals.first.sampleCode;
-        selectedPalletSample = sampleModals.first.sampleCode;
-        selectedShippingSample = sampleModals.first.sampleCode;
-      });
-    }
-  }
-*/
-
   Future<void> handlePkgAppearance() async {
     String pkgAppRemark = editPackingAppearRemarkController.text;
     poItemDtl.pkgAppRemark = pkgAppRemark;
@@ -636,7 +561,6 @@ class _PackingAppearanceState extends State<PackingAppearance> {
         await POItemDtlHandler.getPKGAPPList();
 
     for (var i = 0; i < pkgAppList.length; i++) {
-
       if (pkgAppList[i].pRowID == pOItemPkgAppDetail.pRowID) {
         POItemDtlHandler.updatePOItemDtlPKGAppDetails(pOItemPkgAppDetail);
       }
@@ -691,8 +615,8 @@ class _PackingAppearanceState extends State<PackingAppearance> {
       packDetailList,
       packFindingList,
     );
-developer.log('Test packList${jsonEncode(packList)}');
-developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
+    developer.log('Test packList${jsonEncode(packList)}');
+    developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
 
     if (packList.isNotEmpty) {
       final detail = packList[0];
@@ -727,7 +651,7 @@ developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
         .map((e) => e.mainDescr)
         .whereType<String>()
         .toList();
-
+    developer.log("developer log of Status List $statusList");
     selectedMasterResult =
         packagePoItemDetalDetail.pkgMeMasterInspectionResultID;
     selectedInnerResult = packagePoItemDetalDetail.pkgMeInnerInspectionResultID;
@@ -739,7 +663,7 @@ developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
 
     sampleList =
         sampleModals.map((e) => "${e.mainDescr} (${e.sampleVal})").toList();
-
+    developer.log("developer log of Status List $sampleList");
     selectedMasterSample = packagePoItemDetalDetail.pkgAppMasterSampleSizeID;
     selectedInnerSample = packagePoItemDetalDetail.pkgAppInnerSampleSizeID;
     selectedUnitSample = packagePoItemDetalDetail.pkgAppUnitSampleSizeID;
@@ -748,7 +672,7 @@ developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
         packagePoItemDetalDetail.pkgAppShippingMarkSampleSizeId;
 
     setState(() {});
-    
+
     // Initialize selections after data is loaded
     _initializeSelections();
   }
@@ -771,16 +695,27 @@ developer.log('Test packList${packList.first.pkgAppInspectionResultID}');
   }
 
   Widget buildOverallResultDropdown() {
-    return     SOverAllDropdown(
+    return SOverAllDropdown(
       poItemDtl: widget.poItemDtl,
       selectInspectionResultId: selectedResultId,
       onChange: (newId) async {
         // Handle DB update here
-        await ItemInspectionDetailHandler().updatePackagingFindingMeasurementList(
+        await ItemInspectionDetailHandler()
+            .updatePackagingFindingMeasurementList(
           packagePoItemDetalDetail..pkgAppInspectionResultID = newId,
         );
         print("Updated OverallInspectionResultID to $newId");
       },
     );
+  }
+
+  Future<void> handleUpdateData() async {
+    bool status = false;
+    for (var i = 0; i < pOItemDtlList.length; i++) {
+      status =
+          await POItemDtlHandler.updatePOItemHdrOnInspection(pOItemDtlList[i]);
+      status =
+          await POItemDtlHandler.updatePOItemDtlOnInspection(pOItemDtlList[i]);
+    }
   }
 }

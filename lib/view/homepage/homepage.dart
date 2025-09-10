@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: const Icon(Icons.lock),
-              title: const Text("share Log"),
+              title: const Text("Share Log"),
               onTap: () {
                 FslLog.shareLog();
               },

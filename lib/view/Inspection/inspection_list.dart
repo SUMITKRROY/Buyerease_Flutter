@@ -1,13 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:developer' as developer;
 
-import 'package:buyerease/main.dart';
 import 'package:buyerease/model/status_modal.dart';
-import 'package:buyerease/services/poitemlist/po_item_dtl_handler.dart';
 import 'package:buyerease/utils/app_constants.dart';
 import 'package:buyerease/utils/loading.dart';
-import 'package:buyerease/utils/logout.dart';
 import 'package:buyerease/view/Inspection/inspection_details.dart';
 import 'package:buyerease/view/sync_inception/sync_status_adaptor.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +12,6 @@ import '../../model/inspection_model.dart';
 import '../../services/inspection_list/InspectionListHandler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
-
 import 'package:buyerease/config/theame_data.dart';
 
 class InspectionList extends StatefulWidget {
@@ -532,7 +527,7 @@ class _InspectionListState extends State<InspectionList> {
                                     color: ColorsData.textColor,
                                   ),
                                 ),
-                                const Divider(color: ColorsData.darkGrayColor),
+                                //const Divider(color: ColorsData.darkGrayColor),
                                 _buildInfoRow('ID', item.pRowID ?? ""),
                                 _buildInfoRow('Customer', item.customer ?? ""),
                                 _buildInfoRow('PO No', item.poListed ?? ""),

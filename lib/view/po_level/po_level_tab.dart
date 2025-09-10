@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../config/theame_data.dart';
 import '../../model/inspection_model.dart';
+import '../../services/poitemlist/po_item_dtl_handler.dart';
 import 'carton.dart';
 import 'enclosure.dart';
 import 'more_details.dart';
@@ -27,6 +28,7 @@ class _PoLevelTabState extends State<PoLevelTab> with SingleTickerProviderStateM
   TabController? _controller;
   int _selectedIndex = 0;
   bool _hasUnsavedChanges = false;
+  List<POItemDtl> pOItemDtlList = [];
   bool _isSaving = false;
   final GlobalKey<State<StatefulWidget>> _poItemKey = GlobalKey<State<StatefulWidget>>();
 final GlobalKey<State<PoWorkmanship>> _workmanshipKey = GlobalKey<State<PoWorkmanship>>();
@@ -90,6 +92,7 @@ final GlobalKey<State<Enclosure>> _enclosureKey = GlobalKey<State<Enclosure>>();
     }
     setState(() {
       _hasUnsavedChanges = false;
+      handleUpdateData();
       _isSaving = false;
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -132,9 +135,13 @@ final GlobalKey<State<Enclosure>> _enclosureKey = GlobalKey<State<Enclosure>>();
         backgroundColor: ColorsData.primaryColor,
         title: Text(widget.pRowId, style: const TextStyle(color: Colors.white)),
         actions: [
-          TextButton(
+          IconButton(
             onPressed: _undoChanges,
-            child: const Text('UNDO', style: TextStyle(color: Colors.white)),
+            icon: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationY(3.1416), // flip horizontally
+              child: Icon(Icons.undo),
+            ),
           ),
           TextButton(
             onPressed: (_hasUnsavedChanges && !_isSaving) ? _saveChanges : null,
@@ -240,5 +247,13 @@ final GlobalKey<State<Enclosure>> _enclosureKey = GlobalKey<State<Enclosure>>();
         ],
       ),
     );
+  }
+
+  Future<void> handleUpdateData() async {
+    bool status = false;
+    for (var i = 0; i < pOItemDtlList.length; i++) {
+      status = await POItemDtlHandler.updatePOItemHdrOnInspection(pOItemDtlList[i]);
+      status = await POItemDtlHandler.updatePOItemDtlOnInspection(pOItemDtlList[i]);
+    }
   }
 }

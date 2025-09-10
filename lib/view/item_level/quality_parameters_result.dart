@@ -10,152 +10,6 @@ import '../../model/po_item_dtl_model.dart';
 import '../../model/quality_parameter_model.dart';
 import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../../services/poitemlist/po_item_dtl_handler.dart';
-import 'parameter_detail_screen.dart';
-
-/*class QualityParametersResult extends StatefulWidget {
-  final String id;
-  final POItemDtl poItemDtl;
-  final VoidCallback onChanged; // ✅ Add this
-
-  const QualityParametersResult({super.key, required this.id, required this.onChanged, required this.poItemDtl});
-
-  @override
-  State<QualityParametersResult> createState() => _QualityParametersResultState();
-}
-
-class _QualityParametersResultState extends State<QualityParametersResult> {
-  late POItemDtl poItemDtl;
-
-  @override
-  void initState() {
-    super.initState();
-    poItemDtl = widget.poItemDtl;}
-  List<Parameter> parameters = [
-    Parameter(name: "Fabric Test", isRadio: false),
-    Parameter(name: "Item Level Parameter 2", isRadio: true),
-    Parameter(name: "Item Level Parameter 3", isRadio: true),
-    Parameter(name: "Packaging", isRadio: false),
-    Parameter(name: "PRODUCT PICTURES", isRadio: false),
-    Parameter(name: "Rub Test", isRadio: false),
-
-
-  ];
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: parameters.length,
-          itemBuilder: (context, index) {
-            final param = parameters[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: param.isRadio
-                  ? buildRadioRow(param)
-                  : buildCheckboxRow(param),
-            );
-          },
-        ),
-      ),
-
-    );
-  }
-  Widget buildCheckboxRow(Parameter param) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(child: Text(param.name)),
-        Row(
-          children: [
-            Text("Applicable"),
-            Checkbox(
-              value: param.isApplicable ?? false,
-              onChanged: (val) {
-                setState(() {
-                  param.isApplicable = val;
-                });
-                if (val == true) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ParameterDetailScreen(
-                        parameterName: param.name, id: widget.id, poItemDtl: poItemDtl,
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget buildRadioRow(Parameter param) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(param.name),
-        Row(
-          children: [
-            Expanded(
-              child: RadioListTile<bool>(
-                title: Text("Yes"),
-                value: true,
-                groupValue: param.radioValue,
-                onChanged: (val) {
-                  setState(() {
-                    param.radioValue = val;
-                  });
-                  if (val == true) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ParameterDetailScreen(
-                          parameterName: param.name, id: widget.id, poItemDtl: poItemDtl,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-            Expanded(
-              child: RadioListTile<bool>(
-                title: Text("No"),
-                value: false,
-                groupValue: param.radioValue,
-                onChanged: (val) {
-                  setState(() {
-                    param.radioValue = val;
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-}
-
-
-class Parameter {
-  final String name;
-  final bool isRadio; // true for radio, false for checkbox
-  bool? isApplicable; // for checkbox
-  bool? radioValue;   // true (Yes), false (No)
-
-  Parameter({
-    required this.name,
-    required this.isRadio,
-    this.isApplicable = false,
-    this.radioValue,
-  });
-}*/
 
 class QualityParametersResult extends StatefulWidget {
   final String id;
@@ -287,19 +141,6 @@ class _QualityParametersResultState extends State<QualityParametersResult> {
   Widget _buildCheckboxTile(String title, QualityParameter param) {
     checkboxStates.putIfAbsent(title, () => false);
 
-    // final options = parseDropdownOptions(param.optionValue);
-    // final selectedCode = param.optionSelected?.toString() ??
-    //     (options.isNotEmpty ? options.first.code : "0");
-    //
-    // dropdownSelections.putIfAbsent(
-    //   title,
-    //       () => options
-    //       .firstWhere(
-    //           (opt) => opt.code == selectedCode,
-    //       orElse: () => options.first)
-    //       .label,
-    // );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -323,20 +164,6 @@ class _QualityParametersResultState extends State<QualityParametersResult> {
 
   Widget _buildRadioTile(String title, QualityParameter param) {
     radioStates.putIfAbsent(title, () => "No");
-
-    // final options = parseDropdownOptions(param.optionValue);
-    // final selectedCode = param.optionSelected?.toString() ??
-    //     (options.isNotEmpty ? options.first.code : "0");
-    //
-    // dropdownSelections.putIfAbsent(
-    //   title,
-    //       () => options
-    //       .firstWhere(
-    //           (opt) => opt.code == selectedCode,
-    //       orElse: () => options.first)
-    //       .label,
-    // );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -406,26 +233,6 @@ class _QualityParametersResultState extends State<QualityParametersResult> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // if (options.isNotEmpty)
-        //   Padding(
-        //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        //     child: DropdownButton<String>(
-        //       value: dropdownSelections[title],
-        //       isExpanded: true,
-        //       onChanged: (value) {
-        //         setState(() {
-        //           dropdownSelections[title] = value!;
-        //         });
-        //         widget.onChanged?.call();
-        //       },
-        //       items: options
-        //           .map((opt) => DropdownMenuItem(
-        //         value: opt.label,
-        //         child: Text(opt.label),
-        //       ))
-        //           .toList(),
-        //     ),
-        //   ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextFormField(

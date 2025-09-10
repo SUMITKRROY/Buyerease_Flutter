@@ -350,7 +350,7 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                       children: [
                         Text(
                           _selectedInspectionDate != null
-                              ? DateFormat('dd-MMM-yy').format(_selectedInspectionDate!)
+                              ? DateFormat('dd-MMM-yyyy').format(_selectedInspectionDate!)
                               : title,
                           style: TextStyle(fontSize: 18),
                         ),
@@ -708,17 +708,22 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         },
       );
     } else if (label == 'Status') {
-      // final uniqueStatusList = statusList.toSet().toList(); // remove duplicates
       final uniqueStatusList = statusList1.toSet().toList();
+
+      // 🔹 Debug print the list data
+      for (var status in uniqueStatusList) {
+        print("MainID: ${status['MainID']}, MainDescr: ${status['MainDescr']}");
+      }
+
       return DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
-          labelStyle: TextStyle(fontSize: 12), // you can keep .sp if using flutter_screenutil
+          labelStyle: TextStyle(fontSize: 12),
         ),
         value: uniqueStatusList.any((s) => s["MainID"] == _selectedStatus)
             ? _selectedStatus
-            : null, // keep MainID as selected value
+            : null,
         items: uniqueStatusList.map((status) {
           return DropdownMenuItem<String>(
             value: status["MainID"], // 👈 backend value
@@ -730,36 +735,17 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
         }).toList(),
         onChanged: (val) {
           setState(() {
-            _selectedStatus = val; // store MainID
-            onChangeInspectionLevel();
-          });
-          _saveChangesIfChanged();
-        },
-      );
-      /*return DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
-          labelStyle: TextStyle(fontSize: 12.sp),
-        ),
-        value: uniqueStatusList.contains(_selectedStatus)
-            ? _selectedStatus
-            : null, // 👈 Fix here
-        items: uniqueStatusList.map((status) {
-          return DropdownMenuItem<String>(
-            value: status,
-            child: Text(status, style: TextStyle(fontSize: 12.sp)),
-          );
-        }).toList(),
-        onChanged: (val) {
-          setState(() {
             _selectedStatus = val;
             onChangeInspectionLevel();
           });
           _saveChangesIfChanged();
+
+          // 🔹 Debug print the selected value
+          print("Selected Status ID: $_selectedStatus");
         },
-      );*/
+      );
     }
+
 
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
@@ -865,9 +851,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
   void _saveChanges() async {
     if (inspectionList.isEmpty) return;
     final item = inspectionList.first;
-item.inspectionLevel = pRowIdOfInspectLevel;
-item.inspectionLevelDescr = _selectedInspectionLevel;
-    // Store the original status to check if it changed
+
+    // Store original status
     String? originalStatus = item.status;
 
     // ✅ Update fields from UI
@@ -877,7 +862,6 @@ item.inspectionLevelDescr = _selectedInspectionLevel;
     item.qlMajorDescr = _selectedQualityLevelMajor ?? item.qlMajorDescr;
     item.qlMinorDescr = _selectedQualityLevelMinor ?? item.qlMinorDescr;
     item.comments = _remarksController.text;
-    // ✅ Add this line
     item.status = _selectedStatus ?? item.status;
 
     // ✅ Convert time fields
@@ -904,16 +888,25 @@ item.inspectionLevelDescr = _selectedInspectionLevel;
     setState(() {
       inspectionList[0] = item;
     });
-    if (_selectedStatus != null && _selectedStatus != originalStatus) {
 
-      Navigator.push(
+    // ✅ Navigation condition
+    if (_selectedStatus != null && _selectedStatus != originalStatus) {
+      if (!["00", "10", "20","30"].contains(_selectedStatus)) {
+        // Navigate only if NOT accepted/partially accepted/deviations
+        Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => IntimationDetailsScreen(
-                pRowId: widget.data['pRowID'],
-                inspectionModal: inspectionList.first,)));
+            builder: (context) => IntimationDetailsScreen(
+              pRowId: widget.data['pRowID'],
+              inspectionModal: inspectionList.first,
+            ),
+          ),
+        );
+      }
     }
   }
+
+
 
   Future<void> _saveChangesIfChanged() async {
     if (isChanged) {

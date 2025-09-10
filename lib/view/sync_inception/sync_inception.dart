@@ -5,21 +5,15 @@ import 'dart:async';
 import 'package:buyerease/database/table/user_master_table.dart';
 import 'package:buyerease/provider/defect_master/defect_master_cubit.dart';
 import 'package:buyerease/provider/sync_cubit/sync_cubit.dart';
-import 'package:buyerease/services/sync/SendDataHandler.dart';
-import 'package:buyerease/utils/app_constants.dart';
-
 import 'package:buyerease/utils/toast.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sqflite/sqflite.dart';
+
 
 import '../../components/custom_appbar.dart';
 import '../../database/database_helper.dart';
-import '../../database/table/qr_po_item_dtl_image_table.dart';
 import '../../provider/download_image/download_image_cubit.dart';
-import '../../provider/login_cubit/login_cubit.dart';
-import '../../provider/sync_to_server/sync_to_server_cubit.dart';
 import '../../routes/route_path.dart';
 
 
@@ -242,6 +236,7 @@ class _SyncInceptionState extends State<SyncInception> {
               children: [
                 ElevatedButton(
                   onPressed: () {
+
                     context.read<SyncCubit>().sync(
                       user: userId,
                       deviceId: deviceID,
@@ -334,6 +329,20 @@ class _SyncInceptionState extends State<SyncInception> {
     });
 
     context.read<DownloadImageCubit>().downloadImages(itemIds);
+  }
+  Future<void> clearTables() async {
+    try {
+      final db = await DatabaseHelper().database;
+
+      // List all tables you want to clear
+      await db.delete(UserMasterTable.TABLE_NAME);
+      await db.delete('QRPOItemDtl_Image');
+      // Add any other tables here as needed
+
+      print("All tables cleared successfully.");
+    } catch (e) {
+      print("Error clearing tables: $e");
+    }
   }
 
 

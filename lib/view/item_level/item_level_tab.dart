@@ -24,23 +24,12 @@ import 'item_measurement/item_measurement.dart';
 import 'item_quantity.dart';
 import 'onsite.dart';
 import 'package:buyerease/components/over_all_dropdown.dart';
-import 'package:buyerease/model/simple_model.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../components/custom_table.dart';
-import '../../components/remarks.dart';
-import '../../config/theame_data.dart';
-import '../../database/table/genmst.dart';
 import '../../model/InsLvHdrModal.dart';
-import '../../model/inspection_level_model.dart';
 import '../../model/on_site_modal.dart';
-import '../../model/po_item_dtl_model.dart';
 import '../../services/InsLvHdrHandler.dart';
 import '../../services/ItemInspectionDetail/ItemInspectionDetailHandler.dart';
 import '../../services/general/GeneralMasterHandler.dart';
 import '../../services/general/GeneralModel.dart';
-import '../../services/inspection_level_handler.dart';
 import '../../services/poitemlist/po_item_dtl_handler.dart';
 import '../../utils/app_constants.dart';
 
@@ -64,11 +53,11 @@ class _ItemLevelTabState extends State<ItemLevelTab>
     with SingleTickerProviderStateMixin {
   TabController? _controller;
   int _selectedIndex = 0;
-  String? _dropDownValue;
 
   bool _hasUnsavedChanges = false; // NEW
   bool _isSaving = false; // NEW
   late POItemDtl poItemDtl;
+  List<POItemDtl> pOItemDtlList = [];
   final GlobalKey<State<ItemQuantity>> _itemQuantityKey =
       GlobalKey<State<ItemQuantity>>(); // NEW
   final GlobalKey<State<PackingAppearance>> _packingAppearanceKey =
@@ -107,6 +96,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
   void initState() {
     super.initState();
     poItemDtl = widget.poItemDtl;
+    pOItemDtlList.add(poItemDtl);
     _controller = TabController(length: list.length, vsync: this);
     handleOnSiteTab();
     developer.log("podetail data >>> ${widget.poItemDtl.orderQty}");
@@ -136,7 +126,8 @@ class _ItemLevelTabState extends State<ItemLevelTab>
           break;
         case 3:
           await (_barcodeKey.currentState as dynamic)?.saveChanges();
-          break;        case 4:
+          break;
+        case 4:
           await (_onsiteKey.currentState as dynamic)?.saveChanges();
           break;
         case 5:
@@ -145,7 +136,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
         case 6:
           await (_sampleCollected.currentState as dynamic)?.saveChanges();
           break;
-          case 7:
+        case 7:
           await (_itemMeasurement.currentState as dynamic)?.saveChanges();
           break;
         case 9:
@@ -162,6 +153,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
 
       setState(() {
         _hasUnsavedChanges = false;
+        handleUpdateData();
         _isSaving = false;
       });
 
@@ -175,7 +167,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Save failed: $e')),
       );
-      print('Save failed: $e');
+      developer.log('Save failed: $e');
     }
   }
 
@@ -217,9 +209,10 @@ class _ItemLevelTabState extends State<ItemLevelTab>
           //height: MediaQuery.of(context).size.height,
           child: Column(
             children: [
-              OverAllDropdown(poItemDtl: poItemDtl,),
+              OverAllDropdown(
+                poItemDtl: poItemDtl,
+              ),
               TabBar(
-
                 tabAlignment: TabAlignment.start, // or center / fill
                 unselectedLabelColor: Colors.grey,
                 isScrollable: true,
@@ -248,7 +241,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height*0.75,
+                height: MediaQuery.of(context).size.height * 0.75,
                 child: TabBarView(
                   controller: _controller,
                   children: [
@@ -262,6 +255,7 @@ class _ItemLevelTabState extends State<ItemLevelTab>
                       pRowId: widget.pRowId,
                       poItemDtl: poItemDtl,
                       inspectionModal: widget.inspectionModal,
+                      itemId: widget.id,
                     ),
                     PackingAppearance(
                       key: _packingAppearanceKey,
@@ -477,14 +471,6 @@ class _ItemLevelTabState extends State<ItemLevelTab>
       debugPrint('onSiteMasterList size: ${onSiteMasterList.length}');
 
       await POItemDtlHandler.updateOnSite(onSiteModalItem);
-
-      // Optional check logic (commented out like Java code)
-      // for (final item in onSiteMasterList) {
-      //   if (onSiteModalItem.pRowID == item.pGenRowID) {
-      //     await POItemDtlHandler.updateOnSite(context, onSiteModalItem);
-      //     break;
-      //   }
-      // }
     }
 
     handleOnSiteRemark(); // Assuming this is a method in your class
@@ -639,12 +625,12 @@ class _ItemLevelTabState extends State<ItemLevelTab>
           );
         }
 
-        print("newMasterList size = ${newMasterList.length}");
-        print(
+        developer.log("newMasterList size = ${newMasterList.length}");
+        developer.log(
             "overAllResultStatusList size = ${overAllResultStatusList.length}");
-        print(
+        developer.log(
             "selected master item pGenRowID = ${newMasterList[selectedItem].pGenRowID}");
-        print(
+        developer.log(
             "selected master item LocID = ${newMasterList[selectedItem].locID}");
 
         if (overAllResultStatusList.isNotEmpty) {
@@ -744,5 +730,15 @@ class _ItemLevelTabState extends State<ItemLevelTab>
   void _showToast(String message) {
     // Use fluttertoast or similar package
     Fluttertoast.showToast(message, true);
+  }
+
+  Future<void> handleUpdateData() async {
+    bool status = false;
+    for (var i = 0; i < pOItemDtlList.length; i++) {
+      status =
+          await POItemDtlHandler.updatePOItemHdrOnInspection(pOItemDtlList[i]);
+      status =
+          await POItemDtlHandler.updatePOItemDtlOnInspection(pOItemDtlList[i]);
+    }
   }
 }
